@@ -1,7 +1,25 @@
 # 项目更新日志 (Changelog)
 
 ### 当前状态
-SDK v1.1 - 支持 YAML + .env 配置系统，具备基础的两表联接能力。
+SDK v1.2 - 支持清理步骤、筛选、聚合等数据处理操作，AI 可调用能力大幅增强。
+
+---
+
+## v1.2 (2026-02-08 11:37)
+
+### 新增功能
+- **清理步骤容器** `add_clean_step`：支持在 Container 中组合多个清理操作
+- **只保留列** `add_keep_only`：快速筛选需要的字段
+- **重命名列** `add_rename`：批量重命名字段
+- **筛选器** `add_filter`：支持 Tableau 计算表达式的数据筛选
+- **聚合步骤** `add_aggregate`：GROUP BY + 聚合函数（SUM/AVG/COUNT 等）
+
+### 文档更新
+- 更新 `skills/tfl-generator/SKILL.md`：添加新 API 参考和使用示例
+- 新增 `docs/tableau_agent_reference.md`：Tableau Agent 官方功能参考与项目规划对比
+
+### 测试
+- 新增 `test_new_features.py`：验证新功能生成的 .tfl 文件
 
 ---
 

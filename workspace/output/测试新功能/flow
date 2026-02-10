@@ -1,0 +1,333 @@
+{
+  "parameters": {
+    "parameters": {}
+  },
+  "initialNodes": [
+    "d69d96ee-10c6-4c27-9690-7bc502c6f052"
+  ],
+  "nodes": {
+    "d69d96ee-10c6-4c27-9690-7bc502c6f052": {
+      "nodeType": ".v1.LoadSql",
+      "name": "订单表",
+      "id": "d69d96ee-10c6-4c27-9690-7bc502c6f052",
+      "baseType": "input",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "ce0645e6-eca3-4ce0-becf-7d087e07469e",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "connectionId": "a6d169db-e535-4e3d-95df-85dc22c577ad",
+      "connectionAttributes": {
+        "dbname": "voxadmin"
+      },
+      "fields": null,
+      "actions": [],
+      "debugModeRowLimit": null,
+      "originalDataTypes": {},
+      "randomSampling": null,
+      "updateTimestamp": null,
+      "restrictedFields": {},
+      "userRenamedFields": {},
+      "selectedFields": null,
+      "samplingType": null,
+      "groupByFields": null,
+      "filters": [],
+      "relation": {
+        "type": "query",
+        "query": "\n        SELECT \n            id AS 订单ID,\n            user_id AS 客户ID,\n            company_id AS 公司ID,\n            total_price / 1000000 AS 订单金额,\n            DATE(FROM_UNIXTIME(check_time)) AS 下单日期\n        FROM e_product_order_list \n        WHERE trash = 0 \n        LIMIT 1000\n        "
+      }
+    },
+    "ce0645e6-eca3-4ce0-becf-7d087e07469e": {
+      "nodeType": ".v1.Container",
+      "name": "只保留关键列",
+      "id": "ce0645e6-eca3-4ce0-becf-7d087e07469e",
+      "baseType": "container",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "a4574c27-d8c2-426e-bb81-f3ac09c21778",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "loomContainer": {
+        "parameters": {
+          "parameters": {}
+        },
+        "initialNodes": [
+          "8b141032-117b-4f44-82f0-9a0b133ca9d6"
+        ],
+        "nodes": {
+          "8b141032-117b-4f44-82f0-9a0b133ca9d6": {
+            "nodeType": ".v2019_2_2.KeepOnlyColumns",
+            "name": "只保留 订单ID + 另外 4 个",
+            "id": "8b141032-117b-4f44-82f0-9a0b133ca9d6",
+            "baseType": "transform",
+            "nextNodes": [],
+            "serialize": false,
+            "description": null,
+            "columnNames": [
+              "订单ID",
+              "客户ID",
+              "公司ID",
+              "订单金额",
+              "下单日期"
+            ]
+          }
+        },
+        "connections": {},
+        "dataConnections": {},
+        "connectionIds": [],
+        "dataConnectionIds": [],
+        "nodeProperties": {},
+        "extensibility": null
+      },
+      "namespacesToInput": {
+        "Default": {
+          "nodeId": "8b141032-117b-4f44-82f0-9a0b133ca9d6",
+          "namespace": "Default"
+        }
+      },
+      "namespacesToOutput": {
+        "Default": {
+          "nodeId": "8b141032-117b-4f44-82f0-9a0b133ca9d6",
+          "namespace": "Default"
+        }
+      },
+      "providedParameters": null
+    },
+    "a4574c27-d8c2-426e-bb81-f3ac09c21778": {
+      "nodeType": ".v1.Container",
+      "name": "重命名",
+      "id": "a4574c27-d8c2-426e-bb81-f3ac09c21778",
+      "baseType": "container",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "4ad91ea9-53b0-46f9-a6a2-bca10910ee0e",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "loomContainer": {
+        "parameters": {
+          "parameters": {}
+        },
+        "initialNodes": [
+          "49752805-8262-46d9-b156-501b962b08e2"
+        ],
+        "nodes": {
+          "49752805-8262-46d9-b156-501b962b08e2": {
+            "nodeType": ".v1.RenameColumn",
+            "columnName": "公司ID",
+            "rename": "分公司ID",
+            "name": "将 公司ID 重命名为 分公司ID",
+            "id": "49752805-8262-46d9-b156-501b962b08e2",
+            "baseType": "transform",
+            "nextNodes": [
+              {
+                "namespace": "Default",
+                "nextNodeId": "c565ed15-7af0-4509-a4e6-7b8884945add",
+                "nextNamespace": "Default"
+              }
+            ],
+            "serialize": false,
+            "description": null
+          },
+          "c565ed15-7af0-4509-a4e6-7b8884945add": {
+            "nodeType": ".v1.RenameColumn",
+            "columnName": "订单金额",
+            "rename": "金额",
+            "name": "将 订单金额 重命名为 金额",
+            "id": "c565ed15-7af0-4509-a4e6-7b8884945add",
+            "baseType": "transform",
+            "nextNodes": [],
+            "serialize": false,
+            "description": null
+          }
+        },
+        "connections": {},
+        "dataConnections": {},
+        "connectionIds": [],
+        "dataConnectionIds": [],
+        "nodeProperties": {},
+        "extensibility": null
+      },
+      "namespacesToInput": {
+        "Default": {
+          "nodeId": "49752805-8262-46d9-b156-501b962b08e2",
+          "namespace": "Default"
+        }
+      },
+      "namespacesToOutput": {
+        "Default": {
+          "nodeId": "c565ed15-7af0-4509-a4e6-7b8884945add",
+          "namespace": "Default"
+        }
+      },
+      "providedParameters": null
+    },
+    "4ad91ea9-53b0-46f9-a6a2-bca10910ee0e": {
+      "nodeType": ".v1.Container",
+      "name": "筛选有效订单",
+      "id": "4ad91ea9-53b0-46f9-a6a2-bca10910ee0e",
+      "baseType": "container",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "4d48211a-b047-46d6-898a-521a090c95f7",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "loomContainer": {
+        "parameters": {
+          "parameters": {}
+        },
+        "initialNodes": [
+          "65d6630f-95b7-4163-8ea2-096c25d7e527"
+        ],
+        "nodes": {
+          "65d6630f-95b7-4163-8ea2-096c25d7e527": {
+            "nodeType": ".v1.FilterOperation",
+            "name": "筛选器",
+            "id": "65d6630f-95b7-4163-8ea2-096c25d7e527",
+            "baseType": "transform",
+            "nextNodes": [],
+            "serialize": false,
+            "description": null,
+            "filterExpression": "[金额] > 0 AND NOT ISNULL([客户ID])"
+          }
+        },
+        "connections": {},
+        "dataConnections": {},
+        "connectionIds": [],
+        "dataConnectionIds": [],
+        "nodeProperties": {},
+        "extensibility": null
+      },
+      "namespacesToInput": {
+        "Default": {
+          "nodeId": "65d6630f-95b7-4163-8ea2-096c25d7e527",
+          "namespace": "Default"
+        }
+      },
+      "namespacesToOutput": {
+        "Default": {
+          "nodeId": "65d6630f-95b7-4163-8ea2-096c25d7e527",
+          "namespace": "Default"
+        }
+      },
+      "providedParameters": null
+    },
+    "4d48211a-b047-46d6-898a-521a090c95f7": {
+      "nodeType": ".v2018_2_3.SuperAggregate",
+      "name": "按公司汇总",
+      "id": "4d48211a-b047-46d6-898a-521a090c95f7",
+      "baseType": "superNode",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "a699ce61-ef79-425e-a037-db0e50e16bdb",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "beforeActionAnnotations": [],
+      "afterActionAnnotations": [],
+      "actionNode": {
+        "nodeType": ".v1.Aggregate",
+        "name": "按公司汇总",
+        "id": "5692e329-7536-4f3d-8c27-69af1621d48a",
+        "baseType": "transform",
+        "nextNodes": [],
+        "serialize": false,
+        "description": null,
+        "groupByFields": [
+          {
+            "columnName": "分公司ID",
+            "function": "GroupBy",
+            "newColumnName": null,
+            "specialFieldType": null
+          }
+        ],
+        "aggregateFields": [
+          {
+            "columnName": "金额",
+            "function": "SUM",
+            "newColumnName": "总金额",
+            "specialFieldType": null
+          },
+          {
+            "columnName": "订单ID",
+            "function": "COUNT",
+            "newColumnName": "订单数",
+            "specialFieldType": null
+          }
+        ]
+      }
+    },
+    "a699ce61-ef79-425e-a037-db0e50e16bdb": {
+      "nodeType": ".v1.PublishExtract",
+      "name": "输出",
+      "id": "a699ce61-ef79-425e-a037-db0e50e16bdb",
+      "baseType": "output",
+      "nextNodes": [],
+      "serialize": false,
+      "description": null,
+      "projectName": "数据源",
+      "projectLuid": "7fa01ebc-72f4-4fd0-a27f-f8ac1e30ac20",
+      "datasourceName": "测试新功能",
+      "datasourceDescription": "",
+      "serverUrl": "http://win-picvs30bivi"
+    }
+  },
+  "connections": {
+    "a6d169db-e535-4e3d-95df-85dc22c577ad": {
+      "connectionType": ".v1.SqlConnection",
+      "id": "a6d169db-e535-4e3d-95df-85dc22c577ad",
+      "name": "rm-uf661w842h18w326nvo.mysql.rds.aliyuncs.com",
+      "isPackaged": false,
+      "connectionAttributes": {
+        "sslmode": "",
+        "odbc-connect-string-extras": "",
+        "server": "rm-uf661w842h18w326nvo.mysql.rds.aliyuncs.com",
+        "prep-protocol-role": ":prep-protocol-reader",
+        ":flow-name": "测试新功能",
+        "odbc-dbms-name": "",
+        ":use-allowlist": "false",
+        "dbname": "voxadmin",
+        "port": "3306",
+        ":protocol-customizations": "",
+        "source-charset": "",
+        "sslcert": "",
+        "odbc-native-protocol": "",
+        "expected-driver-version": "",
+        "class": "mysql",
+        "one-time-sql": "",
+        "authentication": "",
+        "username": "link_BI"
+      }
+    }
+  },
+  "dataConnections": {},
+  "connectionIds": [
+    "a6d169db-e535-4e3d-95df-85dc22c577ad"
+  ],
+  "dataConnectionIds": [],
+  "nodeProperties": {},
+  "extensibility": {},
+  "selection": [],
+  "majorVersion": 1,
+  "minorVersion": 4,
+  "documentId": "c74e2d84-7781-418f-b5e0-8c15fa180d21",
+  "obfuscatorId": "09ced99b-1c18-42ea-9dd7-9afdcf043d5a"
+}

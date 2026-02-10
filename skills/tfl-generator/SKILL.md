@@ -84,15 +84,73 @@ builder = TFLBuilder(flow_name="流程名", config=my_config)
 | `add_connection_from_config()` | 无 | 使用默认配置连接 |
 | `add_input_sql(name, sql, conn_id)` | 节点名, SQL, 连接ID | 添加 SQL 输入 |
 | `add_join(name, left_id, right_id, left_col, right_col, join_type)` | 联接参数 | 添加联接 |
+| `add_clean_step(name, parent_id, actions)` | 步骤名, 上游ID, 操作列表 | 添加清理步骤 |
+| `add_keep_only(name, parent_id, columns)` | 步骤名, 上游ID, 列名列表 | 只保留指定列 |
+| `add_rename(parent_id, renames)` | 上游ID, 重命名映射 | 重命名列 |
+| `add_filter(name, parent_id, expression)` | 步骤名, 上游ID, 筛选表达式 | 添加筛选器 |
+| `add_aggregate(name, parent_id, group_by, aggregations)` | 聚合参数 | 添加聚合步骤 |
 | `add_output_server(name, parent_id, datasource_name, project_name, server_url)` | 输出参数 | 添加服务器输出 |
 | `build()` | 无 | 返回 (flow, display, meta) |
 
 ### `TFLPackager` 类
 
 | 方法 | 参数 | 说明 |
-|------|------|------|
+|------|------|------| 
 | `save_to_folder(folder, flow, display, meta)` | 保存路径, JSON对象 | 保存为文件夹 |
 | `pack_zip(folder, output_tfl)` | 文件夹, 输出路径 | 打包为 .tfl |
+
+---
+
+## 数据清理操作
+
+### 只保留列
+```python
+builder.add_keep_only(
+    name="只保留关键列",
+    parent_id=input_id,
+    columns=["订单ID", "客户ID", "金额"]
+)
+```
+
+### 重命名列
+```python
+builder.add_rename(
+    parent_id=input_id,
+    renames={
+        "旧列名1": "新列名1",
+        "旧列名2": "新列名2"
+    }
+)
+```
+
+### 筛选数据
+```python
+# 筛选表达式使用 Tableau 计算语法
+builder.add_filter(
+    name="筛选有效订单",
+    parent_id=input_id,
+    expression='[金额] > 100 AND NOT ISNULL([客户ID])'
+)
+```
+
+---
+
+## 聚合操作
+
+```python
+builder.add_aggregate(
+    name="按公司汇总",
+    parent_id=input_id,
+    group_by=["公司ID", "月份"],
+    aggregations=[
+        {"field": "金额", "function": "SUM", "output_name": "总金额"},
+        {"field": "订单ID", "function": "COUNT", "output_name": "订单数"},
+        {"field": "金额", "function": "AVG", "output_name": "平均金额"}
+    ]
+)
+```
+
+**支持的聚合函数**: `SUM`, `AVG`, `COUNT`, `COUNTD`, `MIN`, `MAX`, `MEDIAN`, `STDEV`, `VAR`
 
 ---
 
@@ -110,7 +168,7 @@ builder = TFLBuilder(flow_name="流程名", config=my_config)
 ## 构建指南
 
 1. **解析 Schema**: 读取 `docs/database.md` 了解表结构和关联关系
-2. **创建流程**: 按 输入→联接→输出 顺序构建
+2. **创建流程**: 按 输入→清理→联接→聚合→输出 顺序构建
 3. **关联键**: 确保 left_col 和 right_col 正确匹配
 4. **验证**: 生成后用 Tableau Prep 打开验证
 
