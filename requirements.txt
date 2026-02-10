@@ -3,3 +3,9 @@
 # Configuration file support
 pyyaml>=6.0
 python-dotenv>=1.0
+
+# Data loading & DB
+pandas
+xlrd
+sqlalchemy
+pymysql

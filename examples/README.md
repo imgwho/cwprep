@@ -6,10 +6,19 @@ This directory contains usage examples for the cwprep SDK, based on the **Sample
 
 ### 1. Initialize Example Database
 
-Execute in your MySQL client:
+You can initialize the database using either the SQL script or the Python loader:
 
+**Option A: Using SQL (Manual)**
+Execute in your MySQL client:
 ```sql
 examples/demo_data/init_superstore.sql
+```
+
+**Option B: Using Python (Automated from Excel)**
+Recommended for using the original `Sample - Superstore.xls` data:
+```bash
+pip install pymysql pandas xlrd
+python examples/demo_data/load_superstore.py
 ```
 
 ### 2. Run Example Scripts
@@ -97,6 +106,7 @@ Feb Orders ─┘
 
 | Script | Feature Count | Difficulty |
 |------|:---:|:---:|
+| `load_superstore.py` | N/A | ⭐ Tool |
 | `demo_basic.py` | 3 | ⭐ Beginner |
 | `demo_cleaning.py` | 6 | ⭐⭐ Basic |
 | `demo_aggregation.py` | 5 | ⭐⭐ Basic |

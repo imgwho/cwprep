@@ -16,7 +16,12 @@ tableau_server:
 
 # Default database configuration
 database:
-  host: "rm-uf661w842h18w326nvo.mysql.rds.aliyuncs.com"
+  host: "localhost"
   port: 3306
-  dbname: "voxadmin"
+  dbname: "superstore"
   type: "mysql"       # mysql, postgres, oracle, sqlserver
+
+  # host: "rm-uf661w842h18w326nvo.mysql.rds.aliyuncs.com"
+  # port: 3306
+  # dbname: "voxadmin"
+  # type: "mysql"       # mysql, postgres, oracle, sqlserver
