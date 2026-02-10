@@ -1,0 +1,96 @@
+{
+  "majorVersion": 1,
+  "minorVersion": 0,
+  "fieldOrder": {
+    "fieldOrdinals": {},
+    "minOrdinal": 0,
+    "maxOrdinal": 0
+  },
+  "flowDisplaySettings": {
+    "flowGroupNodeDisplay": {},
+    "flowSelection": {
+      "type": "nothing",
+      "selectedNodePath": null,
+      "selectedType": null
+    },
+    "flowNodeDisplaySettings": {
+      "55f7c4a9-6e73-43b9-b114-30fc62883d89": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 0,
+          "y": 1
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "feb42cb6-e526-45d7-9af3-ccd18533b49c": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 2,
+          "y": 1
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "14745e5a-da5e-4f44-8241-1d772f265e30": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 4,
+          "y": 1
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "20b0e02d-8834-4e16-935b-c634def3c797": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 6,
+          "y": 1
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      }
+    }
+  },
+  "hiddenColumns": []
+}

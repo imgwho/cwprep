@@ -12,8 +12,8 @@
 | :--- | :--- | :--- |
 | **`flow`** | **核心逻辑文件**。无后缀的 JSON，定义了所有节点、连接、转换逻辑。 | ⭐⭐⭐⭐⭐ (最重要) |
 | `connections` | (可选) 有时连接信息会单独存储，但在 `flow` 文件中通常也包含。 | ⭐⭐ |
-| `displaySettings` | 定义节点在 UI 画布上的 X,Y 坐标和颜色。若缺失，流程可运行但 UI 会重叠。 | ⭐⭐⭐ |
-| `maestroMetadata` | 版本和元数据信息。 | ⭐ |
+| **`displaySettings`** | 定义节点在 UI 画布上的 X,Y 坐标和颜色。若缺失，流程可运行但 UI 会重叠。 | ⭐⭐⭐ |
+| **`maestroMetadata`** | **特性声明文件**。决定了哪些版本的软件可以打开此文件。 | ⭐⭐⭐⭐ |
 
 ---
 
@@ -116,24 +116,25 @@ Tableau Prep 的 Join 是一个“超级节点”，包含外壳和内部动作�
 
 ---
 
-## 4. 连接 (Connections) 定义
+## 4. 元数据与布局规范
 
-在 `connections` 对象中定义数据源凭证。
+### 4.1 maestroMetadata 安全减重规则 (重要) ⭐⭐⭐
 
-```json
-"b688...": {
-  "connectionType": ".v1.SqlConnection",
-  "name": "mysql.aliyun.com",
-  "connectionAttributes": {
-    "server": "rm-uf6...mysql.rds.aliyuncs.com",
-    "class": "mysql",
-    "port": "3306",
-    "username": "link_BI",
-    "dbname": "voxadmin",
-    "authentication": "sql-password" // 密码通常不在此处明文存储，需用户在打开时输入或配置
-  }
-}
-```
+Tableau Prep 对元数据的 JSON 结构有严格校验。**字段不能缺失，但内容可以置空**。
+
+*   **禁止删除字段**: 不可直接从 JSON 中删除 `notSupportedMessages` 等字段，否则会报错“在文档中找不到元数据”。
+*   **安全减重方案**:
+    1.  将 `notSupportedMessages` 设为 **空列表 `[]`**。
+    2.  必须保留 `firstSoftwareVersionSupportedIn` 和 `minimumCompatibleSoftwareVersion` 对象。
+*   **最小可行 ID**: 必须在 `documentFeaturesUsedInDocument` 中声明所有在 `flow` 中用到的特性 ID（如 `node.v2018_2_3.SuperJoin`）。
+
+### 4.2 displaySettings UI 布局规则
+
+*   **坐标系**: 使用简单的网格坐标 `{"x": int, "y": int}`。
+*   **自动生成算法**: 
+    *   每增加一个流程步骤，`x` 坐标递增 1。
+    *   同级的分支（如多个输入表）使用不同的 `y` 坐标。
+*   **颜色分配**: 建议按节点类型预设颜色（Input: 蓝色, Join: 棕色, Clean: 绿色, Output: 橙色）。
 
 ---
 
@@ -144,38 +145,31 @@ Tableau Prep 的 Join 是一个“超级节点”，包含外壳和内部动作�
 1.  **UUID 生成**: 所有 `id` 必须是唯一的 UUID v4。
 2.  **链式连接 (Wiring)**:
     *   每个节点（除了 Output）必须在 `nextNodes` 数组中定义下游节点。
-    *   **格式**:
-        ```json
-        "nextNodes": [{
-          "namespace": "Default",
-          "nextNodeId": "target-uuid",
-          "nextNamespace": "Default" // 如果目标是 Join，这里必须是 "Left" 或 "Right"
-        }]
-        ```
-3.  **Schema 校验**: Input 节点中的 `fields` 列表必须与 SQL 查询结果或数据库表结构严格匹配，否则流程会报错。
-4.  **删除节点的逻辑**:
-    *   若删除节点 B (A -> B -> C)，必须将 A 的 `nextNodeId` 更新为 C 的 UUID。
-    *   若 C 是 Join 节点，必须保留 B 原来连接到 C 时使用的 `nextNamespace` (Left/Right)。
-5.  **Clean Step 的特殊性**: 不要试图直接在主 `nodes` 列表里加 `RenameColumn`。必须先创建一个 `Container` 节点，然后在 `loomContainer.nodes` 内部添加具体的清洗操作节点。
+    *   **格式**: 如果目标是 Join，`nextNamespace` 必须是 "Left" 或 "Right"。
+3.  **Schema 校验**: Input 节点中的 `fields` 列表必须与数据源结构严格匹配。
+4.  **打包规则**: 修改完成后，必须将整个文件夹重新打包为 **ZIP 格式**，并重命名后缀为 **`.tfl`**。
 
 ---
 
 ## 6. 示例：Python 伪代码构建流程
 
 ```python
+# 构建元数据 (安全减重模式)
+metadata = {
+    "majorVersion": 1,
+    "documentFeaturesUsedInDocument": [
+        {
+            "id": "node.v2018_2_3.SuperJoin",
+            "notSupportedMessages": [], # 设为空列表
+            "minimumCompatibleSoftwareVersion": {"year": 2018, "versionString": "2018.2.3"}
+        }
+    ]
+}
+
+# 构建流程逻辑
 flow = { "nodes": {}, "connections": {} }
+# ... 添加节点逻辑 ...
 
-# 1. 创建连接
-conn_id = create_connection(flow, host="127.0.0.1", user="root")
-
-# 2. 创建输入节点 (自定义 SQL)
-input_id = create_node(flow, type="LoadSql", sql="SELECT * FROM Orders")
-link_connection(flow, input_id, conn_id)
-
-# 3. 创建清洗节点 (重命名 ID 为 OrderID)
-clean_id = create_clean_step(flow, parent=input_id)
-add_rename_operation(flow, clean_id, col="ID", new_name="OrderID")
-
-# 4. 创建输出
-output_id = create_output(flow, parent=clean_id, path="output.hyper")
+# 最后打包
+# zip -r dataflow.tfl ./folder/*
 ```

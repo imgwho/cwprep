@@ -1,0 +1,157 @@
+{
+  "parameters": {
+    "parameters": {}
+  },
+  "initialNodes": [
+    "ff40cd00-833c-4d22-a713-ad5328b8eeab",
+    "bf1ee8fd-8b45-4e3f-b20f-015d50853aeb"
+  ],
+  "nodes": {
+    "ff40cd00-833c-4d22-a713-ad5328b8eeab": {
+      "nodeType": ".v1.LoadSql",
+      "name": "e_product_order_list",
+      "id": "ff40cd00-833c-4d22-a713-ad5328b8eeab",
+      "baseType": "input",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "58839af0-737d-4435-af05-9e493b48438a",
+          "nextNamespace": "Left"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "connectionId": "1f4ceaab-aa64-4d8b-bb1f-6ef6f8aa69bb",
+      "connectionAttributes": {
+        "dbname": "voxadmin"
+      },
+      "fields": null,
+      "actions": [],
+      "debugModeRowLimit": null,
+      "originalDataTypes": {},
+      "randomSampling": null,
+      "updateTimestamp": null,
+      "relation": {
+        "type": "query",
+        "query": "SELECT o.user_id AS 客户ID, o.id AS 订单ID, o.acc AS 员工ID FROM e_product_order_list o WHERE trash = 0 LIMIT 100"
+      }
+    },
+    "bf1ee8fd-8b45-4e3f-b20f-015d50853aeb": {
+      "nodeType": ".v1.LoadSql",
+      "name": "bi_e_admin",
+      "id": "bf1ee8fd-8b45-4e3f-b20f-015d50853aeb",
+      "baseType": "input",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "58839af0-737d-4435-af05-9e493b48438a",
+          "nextNamespace": "Right"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "connectionId": "1f4ceaab-aa64-4d8b-bb1f-6ef6f8aa69bb",
+      "connectionAttributes": {
+        "dbname": "voxadmin"
+      },
+      "fields": null,
+      "actions": [],
+      "debugModeRowLimit": null,
+      "originalDataTypes": {},
+      "randomSampling": null,
+      "updateTimestamp": null,
+      "relation": {
+        "type": "query",
+        "query": "SELECT id, username FROM bi_e_admin LIMIT 100"
+      }
+    },
+    "58839af0-737d-4435-af05-9e493b48438a": {
+      "nodeType": ".v2018_2_3.SuperJoin",
+      "name": "联接 1",
+      "id": "58839af0-737d-4435-af05-9e493b48438a",
+      "baseType": "superNode",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "1ee6db0d-3931-44d3-a345-160e46c6a45f",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "actionNode": {
+        "nodeType": ".v1.SimpleJoin",
+        "name": "联接 1",
+        "id": "7ec48f48-a615-4500-997c-44f33f9e59c4",
+        "baseType": "transform",
+        "nextNodes": [],
+        "serialize": false,
+        "description": null,
+        "conditions": [
+          {
+            "leftExpression": "[员工ID]",
+            "rightExpression": "[id]",
+            "comparator": "=="
+          }
+        ],
+        "joinType": "left"
+      }
+    },
+    "1ee6db0d-3931-44d3-a345-160e46c6a45f": {
+      "nodeType": ".v1.PublishExtract",
+      "name": "输出",
+      "id": "1ee6db0d-3931-44d3-a345-160e46c6a45f",
+      "baseType": "output",
+      "nextNodes": [],
+      "serialize": false,
+      "description": null,
+      "projectName": "数据源",
+      "projectLuid": "7fa01ebc-72f4-4fd0-a27f-f8ac1e30ac20",
+      "datasourceName": "SDK_Ultimate_V2_Result",
+      "serverUrl": "http://win-picvs30bivi"
+    }
+  },
+  "connections": {
+    "1f4ceaab-aa64-4d8b-bb1f-6ef6f8aa69bb": {
+      "connectionType": ".v1.SqlConnection",
+      "id": "1f4ceaab-aa64-4d8b-bb1f-6ef6f8aa69bb",
+      "name": "rm-uf661w842h18w326nvo.mysql.rds.aliyuncs.com",
+      "isPackaged": false,
+      "connectionAttributes": {
+        "sslmode": "",
+        "odbc-connect-string-extras": "",
+        "server": "rm-uf661w842h18w326nvo.mysql.rds.aliyuncs.com",
+        "prep-protocol-role": ":prep-protocol-reader",
+        ":flow-name": "Ultimate_V2_Test",
+        "odbc-dbms-name": "",
+        ":use-allowlist": "false",
+        "dbname": "voxadmin",
+        "port": "3306",
+        ":protocol-customizations": "",
+        "source-charset": "",
+        "sslcert": "",
+        "odbc-native-protocol": "",
+        "expected-driver-version": "",
+        "class": "mysql",
+        "one-time-sql": "",
+        "authentication": "",
+        "username": "link_BI"
+      }
+    }
+  },
+  "nodeProperties": {
+    "58839af0-737d-4435-af05-9e493b48438a": {
+      "com.tableau.loom.doc.fileformat.v2019_1_3.PrimaryKey": {
+        "nodePropertyType": ".v2019_1_3.PrimaryKey",
+        "empty": false,
+        "fieldNames": [
+          "id"
+        ]
+      }
+    }
+  },
+  "majorVersion": 1,
+  "minorVersion": 4,
+  "documentId": "117eaea6-0233-4595-9b6e-87fd1a58028f",
+  "obfuscatorId": "ce0f3172-d104-4480-a653-387d994943f6"
+}

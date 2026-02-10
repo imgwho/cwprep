@@ -1,0 +1,91 @@
+{
+  "majorVersion": 1,
+  "minorVersion": 0,
+  "flowDisplaySettings": {
+    "flowGroupNodeDisplay": {},
+    "flowSelection": {
+      "type": "nothing",
+      "selectedNodePath": null,
+      "selectedType": null
+    },
+    "flowNodeDisplaySettings": {
+      "ff40cd00-833c-4d22-a713-ad5328b8eeab": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 0,
+          "y": 1
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "bf1ee8fd-8b45-4e3f-b20f-015d50853aeb": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 1,
+          "y": 1
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "58839af0-737d-4435-af05-9e493b48438a": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 2,
+          "y": 1
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "1ee6db0d-3931-44d3-a345-160e46c6a45f": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 3,
+          "y": 1
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      }
+    }
+  },
+  "hiddenColumns": []
+}
