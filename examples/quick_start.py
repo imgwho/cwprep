@@ -1,51 +1,51 @@
 """
-cwprep 快速开始示例
+cwprep Quick Start Example
 
-这个示例展示如何使用 cwprep SDK 创建一个简单的 Tableau Prep 数据流程。
+This example shows how to use cwprep SDK to create a simple Tableau Prep data flow.
 
-使用方法:
-    1. 安装 cwprep: pip install cwprep
-    2. 运行此脚本: python quick_start.py
-    3. 在 Tableau Prep 中打开生成的 .tfl 文件
+Usage:
+    1. Install cwprep: pip install cwprep
+    2. Run this script: python quick_start.py
+    3. Open the generated .tfl file in Tableau Prep
 """
 
 from cwprep import TFLBuilder, TFLPackager
 
 def main():
     print("=" * 50)
-    print("cwprep 快速开始示例")
+    print("cwprep Quick Start Example")
     print("=" * 50)
     print()
     
-    # 1. 创建 Builder
+    # 1. Create Builder
     builder = TFLBuilder(flow_name="Demo Flow")
-    print("✅ 创建 Builder")
+    print("[OK] Create Builder")
     
-    # 2. 添加数据库连接
-    # 注意：这里使用占位符，实际使用时请替换为真实的数据库信息
+    # 2. Add database connection
+    # Note: Using placeholder values, replace with actual database info
     conn_id = builder.add_connection(
         host="localhost",
         username="root",
         dbname="demo_db"
     )
-    print(f"✅ 添加数据库连接: {conn_id[:8]}...")
+    print(f"[OK] Add database connection: {conn_id[:8]}...")
     
-    # 3. 添加输入表
+    # 3. Add input tables
     users_id = builder.add_input_sql(
         name="Users",
         sql="SELECT id, name, email, created_at FROM users",
         connection_id=conn_id
     )
-    print(f"✅ 添加输入表 Users: {users_id[:8]}...")
+    print(f"[OK] Add input table Users: {users_id[:8]}...")
     
     orders_id = builder.add_input_sql(
         name="Orders", 
         sql="SELECT id, user_id, amount, status FROM orders",
         connection_id=conn_id
     )
-    print(f"✅ 添加输入表 Orders: {orders_id[:8]}...")
+    print(f"[OK] Add input table Orders: {orders_id[:8]}...")
     
-    # 4. 联接两张表
+    # 4. Join two tables
     join_id = builder.add_join(
         name="Users + Orders",
         left_id=users_id,
@@ -54,40 +54,40 @@ def main():
         right_col="user_id",
         join_type="left"
     )
-    print(f"✅ 添加联接节点: {join_id[:8]}...")
+    print(f"[OK] Add join node: {join_id[:8]}...")
     
-    # 5. 添加筛选条件
+    # 5. Add filter condition
     filter_id = builder.add_filter(
-        name="过滤有效订单",
+        name="Filter Valid Orders",
         parent_id=join_id,
         expression="[status] = 'completed'"
     )
-    print(f"✅ 添加筛选器: {filter_id[:8]}...")
+    print(f"[OK] Add filter: {filter_id[:8]}...")
     
-    # 6. 添加计算字段
+    # 6. Add calculated field
     calc_id = builder.add_calculation(
-        name="订单等级",
+        name="Order Level",
         parent_id=filter_id,
         column_name="order_level",
         formula="IF [amount] >= 1000 THEN 'High' ELSEIF [amount] >= 100 THEN 'Medium' ELSE 'Low' END"
     )
-    print(f"✅ 添加计算字段: {calc_id[:8]}...")
+    print(f"[OK] Add calculated field: {calc_id[:8]}...")
     
-    # 7. 添加输出
+    # 7. Add output
     output_id = builder.add_output_server(
         name="Output",
         parent_id=calc_id,
         datasource_name="Demo_Output"
     )
-    print(f"✅ 添加输出节点: {output_id[:8]}...")
+    print(f"[OK] Add output node: {output_id[:8]}...")
     
-    # 8. 构建并保存
+    # 8. Build and save
     print()
     print("-" * 50)
     flow, display, meta = builder.build()
-    print("✅ 构建完成")
+    print("[OK] Build complete")
     
-    # 保存到文件夹
+    # Save to folder
     output_folder = "./demo_output"
     output_tfl = "./demo_output.tfl"
     
@@ -96,12 +96,12 @@ def main():
     
     print()
     print("=" * 50)
-    print(f"✅ 成功生成: {output_tfl}")
+    print(f"[OK] Successfully generated: {output_tfl}")
     print()
-    print("下一步:")
-    print("  1. 用 Tableau Prep 打开 demo_output.tfl")
-    print("  2. 配置数据库连接")
-    print("  3. 运行流程验证")
+    print("Next steps:")
+    print("  1. Open demo_output.tfl with Tableau Prep")
+    print("  2. Configure database connection")
+    print("  3. Run flow to verify")
     print("=" * 50)
 
 

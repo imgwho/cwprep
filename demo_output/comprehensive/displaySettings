@@ -9,7 +9,7 @@
       "selectedType": null
     },
     "flowNodeDisplaySettings": {
-      "d2dc9c76-ead5-448f-ac84-67d00d0d6f3f": {
+      "67825b88-cb35-4c9a-94d6-3d599141f4e2": {
         "color": {
           "hexCss": "#EFC637",
           "rgba": [
@@ -28,7 +28,7 @@
           "height": 1
         }
       },
-      "c40f3718-b0ef-406f-ae89-010232db4e5f": {
+      "37b12115-cd08-432a-b9fb-68aa02d74cbb": {
         "color": {
           "hexCss": "#EFC637",
           "rgba": [
@@ -47,7 +47,7 @@
           "height": 1
         }
       },
-      "b9a456ba-f92e-4a65-9d68-f4f194e66168": {
+      "d3e5f3dc-5a81-4747-9a40-c7d14db07a8e": {
         "color": {
           "hexCss": "#EFC637",
           "rgba": [
@@ -66,7 +66,7 @@
           "height": 1
         }
       },
-      "5d1ffaf8-a30e-406a-a471-8e9b89f7c481": {
+      "60b1826d-da84-425c-8c06-2c2066b97730": {
         "color": {
           "hexCss": "#EFC637",
           "rgba": [
@@ -85,26 +85,7 @@
           "height": 1
         }
       },
-      "7e038b1a-3d0a-4483-a896-43c6f946eda5": {
-        "color": {
-          "hexCss": "#EFC637",
-          "rgba": [
-            "239",
-            "198",
-            "55",
-            "1"
-          ]
-        },
-        "position": {
-          "x": 0,
-          "y": 5
-        },
-        "size": {
-          "width": 1,
-          "height": 1
-        }
-      },
-      "53af92fa-0d92-4753-8838-4b10f00dd471": {
+      "2296a672-ed99-4087-bf5b-b017a3c17552": {
         "color": {
           "hexCss": "#3D7FA6",
           "rgba": [
@@ -123,7 +104,7 @@
           "height": 1
         }
       },
-      "be3983d7-3e6a-402e-a0ed-72b4743ac89f": {
+      "34549d4f-71ea-4ec3-a915-4be2a6521364": {
         "color": {
           "hexCss": "#499893",
           "rgba": [
@@ -142,7 +123,7 @@
           "height": 1
         }
       },
-      "c9c0f8cd-775d-49e2-a109-8ac8b70984b8": {
+      "f3be775e-d732-480d-b26f-436f54766252": {
         "color": {
           "hexCss": "#499893",
           "rgba": [
@@ -161,7 +142,7 @@
           "height": 1
         }
       },
-      "ad4dcb55-d26d-4410-bdcd-7697cc025ae2": {
+      "da55a1e9-c68a-4878-ac8a-15b6931dcb95": {
         "color": {
           "hexCss": "#3D7FA6",
           "rgba": [
@@ -180,7 +161,7 @@
           "height": 1
         }
       },
-      "d712bd46-8e03-4b1d-9aa1-da024bf84f9e": {
+      "cd0f09a5-a579-45cf-ac92-d19f9033fb4a": {
         "color": {
           "hexCss": "#3D7FA6",
           "rgba": [
@@ -199,7 +180,7 @@
           "height": 1
         }
       },
-      "014611f6-eaca-4a8e-8873-3b95e7181250": {
+      "0f41970d-1cfb-42d4-b0a9-4691f339a754": {
         "color": {
           "hexCss": "#3D7FA6",
           "rgba": [
@@ -218,7 +199,7 @@
           "height": 1
         }
       },
-      "b43e8e1a-2218-404d-b2fd-777241965b02": {
+      "ac49f654-83be-4bd8-9c09-57072078aedf": {
         "color": {
           "hexCss": "#3D7FA6",
           "rgba": [
@@ -237,7 +218,7 @@
           "height": 1
         }
       },
-      "064d367b-cabd-4737-8275-79d59bdba35b": {
+      "f736f346-7896-4d0d-94c7-f4233944ed25": {
         "color": {
           "hexCss": "#3D7FA6",
           "rgba": [
@@ -256,7 +237,7 @@
           "height": 1
         }
       },
-      "ed241bdf-98ab-49b4-bb65-6cff51bc9f84": {
+      "b25bd20d-0a65-4620-96b0-5a0501e67680": {
         "color": {
           "hexCss": "#3D7FA6",
           "rgba": [
@@ -275,7 +256,7 @@
           "height": 1
         }
       },
-      "51c27e29-4ebe-4500-a9fe-b0e54f7d4985": {
+      "191c300b-9cc7-404a-84fc-69a422ab1433": {
         "color": {
           "hexCss": "#3D7FA6",
           "rgba": [
@@ -294,7 +275,7 @@
           "height": 1
         }
       },
-      "5b756db4-a7a3-4fac-b697-d59d3673a01d": {
+      "eecb31d1-9a13-4b84-856c-d21c2aa400e5": {
         "color": {
           "hexCss": "#3D7FA6",
           "rgba": [
@@ -313,7 +294,7 @@
           "height": 1
         }
       },
-      "7512faaa-9f8d-4ea6-9367-690f2fdcd716": {
+      "852f8956-d71c-44ae-bbc6-011a96ca73ab": {
         "color": {
           "hexCss": "#3D7FA6",
           "rgba": [
@@ -332,7 +313,7 @@
           "height": 1
         }
       },
-      "7349ffda-121e-4195-9a6c-e7cebe3114e1": {
+      "21928472-17df-4d96-8a3d-4532afb054d1": {
         "color": {
           "hexCss": "#3D7FA6",
           "rgba": [
@@ -351,7 +332,7 @@
           "height": 1
         }
       },
-      "7f3f0f5d-5a98-489e-9ef6-c9591ad47868": {
+      "a06e91aa-6084-488f-9d64-9473a90e0380": {
         "color": {
           "hexCss": "#3D7FA6",
           "rgba": [
@@ -370,7 +351,7 @@
           "height": 1
         }
       },
-      "df5426ab-996b-4cf6-beeb-0eb4f54238ca": {
+      "13c5aada-9b2b-4387-bed8-a2ff7409ccac": {
         "color": {
           "hexCss": "#E76E50",
           "rgba": [

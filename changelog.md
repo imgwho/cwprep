@@ -1,11 +1,28 @@
 # 项目更新日志 (Changelog)
 
 ### 当前状态
-SDK v1.5 - 完善综合测试脚本，添加 Tableau Prep 计算语法规则文档。
+SDK v0.1.1 - 修复 Value Filter 字符串引号问题，添加 add_input_table 方法，示例全部英文化。
+
+---
+
+## v0.1.1 (2026-02-09 14:20)
+
+### Added
+- `add_input_table()`: Direct table connection without custom SQL
+- Proper `dbname` resolution from connection object
+
+### Fixed
+- **Value Filter quotes**: `add_value_filter()` now uses `.v1.FilterOperation` format with single quotes for strings (e.g., `'Same Day'`)
+- **Connection dbname bug**: Input nodes no longer use hardcoded `voxadmin`, correctly reads from `add_connection()`
+
+### Changed
+- All example scripts converted from Chinese to English
+- `add_rename()` internal node name: "重命名" → "rename"
 
 ---
 
 ## v1.5 (2026-02-09 10:24)
+
 
 ### 新增
 - **综合测试脚本** `test_comprehensive.py`：覆盖全部 14 个 SDK 方法

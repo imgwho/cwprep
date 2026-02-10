@@ -1,88 +1,89 @@
-# Tableau Agent 功能参考与项目规划
+# Tableau Agent Reference & Project Comparison
 
-> 基于 [Tableau Prep Einstein 官方文档](https://help.tableau.com/current/prep/zh-cn/prep_einstein.htm) 整理
+> Based on [Tableau Prep Einstein Official Docs](https://help.tableau.com/current/prep/en-us/prep_einstein.htm)
 > 
-> 文档更新时间：2026-02-08 17:50
+> Last updated: 2026-02-09 14:20
 
 ---
 
-## Tableau Agent vs TFL Generator 功能对比
+## Tableau Agent vs cwprep Feature Comparison
 
-### Tableau Agent 原生支持的操作
+### Tableau Agent Supported Operations
 
-| Tableau Agent 功能 | TFL Generator | 状态 |
-|-------------------|--------------|------|
-| **检查数据** | | |
-| 筛选数据 | `add_filter` | ✅ 已实现 |
-| 筛选 null 值 | `add_filter("ISNULL([字段])")` | ✅ 已实现 |
-| 按日期时间范围筛选 | `add_filter("[日期] >= ...")` | ✅ 已实现 |
-| 通过相对日期筛选 | `add_filter` + 表达式 | ✅ 已实现 |
-| 移除字段 | `add_remove_columns` | ✅ 已实现 |
-| 更改数据类型 | - | 🔲 待实现 |
-| **清理和调整数据** | | |
-| 设为大写/小写/首字母大写 | - | 🔲 待实现 |
-| 移除空格/字母/数字/标点 | - | 🔲 待实现 |
-| 剪裁空格 | - | 🔲 待实现 |
-| 创建计算 | `add_calculation` | ✅ 已实现 |
-| 重命名字段 | `add_rename` | ✅ 已实现 |
-| 转换日期格式 | `add_calculation` | ✅ 已实现 |
-| 拆分值 | - | 🔲 待实现 |
-| 识别重复的行 | - | 🔲 待实现 |
-| 填补顺序数据中的空白 | - | 🔲 待实现 |
-| **转置数据** | | |
-| 将列转置为行 | `add_unpivot` | ✅ 已实现 |
-| 将行转置为列 | `add_pivot` | ✅ 已实现 |
-| **聚合数据** | | |
-| 创建聚合步骤 | `add_aggregate` | ✅ 已实现 |
-| 对值进行聚合和分组 | `add_aggregate` | ✅ 已实现 |
+| Tableau Agent Feature | cwprep Method | Status |
+|----------------------|---------------|--------|
+| **Inspect Data** | | |
+| Filter data | `add_filter()` | ✅ Implemented |
+| Filter null values | `add_filter("ISNULL([field])")` | ✅ Implemented |
+| Filter by date range | `add_filter("[date] >= ...")` | ✅ Implemented |
+| Filter by relative date | `add_filter()` + expression | ✅ Implemented |
+| Remove fields | `add_remove_columns()` | ✅ Implemented |
+| Change data type | - | 🔲 Planned |
+| **Clean and Shape** | | |
+| Set case (upper/lower/title) | - | 🔲 Planned |
+| Remove characters | - | 🔲 Planned |
+| Trim whitespace | - | 🔲 Planned |
+| Create calculation | `add_calculation()` | ✅ Implemented |
+| Rename field | `add_rename()` | ✅ Implemented |
+| Convert date format | `add_calculation()` | ✅ Implemented |
+| Split values | - | 🔲 Planned |
+| Identify duplicate rows | - | 🔲 Planned |
+| Fill gaps in sequence | - | 🔲 Planned |
+| **Pivot Data** | | |
+| Columns to rows | `add_unpivot()` | ✅ Implemented |
+| Rows to columns | `add_pivot()` | ✅ Implemented |
+| **Aggregate Data** | | |
+| Create aggregate step | `add_aggregate()` | ✅ Implemented |
+| Group and aggregate | `add_aggregate()` | ✅ Implemented |
 
-**覆盖率**: 12/18 (67%)
-
----
-
-### TFL Generator 独有功能（Tableau Agent 不支持）
-
-| 功能 | TFL Generator | 说明 |
-|------|--------------|------|
-| 选择数据源 | `add_input_sql` | ✅ 从数据库读取 |
-| 联接操作 | `add_join` | ✅ left/right/inner/full |
-| 并集操作 | `add_union` | ✅ 合并多个表 |
-| 输出步骤 | `add_output_server` | ✅ 发布到 Server |
-| 流程分支 | 多个 nextNodes | ✅ 支持非线性流程 |
-| 按值筛选 | `add_value_filter` | ✅ 保留/排除特定值 |
-| 只保留列 | `add_keep_only` | ✅ 选择字段 |
+**Coverage**: 12/18 (67%)
 
 ---
 
-### 待实现功能 🔲
+### cwprep Exclusive Features (Not in Tableau Agent)
 
-| 功能 | 优先级 | 说明 |
-|------|--------|------|
-| 更改数据类型 | 🟡 中 | ChangeDataType 节点 |
-| 快速清理操作 | � 低 | 大小写、去空格等 |
-| 拆分值 | 🟢 低 | SplitValues 节点 |
-| 识别重复行 | 🟢 低 | 数据去重 |
-| 文件输入/输出 | 🟢 低 | CSV/Excel/Hyper |
-
----
-
-## 项目差异化优势
-
-| 对比项 | Tableau Agent | TFL Generator |
-|--------|---------------|---------------|
-| 联接/并集 | ❌ 不支持 | ✅ 支持 |
-| 转置 | ✅ 支持 | ✅ 支持 |
-| 流程分支 | ❌ 仅线性 | ✅ 支持 |
-| 数据源选择 | ❌ 不支持 | ✅ 支持 |
-| 输出步骤 | ❌ 不支持 | ✅ 支持 |
-| 离线使用 | ❌ 需连接 | ✅ 完全本地 |
-| 自动化集成 | ❌ 交互式 | ✅ CI/CD 集成 |
-| 版本控制 | ❌ 不支持 | ✅ Git 管理 |
-| 成本 | 需 Tableau+ | 开源免费 |
+| Feature | cwprep Method | Description |
+|---------|---------------|-------------|
+| Select data source | `add_input_sql()` | ✅ Read from database |
+| Direct table input | `add_input_table()` | ✅ Connect to table directly |
+| Join operation | `add_join()` | ✅ left/right/inner/full |
+| Union operation | `add_union()` | ✅ Merge multiple tables |
+| Output step | `add_output_server()` | ✅ Publish to Server |
+| Flow branching | Multiple nextNodes | ✅ Non-linear flows |
+| Value filter | `add_value_filter()` | ✅ Keep/exclude values |
+| Keep only columns | `add_keep_only()` | ✅ Select fields |
 
 ---
 
-## 参考链接
+### Planned Features 🔲
 
-- [Tableau Prep Einstein 官方文档](https://help.tableau.com/current/prep/zh-cn/prep_einstein.htm)
-- [Tableau Agent 支持的操作](https://help.tableau.com/current/prep/zh-cn/prep_einstein.htm#Tableau)
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| Change data type | 🟡 Medium | ChangeDataType node |
+| Quick clean operations | 🟢 Low | Case, trim, etc. |
+| Split values | 🟢 Low | SplitValues node |
+| Identify duplicates | 🟢 Low | Deduplication |
+| File input/output | 🟢 Low | CSV/Excel/Hyper |
+
+---
+
+## Project Differentiation
+
+| Comparison | Tableau Agent | cwprep |
+|------------|---------------|--------|
+| Join/Union | ❌ Not supported | ✅ Supported |
+| Pivot/Unpivot | ✅ Supported | ✅ Supported |
+| Flow branching | ❌ Linear only | ✅ Supported |
+| Data source selection | ❌ Not supported | ✅ Supported |
+| Output step | ❌ Not supported | ✅ Supported |
+| Offline usage | ❌ Requires connection | ✅ Fully local |
+| Automation | ❌ Interactive | ✅ CI/CD integration |
+| Version control | ❌ Not supported | ✅ Git-friendly |
+| Cost | Requires Tableau+ | Open source |
+
+---
+
+## References
+
+- [Tableau Prep Einstein Docs](https://help.tableau.com/current/prep/en-us/prep_einstein.htm)
+- [Tableau Agent Operations](https://help.tableau.com/current/prep/en-us/prep_einstein.htm#Tableau)

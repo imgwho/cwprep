@@ -144,16 +144,17 @@ class TFLBuilder:
         self._input_count += 1
         self._node_order.append({"id": node_id, "type": "input", "y_hint": self._input_count})
         
-        # 获取默认数据库名
-        default_dbname = "voxadmin"
-        if self.config.database:
-            default_dbname = self.config.database.dbname
+        # 从连接对象中获取数据库名
+        dbname = "voxadmin"
+        if connection_id in self.connections:
+            conn_attrs = self.connections[connection_id].get("connectionAttributes", {})
+            dbname = conn_attrs.get("dbname", dbname)
         
         self.nodes[node_id] = {
             "nodeType": ".v1.LoadSql", "name": name, "id": node_id,
             "baseType": "input", "nextNodes": [], "serialize": False, "description": None,
             "connectionId": connection_id, 
-            "connectionAttributes": {"dbname": default_dbname},
+            "connectionAttributes": {"dbname": dbname},
             "fields": None, "actions": [], "debugModeRowLimit": None,
             "originalDataTypes": {}, "randomSampling": None,
             "updateTimestamp": None,
@@ -181,16 +182,17 @@ class TFLBuilder:
         self._input_count += 1
         self._node_order.append({"id": node_id, "type": "input", "y_hint": self._input_count})
         
-        # 获取默认数据库名
-        default_dbname = "voxadmin"
-        if self.config.database:
-            default_dbname = self.config.database.dbname
+        # 从连接对象中获取数据库名
+        dbname = "voxadmin"
+        if connection_id in self.connections:
+            conn_attrs = self.connections[connection_id].get("connectionAttributes", {})
+            dbname = conn_attrs.get("dbname", dbname)
         
         self.nodes[node_id] = {
             "nodeType": ".v1.LoadSql", "name": name, "id": node_id,
             "baseType": "input", "nextNodes": [], "serialize": False, "description": None,
             "connectionId": connection_id, 
-            "connectionAttributes": {"dbname": default_dbname},
+            "connectionAttributes": {"dbname": dbname},
             "fields": None, "actions": [], "debugModeRowLimit": None,
             "originalDataTypes": {}, "randomSampling": None,
             "updateTimestamp": None,
@@ -630,21 +632,42 @@ class TFLBuilder:
         exclude: bool = False
     ) -> str:
         """
-        添加值筛选操作（按值保留或排除）
+        Add value filter operation (keep or exclude by values)
         
         Args:
-            name: 步骤名称
-            parent_id: 上游节点 ID
-            field: 要筛选的字段名
-            values: 要保留（或排除）的值列表
-            exclude: 如果为 True，则排除这些值；False 则只保留这些值
+            name: Step name
+            parent_id: Upstream node ID
+            field: Field name to filter
+            values: List of values to keep (or exclude)
+            exclude: If True, exclude these values; False keeps only these values
             
         Returns:
-            str: 节点 ID
+            str: Node ID
         """
         node_id = str(uuid.uuid4())
         filter_node_id = str(uuid.uuid4())
         self._node_order.append({"id": node_id, "type": "clean"})
+        
+        # Build filter expression with proper single quotes for string values
+        # Format: NOT ((([field] == 'value1') OR ([field] == 'value2')) AND NOT (ISNULL([field])))
+        # or for keep: (([field] == 'value1') OR ([field] == 'value2')) AND NOT (ISNULL([field]))
+        conditions = [f"([{field}] == '{v}')" for v in values]
+        if len(conditions) == 1:
+            inner_expr = conditions[0]
+        else:
+            inner_expr = " OR ".join(conditions)
+            inner_expr = f"({inner_expr})"
+        
+        # Add ISNULL check
+        full_expr = f"({inner_expr} AND NOT (ISNULL([{field}])))"
+        
+        # Wrap with NOT if excluding
+        if exclude:
+            filter_expr = f"NOT ({full_expr})"
+        else:
+            filter_expr = full_expr
+        
+        action_name = f"{'Exclude' if exclude else 'Keep'} {field}:{values[0] if len(values) == 1 else 'multiple'}"
         
         self.nodes[node_id] = {
             "nodeType": ".v1.Container",
@@ -659,15 +682,14 @@ class TFLBuilder:
                 "initialNodes": [filter_node_id],
                 "nodes": {
                     filter_node_id: {
-                        "nodeType": ".v1.ValueFilter",
-                        "name": f"{'排除' if exclude else '只保留'} {field}:{values[0]}",
+                        "nodeType": ".v1.FilterOperation",
+                        "name": action_name,
                         "id": filter_node_id,
                         "baseType": "transform",
                         "nextNodes": [],
                         "serialize": False,
                         "description": None,
-                        "exclude": exclude,
-                        "values": {field: [str(v) for v in values]}
+                        "filterExpression": filter_expr
                     }
                 },
                 "connections": {},
@@ -785,7 +807,7 @@ class TFLBuilder:
             str: 节点 ID
         """
         actions = [{"type": "rename", "from": old, "to": new} for old, new in renames.items()]
-        return self.add_clean_step("重命名", parent_id, actions)
+        return self.add_clean_step("rename", parent_id, actions)
     
     def add_filter(
         self,

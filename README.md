@@ -1,26 +1,114 @@
-# TFL Generator
+# cwprep - Tableau Prep Flow SDK
 
-这是一个基于 AI 和 Python SDK 的 Tableau Prep 数据流程 (.tfl) 自动生成工具。它通过对 .tfl 文件的底层 JSON 结构进行逆向工程，实现了无需打开软件即可通过代码生成或修改数据准备流程的能力。
+A Python SDK for programmatically generating Tableau Prep data flow (.tfl) files. Built through reverse-engineering the TFL JSON structure, enabling flow creation and modification via code without opening the GUI.
 
-## 项目核心功能
-- **自动构建流程**：支持通过 Python 代码添加 SQL 输入、多表联接（Join）和输出节点。
-- **UI 自动布局**：SDK 会自动计算节点在 Tableau Prep 画布上的坐标，确保生成的流程整洁不重叠。
-- **兼容性保障**：遵循 Tableau Prep 的元数据校验规则，生成的流程文件可直接在软件中打开。
-- **AI 技能集成**：内置 Gemini CLI 技能规范，允许 AI Agent 理解业务逻辑后直接调用 SDK 产出文件。
+## Installation
 
-## 目录结构说明
-- `core/`: SDK 源码。`builder.py` 负责逻辑构造，`packager.py` 负责文件打包。
-- `docs/`: 存放 .tfl 文件 JSON 结构规范和开发迭代日志。
-- `skills/`: 符合 Gemini CLI 规范的 AI 技能定义。
-- `workspace/`: 工作目录。`input/` 存放原始文件，`output/` 存放生成的产物。
-- `scripts/`: 存放开发过程中使用的比对和测试工具。
+```bash
+pip install cwprep
+```
 
-## 使用规则
-1. **更新日志**：**每次提交代码修改（Commit）后，必须同步更新 `changelog.md`**，记录本次修改的具体内容。
-2. **生成流程**：参考 `test_sdk_ultimate_final_fix.py` 调用 `TFLBuilder` 类构建逻辑，然后使用 `TFLPackager` 进行打包。
-3. **打包规范**：生成的 flow, displaySettings, maestroMetadata 三个文件必须放在同级目录下打包为 ZIP，并重命名为 `.tfl`。
+## Quick Start
 
-## 当前技术要点
-- **maestroMetadata**: 必须保留版本详情对象，且报错信息列表需设为 `[]`。
-- **displaySettings**: 必须包含主版本号，且若无法预测字段顺序，应保持 `fieldOrder` 对象为空。
-- **nodeProperties**: 必须为联接节点注册主键信息，否则软件可能报损坏。
+```python
+from cwprep import TFLBuilder, TFLPackager
+
+# Create builder
+builder = TFLBuilder(flow_name="My Flow")
+
+# Add database connection
+conn_id = builder.add_connection(
+    host="localhost",
+    username="root",
+    dbname="mydb"
+)
+
+# Add input tables
+orders = builder.add_input_table("orders", "orders", conn_id)
+customers = builder.add_input_table("customers", "customers", conn_id)
+
+# Join tables
+joined = builder.add_join(
+    name="Orders + Customers",
+    left_id=orders,
+    right_id=customers,
+    left_col="customer_id",
+    right_col="customer_id",
+    join_type="left"
+)
+
+# Add output
+builder.add_output_server("Output", joined, "My_Datasource")
+
+# Build and save
+flow, display, meta = builder.build()
+TFLPackager.save_to_folder("./output", flow, display, meta)
+TFLPackager.pack_zip("./output", "./my_flow.tfl")
+```
+
+## Features
+
+| Feature | Method | Description |
+|---------|--------|-------------|
+| Database Connection | `add_connection()` | Connect to MySQL/PostgreSQL/Oracle |
+| SQL Input | `add_input_sql()` | Custom SQL query input |
+| Table Input | `add_input_table()` | Direct table connection |
+| Join | `add_join()` | left/right/inner/full joins |
+| Union | `add_union()` | Merge multiple tables |
+| Filter | `add_filter()` | Expression-based filter |
+| Value Filter | `add_value_filter()` | Keep/exclude by values |
+| Keep Only | `add_keep_only()` | Select columns |
+| Remove Columns | `add_remove_columns()` | Drop columns |
+| Rename | `add_rename()` | Rename columns |
+| Calculation | `add_calculation()` | Tableau formula fields |
+| Aggregate | `add_aggregate()` | GROUP BY with SUM/AVG/COUNT |
+| Pivot | `add_pivot()` | Rows to columns |
+| Unpivot | `add_unpivot()` | Columns to rows |
+| Output | `add_output_server()` | Publish to Tableau Server |
+
+## Examples
+
+See the `examples/` directory for complete demos:
+- `demo_basic.py` - Input, Join, Output
+- `demo_cleaning.py` - Filter, Calculate, Rename
+- `demo_aggregation.py` - Union, Aggregate, Pivot
+- `demo_comprehensive.py` - All features combined
+
+## Directory Structure
+
+```
+cwprep/
+├── src/cwprep/          # SDK source code
+│   ├── builder.py       # TFLBuilder class
+│   ├── packager.py      # TFLPackager class
+│   └── config.py        # Configuration utilities
+├── examples/            # Demo scripts
+│   └── demo_data/       # Sample database SQL
+├── docs/                # Documentation
+└── tests/               # Unit tests
+```
+
+## Configuration
+
+Create `config.yaml` for default settings:
+
+```yaml
+database:
+  host: localhost
+  username: root
+  dbname: mydb
+  port: "3306"
+  db_class: mysql
+
+tableau_server:
+  url: http://your-server
+  project_name: Default
+```
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.
+
+## License
+
+MIT License

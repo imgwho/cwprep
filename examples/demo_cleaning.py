@@ -1,26 +1,26 @@
 """
-cwprep 数据清理功能演示
+cwprep Data Cleaning Demo
 
-业务场景：盈利订单筛选与分析
-- 筛选利润 > 0 的订单
-- 计算利润率
-- 重命名为中文字段
+Business Scenario: Profitable Orders Analysis
+- Filter orders with profit > 0
+- Calculate profit rate
+- Rename fields
 
-功能覆盖：
-1. add_filter - 表达式筛选
-2. add_value_filter - 值筛选
-3. add_keep_only - 只保留列
-4. add_remove_columns - 移除列
-5. add_rename - 重命名
-6. add_calculation - 计算字段
+Features Covered:
+1. add_filter - Expression filter
+2. add_value_filter - Value filter
+3. add_keep_only - Keep only columns
+4. add_remove_columns - Remove columns
+5. add_rename - Rename columns
+6. add_calculation - Calculated fields
 
-使用方法：
+Usage:
     python examples/demo_cleaning.py
 """
 
 from cwprep import TFLBuilder, TFLPackager
 
-# 数据库配置
+# Database configuration
 DB_CONFIG = {
     "host": "localhost",
     "username": "root",
@@ -31,48 +31,46 @@ DB_CONFIG = {
 
 def run_cleaning_demo():
     print("=" * 50)
-    print("cwprep 数据清理功能演示")
+    print("cwprep Data Cleaning Demo")
     print("=" * 50)
     print()
     
     builder = TFLBuilder(flow_name="Profitable Orders Analysis")
     conn_id = builder.add_connection(**DB_CONFIG)
-    print(f"✅ 添加数据库连接")
+    print(f"[OK] Add database connection")
     
-    # 添加订单表（包含产品信息）
+    # Add orders table (with product info)
     orders_id = builder.add_input_sql(
         name="Orders with Products",
-        sql="""
-        SELECT 
-            o.order_id,
-            o.order_date,
-            o.ship_mode,
-            o.customer_id,
-            o.city,
-            o.state,
-            p.product_name,
-            p.category,
-            p.sub_category,
-            o.sales,
-            o.quantity,
-            o.discount,
-            o.profit
-        FROM orders o
-        JOIN products p ON o.product_id = p.product_id
-        """,
+        sql="""SELECT 
+o.order_id,
+o.order_date,
+o.ship_mode,
+o.customer_id,
+o.city,
+o.state,
+p.product_name,
+p.category,
+p.sub_category,
+o.sales,
+o.quantity,
+o.discount,
+o.profit
+FROM orders o
+JOIN products p ON o.product_id = p.product_id""",
         connection_id=conn_id
     )
-    print(f"✅ [1] add_input_sql: 添加订单+产品关联表")
+    print(f"[OK] [1] add_input_sql: Add orders+products table")
     
-    # 1. 表达式筛选：利润大于0
+    # 1. Expression filter: profit > 0
     filter1_id = builder.add_filter(
         name="Filter Profitable",
         parent_id=orders_id,
         expression="[profit] > 0"
     )
-    print(f"✅ [2] add_filter: 筛选 profit > 0")
+    print(f"[OK] [2] add_filter: Filter profit > 0")
     
-    # 2. 值筛选：只保留特定配送方式
+    # 2. Value filter: keep specific ship modes
     filter2_id = builder.add_value_filter(
         name="Filter Ship Mode",
         parent_id=filter1_id,
@@ -80,68 +78,68 @@ def run_cleaning_demo():
         values=["Standard Class", "First Class"],
         exclude=False
     )
-    print(f"✅ [3] add_value_filter: 保留 Standard/First Class")
+    print(f"[OK] [3] add_value_filter: Keep Standard/First Class")
     
-    # 3. 只保留核心列
+    # 3. Keep only core columns
     keep_id = builder.add_keep_only(
         name="Keep Core Fields",
         parent_id=filter2_id,
         columns=["order_id", "order_date", "customer_id", "category", 
                  "product_name", "sales", "quantity", "profit"]
     )
-    print(f"✅ [4] add_keep_only: 保留 8 个核心字段")
+    print(f"[OK] [4] add_keep_only: Keep 8 core fields")
     
-    # 4. 重命名为中文
+    # 4. Rename fields
     rename_id = builder.add_rename(
         parent_id=keep_id,
         renames={
-            "order_id": "订单编号",
-            "order_date": "订单日期",
-            "customer_id": "客户编号",
-            "category": "产品大类",
-            "product_name": "产品名称",
-            "sales": "销售额",
-            "quantity": "数量",
-            "profit": "利润"
+            "order_id": "Order_ID",
+            "order_date": "Order_Date",
+            "customer_id": "Customer_ID",
+            "category": "Category",
+            "product_name": "Product_Name",
+            "sales": "Sales",
+            "quantity": "Quantity",
+            "profit": "Profit"
         }
     )
-    print(f"✅ [5] add_rename: 重命名为中文")
+    print(f"[OK] [5] add_rename: Rename fields")
     
-    # 5. 计算利润率
+    # 5. Calculate profit rate
     calc1_id = builder.add_calculation(
         name="Calculate Profit Rate",
         parent_id=rename_id,
-        column_name="利润率",
-        formula="[利润] / [销售额]"
+        column_name="Profit_Rate",
+        formula="[Profit] / [Sales]"
     )
-    print(f"✅ [6] add_calculation: 计算利润率 = 利润/销售额")
+    print(f"[OK] [6] add_calculation: Calculate Profit_Rate = Profit/Sales")
     
-    # 6. 计算订单等级
+    # 6. Calculate order level
     calc2_id = builder.add_calculation(
         name="Calculate Order Level",
         parent_id=calc1_id,
-        column_name="订单等级",
-        formula="IF [销售额] >= 500 THEN 'High' ELSEIF [销售额] >= 100 THEN 'Medium' ELSE 'Low' END"
+        column_name="Order_Level",
+        formula="IF [Sales] >= 500 THEN 'High' ELSEIF [Sales] >= 100 THEN 'Medium' ELSE 'Low' END"
     )
-    print(f"✅ [7] add_calculation: 计算订单等级")
+    print(f"[OK] [7] add_calculation: Calculate Order_Level")
     
-    # 7. 移除客户编号（脱敏）
+    # 7. Remove customer ID (anonymize)
     remove_id = builder.add_remove_columns(
         name="Remove Customer ID",
         parent_id=calc2_id,
-        columns=["客户编号"]
+        columns=["Customer_ID"]
     )
-    print(f"✅ [8] add_remove_columns: 移除客户编号")
+    print(f"[OK] [8] add_remove_columns: Remove Customer_ID")
     
-    # 输出
+    # Output
     output_id = builder.add_output_server(
         name="Output",
         parent_id=remove_id,
         datasource_name="Profitable_Orders"
     )
-    print(f"✅ [9] add_output_server: 添加输出")
+    print(f"[OK] [9] add_output_server: Add output")
     
-    # 构建
+    # Build
     print()
     flow, display, meta = builder.build()
     
@@ -151,15 +149,15 @@ def run_cleaning_demo():
     TFLPackager.save_to_folder(output_folder, flow, display, meta)
     TFLPackager.pack_zip(output_folder, output_tfl)
     
-    print(f"✅ 已生成: {output_tfl}")
+    print(f"[OK] Generated: {output_tfl}")
     print()
-    print("功能覆盖:")
-    print("  • add_filter (profit > 0)")
-    print("  • add_value_filter (ship_mode)")
-    print("  • add_keep_only")
-    print("  • add_rename")
-    print("  • add_calculation (利润率, 订单等级)")
-    print("  • add_remove_columns")
+    print("Features covered:")
+    print("  - add_filter (profit > 0)")
+    print("  - add_value_filter (ship_mode)")
+    print("  - add_keep_only")
+    print("  - add_rename")
+    print("  - add_calculation (Profit_Rate, Order_Level)")
+    print("  - add_remove_columns")
 
 
 if __name__ == "__main__":

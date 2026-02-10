@@ -1,24 +1,24 @@
 """
-cwprep 聚合与转置功能演示
+cwprep Aggregation and Pivot Demo
 
-业务场景：区域月度销售对比分析
-- 合并1月和2月订单（Union）
-- 按区域汇总销售指标（Aggregate）
-- 月度对比透视（Pivot/Unpivot）
+Business Scenario: Regional Monthly Sales Analysis
+- Union January and February orders
+- Aggregate sales metrics by region
+- Monthly comparison with Pivot/Unpivot
 
-功能覆盖：
-1. add_union - 并集合并
-2. add_aggregate - 聚合统计
-3. add_pivot - 行转列
-4. add_unpivot - 列转行
+Features Covered:
+1. add_union - Union merge
+2. add_aggregate - Aggregation statistics
+3. add_pivot - Rows to columns
+4. add_unpivot - Columns to rows
 
-使用方法：
+Usage:
     python examples/demo_aggregation.py
 """
 
 from cwprep import TFLBuilder, TFLPackager
 
-# 数据库配置
+# Database configuration
 DB_CONFIG = {
     "host": "localhost",
     "username": "root",
@@ -29,60 +29,56 @@ DB_CONFIG = {
 
 def run_aggregation_demo():
     print("=" * 50)
-    print("cwprep 聚合与转置功能演示")
+    print("cwprep Aggregation and Pivot Demo")
     print("=" * 50)
     print()
     
     builder = TFLBuilder(flow_name="Regional Sales Analysis")
     conn_id = builder.add_connection(**DB_CONFIG)
-    print(f"✅ 添加数据库连接")
+    print(f"[OK] Add database connection")
     
-    # 1. 添加1月订单
+    # 1. Add January orders
     jan_id = builder.add_input_sql(
         name="Orders Jan 2024",
-        sql="""
-        SELECT 
-            '2024-01' AS month_label,
-            r.region_name,
-            r.manager_name,
-            o.sales,
-            o.profit
-        FROM orders o
-        JOIN regions r ON o.region_id = r.region_id
-        WHERE o.order_date >= '2024-01-01' 
-          AND o.order_date < '2024-02-01'
-        """,
+        sql="""SELECT 
+'2024-01' AS month_label,
+r.region_name,
+r.manager_name,
+o.sales,
+o.profit
+FROM orders o
+JOIN regions r ON o.region_id = r.region_id
+WHERE o.order_date >= '2024-01-01' 
+AND o.order_date < '2024-02-01'""",
         connection_id=conn_id
     )
-    print(f"✅ [1] add_input_sql: 1月订单")
+    print(f"[OK] [1] add_input_sql: January orders")
     
-    # 2. 添加2月订单
+    # 2. Add February orders
     feb_id = builder.add_input_sql(
         name="Orders Feb 2024",
-        sql="""
-        SELECT 
-            '2024-02' AS month_label,
-            r.region_name,
-            r.manager_name,
-            o.sales,
-            o.profit
-        FROM orders o
-        JOIN regions r ON o.region_id = r.region_id
-        WHERE o.order_date >= '2024-02-01' 
-          AND o.order_date < '2024-03-01'
-        """,
+        sql="""SELECT 
+'2024-02' AS month_label,
+r.region_name,
+r.manager_name,
+o.sales,
+o.profit
+FROM orders o
+JOIN regions r ON o.region_id = r.region_id
+WHERE o.order_date >= '2024-02-01' 
+AND o.order_date < '2024-03-01'""",
         connection_id=conn_id
     )
-    print(f"✅ [2] add_input_sql: 2月订单")
+    print(f"[OK] [2] add_input_sql: February orders")
     
-    # 3. 并集合并
+    # 3. Union merge
     union_id = builder.add_union(
         name="Union Jan + Feb",
         parent_ids=[jan_id, feb_id]
     )
-    print(f"✅ [3] add_union: 合并1-2月订单")
+    print(f"[OK] [3] add_union: Merge Jan-Feb orders")
     
-    # 4. 按区域和月份聚合
+    # 4. Aggregate by region and month
     agg_id = builder.add_aggregate(
         name="Aggregate by Region",
         parent_id=union_id,
@@ -94,9 +90,9 @@ def run_aggregation_demo():
             {"field": "profit", "function": "SUM", "output_name": "total_profit"}
         ]
     )
-    print(f"✅ [4] add_aggregate: 区域月度汇总 (SUM/COUNT/AVG)")
+    print(f"[OK] [4] add_aggregate: Regional monthly summary (SUM/COUNT/AVG)")
     
-    # 5. 重命名字段
+    # 5. Rename fields
     rename_id = builder.add_rename(
         parent_id=agg_id,
         renames={
@@ -105,9 +101,9 @@ def run_aggregation_demo():
             "month_label": "Month"
         }
     )
-    print(f"✅ [5] add_rename: 重命名字段")
+    print(f"[OK] [5] add_rename: Rename fields")
     
-    # 6. 行转列：月份对比
+    # 6. Pivot: monthly comparison
     pivot_id = builder.add_pivot(
         name="Pivot by Month",
         parent_id=rename_id,
@@ -117,9 +113,9 @@ def run_aggregation_demo():
         group_by=["Region", "Manager"],
         aggregation="SUM"
     )
-    print(f"✅ [6] add_pivot: 行转列 (Month → Columns)")
+    print(f"[OK] [6] add_pivot: Rows to columns (Month -> Columns)")
     
-    # 7. 列转行
+    # 7. Unpivot
     unpivot_id = builder.add_unpivot(
         name="Unpivot Months",
         parent_id=pivot_id,
@@ -127,17 +123,17 @@ def run_aggregation_demo():
         name_column="Month",
         value_column="Sales"
     )
-    print(f"✅ [7] add_unpivot: 列转行")
+    print(f"[OK] [7] add_unpivot: Columns to rows")
     
-    # 输出
+    # Output
     output_id = builder.add_output_server(
         name="Output",
         parent_id=unpivot_id,
         datasource_name="Regional_Sales_Report"
     )
-    print(f"✅ [8] add_output_server: 添加输出")
+    print(f"[OK] [8] add_output_server: Add output")
     
-    # 构建
+    # Build
     print()
     flow, display, meta = builder.build()
     
@@ -147,13 +143,13 @@ def run_aggregation_demo():
     TFLPackager.save_to_folder(output_folder, flow, display, meta)
     TFLPackager.pack_zip(output_folder, output_tfl)
     
-    print(f"✅ 已生成: {output_tfl}")
+    print(f"[OK] Generated: {output_tfl}")
     print()
-    print("功能覆盖:")
-    print("  • add_union: 合并多月数据")
-    print("  • add_aggregate: SUM/COUNT/AVG")
-    print("  • add_pivot: 行转列")
-    print("  • add_unpivot: 列转行")
+    print("Features covered:")
+    print("  - add_union: Merge multi-month data")
+    print("  - add_aggregate: SUM/COUNT/AVG")
+    print("  - add_pivot: Rows to columns")
+    print("  - add_unpivot: Columns to rows")
 
 
 if __name__ == "__main__":

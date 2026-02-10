@@ -1,17 +1,17 @@
 """
-cwprep 基础功能演示：输入、联接、输出
+cwprep Basic Demo: Input, Join, Output
 
-业务场景：客户订单分析
-- 订单表关联客户表
-- 展示客户购买记录
+Business Scenario: Customer Orders Analysis
+- Join orders table with customers table
+- Display customer purchase records
 
-使用方法：
+Usage:
     python examples/demo_basic.py
 """
 
 from cwprep import TFLBuilder, TFLPackager
 
-# 数据库配置
+# Database configuration
 DB_CONFIG = {
     "host": "localhost",
     "username": "root",
@@ -22,50 +22,46 @@ DB_CONFIG = {
 
 def run_basic_demo():
     print("=" * 50)
-    print("cwprep 基础功能演示：客户订单关联")
+    print("cwprep Basic Demo: Customer Orders Join")
     print("=" * 50)
     print()
     
-    # 1. 创建 Builder 和连接
+    # 1. Create Builder and connection
     builder = TFLBuilder(flow_name="Customer Orders Analysis")
     conn_id = builder.add_connection(**DB_CONFIG)
-    print(f"✅ 添加数据库连接: {conn_id[:8]}...")
+    print(f"[OK] Add database connection: {conn_id[:8]}...")
     
-    # 2. 添加订单表
+    # 2. Add orders table
     orders_id = builder.add_input_sql(
         name="Orders",
-        sql="""
-        SELECT 
-            order_id,
-            order_date,
-            ship_mode,
-            customer_id,
-            city,
-            state,
-            sales,
-            quantity,
-            profit
-        FROM orders
-        """,
+        sql="""SELECT 
+order_id,
+order_date,
+ship_mode,
+customer_id,
+city,
+state,
+sales,
+quantity,
+profit
+FROM orders""",
         connection_id=conn_id
     )
-    print(f"✅ 添加订单表: {orders_id[:8]}...")
+    print(f"[OK] Add orders table: {orders_id[:8]}...")
     
-    # 3. 添加客户表
+    # 3. Add customers table
     customers_id = builder.add_input_sql(
         name="Customers",
-        sql="""
-        SELECT 
-            customer_id,
-            customer_name,
-            segment
-        FROM customers
-        """,
+        sql="""SELECT 
+customer_id,
+customer_name,
+segment
+FROM customers""",
         connection_id=conn_id
     )
-    print(f"✅ 添加客户表: {customers_id[:8]}...")
+    print(f"[OK] Add customers table: {customers_id[:8]}...")
     
-    # 4. 联接订单和客户
+    # 4. Join orders and customers
     join_id = builder.add_join(
         name="Orders + Customers",
         left_id=orders_id,
@@ -74,17 +70,17 @@ def run_basic_demo():
         right_col="customer_id",
         join_type="left"
     )
-    print(f"✅ 添加联接: {join_id[:8]}...")
+    print(f"[OK] Add join: {join_id[:8]}...")
     
-    # 5. 添加输出
+    # 5. Add output
     output_id = builder.add_output_server(
         name="Output",
         parent_id=join_id,
         datasource_name="Customer_Orders"
     )
-    print(f"✅ 添加输出: {output_id[:8]}...")
+    print(f"[OK] Add output: {output_id[:8]}...")
     
-    # 6. 构建和保存
+    # 6. Build and save
     print()
     flow, display, meta = builder.build()
     
@@ -94,9 +90,9 @@ def run_basic_demo():
     TFLPackager.save_to_folder(output_folder, flow, display, meta)
     TFLPackager.pack_zip(output_folder, output_tfl)
     
-    print(f"✅ 已生成: {output_tfl}")
+    print(f"[OK] Generated: {output_tfl}")
     print()
-    print("数据流: Orders + Customers → Join → Output")
+    print("Data flow: Orders + Customers -> Join -> Output")
 
 
 if __name__ == "__main__":

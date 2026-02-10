@@ -3,30 +3,29 @@
     "parameters": {}
   },
   "initialNodes": [
-    "d2dc9c76-ead5-448f-ac84-67d00d0d6f3f",
-    "c40f3718-b0ef-406f-ae89-010232db4e5f",
-    "b9a456ba-f92e-4a65-9d68-f4f194e66168",
-    "5d1ffaf8-a30e-406a-a471-8e9b89f7c481",
-    "7e038b1a-3d0a-4483-a896-43c6f946eda5"
+    "67825b88-cb35-4c9a-94d6-3d599141f4e2",
+    "37b12115-cd08-432a-b9fb-68aa02d74cbb",
+    "d3e5f3dc-5a81-4747-9a40-c7d14db07a8e",
+    "60b1826d-da84-425c-8c06-2c2066b97730"
   ],
   "nodes": {
-    "d2dc9c76-ead5-448f-ac84-67d00d0d6f3f": {
+    "67825b88-cb35-4c9a-94d6-3d599141f4e2": {
       "nodeType": ".v1.LoadSql",
       "name": "Orders_Jan_2024",
-      "id": "d2dc9c76-ead5-448f-ac84-67d00d0d6f3f",
+      "id": "67825b88-cb35-4c9a-94d6-3d599141f4e2",
       "baseType": "input",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "53af92fa-0d92-4753-8838-4b10f00dd471",
-          "nextNamespace": "Union-Namespace-75e328e8-ae52-4014-93ed-6750b5dde80f"
+          "nextNodeId": "2296a672-ed99-4087-bf5b-b017a3c17552",
+          "nextNamespace": "Union-Namespace-12eea8c9-6a65-4c25-89c6-154180d34481"
         }
       ],
       "serialize": false,
       "description": null,
-      "connectionId": "88d62779-20eb-4a60-bfc5-ee9774587125",
+      "connectionId": "bfb05df0-a399-4ef4-b781-fd5a1ca8fe72",
       "connectionAttributes": {
-        "dbname": "voxadmin"
+        "dbname": "superstore"
       },
       "fields": null,
       "actions": [],
@@ -42,26 +41,26 @@
       "filters": [],
       "relation": {
         "type": "query",
-        "query": "\n        SELECT \n            '2024-01' AS month_label,\n            order_id,\n            order_date,\n            ship_mode,\n            customer_id,\n            region_id,\n            city,\n            state,\n            product_id,\n            sales,\n            quantity,\n            discount,\n            profit\n        FROM orders \n        WHERE order_date >= '2024-01-01'\n          AND order_date < '2024-02-01'\n        "
+        "query": "SELECT\n'2024-01' AS month_label,\norder_id,\norder_date,\nship_mode,\ncustomer_id,\nregion_id,\ncity,\nstate,\nproduct_id,\nsales,\nquantity,\ndiscount,\nprofit\nFROM orders\nWHERE order_date >= '2024-01-01'\nAND order_date < '2024-02-01'"
       }
     },
-    "c40f3718-b0ef-406f-ae89-010232db4e5f": {
+    "37b12115-cd08-432a-b9fb-68aa02d74cbb": {
       "nodeType": ".v1.LoadSql",
       "name": "Orders_Feb_2024",
-      "id": "c40f3718-b0ef-406f-ae89-010232db4e5f",
+      "id": "37b12115-cd08-432a-b9fb-68aa02d74cbb",
       "baseType": "input",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "53af92fa-0d92-4753-8838-4b10f00dd471",
-          "nextNamespace": "Union-Namespace-0be74b97-f0ce-4596-9e64-961cf6328618"
+          "nextNodeId": "2296a672-ed99-4087-bf5b-b017a3c17552",
+          "nextNamespace": "Union-Namespace-9e9eb420-3dbf-4907-88b2-7ce19ef22c69"
         }
       ],
       "serialize": false,
       "description": null,
-      "connectionId": "88d62779-20eb-4a60-bfc5-ee9774587125",
+      "connectionId": "bfb05df0-a399-4ef4-b781-fd5a1ca8fe72",
       "connectionAttributes": {
-        "dbname": "voxadmin"
+        "dbname": "superstore"
       },
       "fields": null,
       "actions": [],
@@ -77,26 +76,26 @@
       "filters": [],
       "relation": {
         "type": "query",
-        "query": "\n        SELECT \n            '2024-02' AS month_label,\n            order_id,\n            order_date,\n            ship_mode,\n            customer_id,\n            region_id,\n            city,\n            state,\n            product_id,\n            sales,\n            quantity,\n            discount,\n            profit\n        FROM orders \n        WHERE order_date >= '2024-02-01'\n          AND order_date < '2024-03-01'\n        "
+        "query": "SELECT\n'2024-02' AS month_label,\norder_id,\norder_date,\nship_mode,\ncustomer_id,\nregion_id,\ncity,\nstate,\nproduct_id,\nsales,\nquantity,\ndiscount,\nprofit\nFROM orders\nWHERE order_date >= '2024-02-01'\nAND order_date < '2024-03-01'"
       }
     },
-    "b9a456ba-f92e-4a65-9d68-f4f194e66168": {
+    "d3e5f3dc-5a81-4747-9a40-c7d14db07a8e": {
       "nodeType": ".v1.LoadSql",
       "name": "customers",
-      "id": "b9a456ba-f92e-4a65-9d68-f4f194e66168",
+      "id": "d3e5f3dc-5a81-4747-9a40-c7d14db07a8e",
       "baseType": "input",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "be3983d7-3e6a-402e-a0ed-72b4743ac89f",
+          "nextNodeId": "34549d4f-71ea-4ec3-a915-4be2a6521364",
           "nextNamespace": "Right"
         }
       ],
       "serialize": false,
       "description": null,
-      "connectionId": "88d62779-20eb-4a60-bfc5-ee9774587125",
+      "connectionId": "bfb05df0-a399-4ef4-b781-fd5a1ca8fe72",
       "connectionAttributes": {
-        "dbname": "voxadmin"
+        "dbname": "superstore"
       },
       "fields": null,
       "actions": [],
@@ -115,23 +114,23 @@
         "table": "[customers]"
       }
     },
-    "5d1ffaf8-a30e-406a-a471-8e9b89f7c481": {
+    "60b1826d-da84-425c-8c06-2c2066b97730": {
       "nodeType": ".v1.LoadSql",
       "name": "regions",
-      "id": "5d1ffaf8-a30e-406a-a471-8e9b89f7c481",
+      "id": "60b1826d-da84-425c-8c06-2c2066b97730",
       "baseType": "input",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "c9c0f8cd-775d-49e2-a109-8ac8b70984b8",
+          "nextNodeId": "f3be775e-d732-480d-b26f-436f54766252",
           "nextNamespace": "Right"
         }
       ],
       "serialize": false,
       "description": null,
-      "connectionId": "88d62779-20eb-4a60-bfc5-ee9774587125",
+      "connectionId": "bfb05df0-a399-4ef4-b781-fd5a1ca8fe72",
       "connectionAttributes": {
-        "dbname": "voxadmin"
+        "dbname": "superstore"
       },
       "fields": null,
       "actions": [],
@@ -150,44 +149,15 @@
         "table": "[regions]"
       }
     },
-    "7e038b1a-3d0a-4483-a896-43c6f946eda5": {
-      "nodeType": ".v1.LoadSql",
-      "name": "returns",
-      "id": "7e038b1a-3d0a-4483-a896-43c6f946eda5",
-      "baseType": "input",
-      "nextNodes": [],
-      "serialize": false,
-      "description": null,
-      "connectionId": "88d62779-20eb-4a60-bfc5-ee9774587125",
-      "connectionAttributes": {
-        "dbname": "voxadmin"
-      },
-      "fields": null,
-      "actions": [],
-      "debugModeRowLimit": null,
-      "originalDataTypes": {},
-      "randomSampling": null,
-      "updateTimestamp": null,
-      "restrictedFields": {},
-      "userRenamedFields": {},
-      "selectedFields": null,
-      "samplingType": null,
-      "groupByFields": null,
-      "filters": [],
-      "relation": {
-        "type": "table",
-        "table": "[returns]"
-      }
-    },
-    "53af92fa-0d92-4753-8838-4b10f00dd471": {
+    "2296a672-ed99-4087-bf5b-b017a3c17552": {
       "nodeType": ".v2018_2_3.SuperUnion",
       "name": "Union_Jan_Feb",
-      "id": "53af92fa-0d92-4753-8838-4b10f00dd471",
+      "id": "2296a672-ed99-4087-bf5b-b017a3c17552",
       "baseType": "superNode",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "be3983d7-3e6a-402e-a0ed-72b4743ac89f",
+          "nextNodeId": "34549d4f-71ea-4ec3-a915-4be2a6521364",
           "nextNamespace": "Left"
         }
       ],
@@ -198,32 +168,32 @@
       "actionNode": {
         "nodeType": ".v1.SimpleUnion",
         "name": "Union_Jan_Feb",
-        "id": "2bcba5db-bf71-4594-94c3-c63137e05ac8",
+        "id": "d60624da-f651-4345-a055-9c357e6f4c66",
         "baseType": "transform",
         "nextNodes": [],
         "serialize": false,
         "description": null,
         "namespaceFieldMappings": [
           {
-            "namespaceName": "Union-Namespace-75e328e8-ae52-4014-93ed-6750b5dde80f",
+            "namespaceName": "Union-Namespace-12eea8c9-6a65-4c25-89c6-154180d34481",
             "fieldMappings": {}
           },
           {
-            "namespaceName": "Union-Namespace-0be74b97-f0ce-4596-9e64-961cf6328618",
+            "namespaceName": "Union-Namespace-9e9eb420-3dbf-4907-88b2-7ce19ef22c69",
             "fieldMappings": {}
           }
         ]
       }
     },
-    "be3983d7-3e6a-402e-a0ed-72b4743ac89f": {
+    "34549d4f-71ea-4ec3-a915-4be2a6521364": {
       "nodeType": ".v2018_2_3.SuperJoin",
       "name": "Orders_Customers",
-      "id": "be3983d7-3e6a-402e-a0ed-72b4743ac89f",
+      "id": "34549d4f-71ea-4ec3-a915-4be2a6521364",
       "baseType": "superNode",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "c9c0f8cd-775d-49e2-a109-8ac8b70984b8",
+          "nextNodeId": "f3be775e-d732-480d-b26f-436f54766252",
           "nextNamespace": "Left"
         }
       ],
@@ -234,7 +204,7 @@
       "actionNode": {
         "nodeType": ".v1.SimpleJoin",
         "name": "Orders_Customers",
-        "id": "72d86953-4897-4985-bed4-4cf9b17431d9",
+        "id": "cf3788b6-1f15-4701-bf23-c58200281041",
         "baseType": "transform",
         "nextNodes": [],
         "serialize": false,
@@ -249,15 +219,15 @@
         "joinType": "left"
       }
     },
-    "c9c0f8cd-775d-49e2-a109-8ac8b70984b8": {
+    "f3be775e-d732-480d-b26f-436f54766252": {
       "nodeType": ".v2018_2_3.SuperJoin",
       "name": "Orders_Customers_Regions",
-      "id": "c9c0f8cd-775d-49e2-a109-8ac8b70984b8",
+      "id": "f3be775e-d732-480d-b26f-436f54766252",
       "baseType": "superNode",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "ad4dcb55-d26d-4410-bdcd-7697cc025ae2",
+          "nextNodeId": "da55a1e9-c68a-4878-ac8a-15b6931dcb95",
           "nextNamespace": "Default"
         }
       ],
@@ -268,7 +238,7 @@
       "actionNode": {
         "nodeType": ".v1.SimpleJoin",
         "name": "Orders_Customers_Regions",
-        "id": "b88a9db1-2817-4504-998b-780cae3f4acf",
+        "id": "1f48c05d-4249-4e57-a9c1-7b4f02f374ba",
         "baseType": "transform",
         "nextNodes": [],
         "serialize": false,
@@ -283,15 +253,15 @@
         "joinType": "left"
       }
     },
-    "ad4dcb55-d26d-4410-bdcd-7697cc025ae2": {
+    "da55a1e9-c68a-4878-ac8a-15b6931dcb95": {
       "nodeType": ".v1.Container",
       "name": "Keep_Core_Fields",
-      "id": "ad4dcb55-d26d-4410-bdcd-7697cc025ae2",
+      "id": "da55a1e9-c68a-4878-ac8a-15b6931dcb95",
       "baseType": "container",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "d712bd46-8e03-4b1d-9aa1-da024bf84f9e",
+          "nextNodeId": "cd0f09a5-a579-45cf-ac92-d19f9033fb4a",
           "nextNamespace": "Default"
         }
       ],
@@ -302,13 +272,13 @@
           "parameters": {}
         },
         "initialNodes": [
-          "d5a12d67-6ca5-4f3a-b042-c1cbe86def85"
+          "9232ca98-fc94-4b4c-9940-314d496f87b4"
         ],
         "nodes": {
-          "d5a12d67-6ca5-4f3a-b042-c1cbe86def85": {
+          "9232ca98-fc94-4b4c-9940-314d496f87b4": {
             "nodeType": ".v2019_2_2.KeepOnlyColumns",
             "name": "只保留 month_label + 另外 13 个",
-            "id": "d5a12d67-6ca5-4f3a-b042-c1cbe86def85",
+            "id": "9232ca98-fc94-4b4c-9940-314d496f87b4",
             "baseType": "transform",
             "nextNodes": [],
             "serialize": false,
@@ -340,27 +310,27 @@
       },
       "namespacesToInput": {
         "Default": {
-          "nodeId": "d5a12d67-6ca5-4f3a-b042-c1cbe86def85",
+          "nodeId": "9232ca98-fc94-4b4c-9940-314d496f87b4",
           "namespace": "Default"
         }
       },
       "namespacesToOutput": {
         "Default": {
-          "nodeId": "d5a12d67-6ca5-4f3a-b042-c1cbe86def85",
+          "nodeId": "9232ca98-fc94-4b4c-9940-314d496f87b4",
           "namespace": "Default"
         }
       },
       "providedParameters": null
     },
-    "d712bd46-8e03-4b1d-9aa1-da024bf84f9e": {
+    "cd0f09a5-a579-45cf-ac92-d19f9033fb4a": {
       "nodeType": ".v1.Container",
-      "name": "重命名",
-      "id": "d712bd46-8e03-4b1d-9aa1-da024bf84f9e",
+      "name": "rename",
+      "id": "cd0f09a5-a579-45cf-ac92-d19f9033fb4a",
       "baseType": "container",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "014611f6-eaca-4a8e-8873-3b95e7181250",
+          "nextNodeId": "0f41970d-1cfb-42d4-b0a9-4691f339a754",
           "nextNamespace": "Default"
         }
       ],
@@ -371,100 +341,100 @@
           "parameters": {}
         },
         "initialNodes": [
-          "6fe14ace-391c-4a8c-aea5-64196f50a23c"
+          "6e08bb35-71fd-486f-b286-dddec7f2fb6d"
         ],
         "nodes": {
-          "6fe14ace-391c-4a8c-aea5-64196f50a23c": {
+          "6e08bb35-71fd-486f-b286-dddec7f2fb6d": {
             "nodeType": ".v1.RenameColumn",
             "columnName": "month_label",
             "rename": "Month",
             "name": "将 month_label 重命名为 Month",
-            "id": "6fe14ace-391c-4a8c-aea5-64196f50a23c",
+            "id": "6e08bb35-71fd-486f-b286-dddec7f2fb6d",
             "baseType": "transform",
             "nextNodes": [
               {
                 "namespace": "Default",
-                "nextNodeId": "b5692d5c-b255-4a9c-94fb-3d87e3ba5fb3",
+                "nextNodeId": "7c5e3d37-8b79-4bb9-b314-9f255851201c",
                 "nextNamespace": "Default"
               }
             ],
             "serialize": false,
             "description": null
           },
-          "b5692d5c-b255-4a9c-94fb-3d87e3ba5fb3": {
+          "7c5e3d37-8b79-4bb9-b314-9f255851201c": {
             "nodeType": ".v1.RenameColumn",
             "columnName": "customer_name",
             "rename": "Customer",
             "name": "将 customer_name 重命名为 Customer",
-            "id": "b5692d5c-b255-4a9c-94fb-3d87e3ba5fb3",
+            "id": "7c5e3d37-8b79-4bb9-b314-9f255851201c",
             "baseType": "transform",
             "nextNodes": [
               {
                 "namespace": "Default",
-                "nextNodeId": "94b79078-b4b4-4259-9a3a-041ceaec4fd2",
+                "nextNodeId": "92b41045-152c-408a-9683-6a1f057cbb16",
                 "nextNamespace": "Default"
               }
             ],
             "serialize": false,
             "description": null
           },
-          "94b79078-b4b4-4259-9a3a-041ceaec4fd2": {
+          "92b41045-152c-408a-9683-6a1f057cbb16": {
             "nodeType": ".v1.RenameColumn",
             "columnName": "segment",
             "rename": "Segment",
             "name": "将 segment 重命名为 Segment",
-            "id": "94b79078-b4b4-4259-9a3a-041ceaec4fd2",
+            "id": "92b41045-152c-408a-9683-6a1f057cbb16",
             "baseType": "transform",
             "nextNodes": [
               {
                 "namespace": "Default",
-                "nextNodeId": "acf886cb-12d2-4879-8842-7413203c8a0a",
+                "nextNodeId": "d0e045d9-3ba6-4f11-aa8a-fd5a7a2e55c0",
                 "nextNamespace": "Default"
               }
             ],
             "serialize": false,
             "description": null
           },
-          "acf886cb-12d2-4879-8842-7413203c8a0a": {
+          "d0e045d9-3ba6-4f11-aa8a-fd5a7a2e55c0": {
             "nodeType": ".v1.RenameColumn",
             "columnName": "region_name",
             "rename": "Region",
             "name": "将 region_name 重命名为 Region",
-            "id": "acf886cb-12d2-4879-8842-7413203c8a0a",
+            "id": "d0e045d9-3ba6-4f11-aa8a-fd5a7a2e55c0",
             "baseType": "transform",
             "nextNodes": [
               {
                 "namespace": "Default",
-                "nextNodeId": "04d22927-dad5-443b-b668-8224e4be1314",
+                "nextNodeId": "6932b0d0-85ff-45f5-af41-b9d3697687da",
                 "nextNamespace": "Default"
               }
             ],
             "serialize": false,
             "description": null
           },
-          "04d22927-dad5-443b-b668-8224e4be1314": {
+          "6932b0d0-85ff-45f5-af41-b9d3697687da": {
             "nodeType": ".v1.RenameColumn",
             "columnName": "manager_name",
             "rename": "Manager",
             "name": "将 manager_name 重命名为 Manager",
-            "id": "04d22927-dad5-443b-b668-8224e4be1314",
+            "id": "6932b0d0-85ff-45f5-af41-b9d3697687da",
             "baseType": "transform",
             "nextNodes": [
               {
                 "namespace": "Default",
-                "nextNodeId": "d82950fa-e5be-421c-a99a-cb3783404c51",
+                "nextNodeId": "e44f3e28-4ca7-4c87-b2c4-47e5e82c3613",
                 "nextNamespace": "Default"
               }
             ],
             "serialize": false,
             "description": null
           },
-          "d82950fa-e5be-421c-a99a-cb3783404c51": {
+          "e44f3e28-4ca7-4c87-b2c4-47e5e82c3613": {
             "nodeType": ".v1.RenameColumn",
             "columnName": "ship_mode",
             "rename": "Ship_Mode",
             "name": "将 ship_mode 重命名为 Ship_Mode",
-            "id": "d82950fa-e5be-421c-a99a-cb3783404c51",
+            "id": "e44f3e28-4ca7-4c87-b2c4-47e5e82c3613",
             "baseType": "transform",
             "nextNodes": [],
             "serialize": false,
@@ -480,27 +450,27 @@
       },
       "namespacesToInput": {
         "Default": {
-          "nodeId": "6fe14ace-391c-4a8c-aea5-64196f50a23c",
+          "nodeId": "6e08bb35-71fd-486f-b286-dddec7f2fb6d",
           "namespace": "Default"
         }
       },
       "namespacesToOutput": {
         "Default": {
-          "nodeId": "d82950fa-e5be-421c-a99a-cb3783404c51",
+          "nodeId": "e44f3e28-4ca7-4c87-b2c4-47e5e82c3613",
           "namespace": "Default"
         }
       },
       "providedParameters": null
     },
-    "014611f6-eaca-4a8e-8873-3b95e7181250": {
+    "0f41970d-1cfb-42d4-b0a9-4691f339a754": {
       "nodeType": ".v1.Container",
       "name": "Filter_Ship_Mode",
-      "id": "014611f6-eaca-4a8e-8873-3b95e7181250",
+      "id": "0f41970d-1cfb-42d4-b0a9-4691f339a754",
       "baseType": "container",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "b43e8e1a-2218-404d-b2fd-777241965b02",
+          "nextNodeId": "ac49f654-83be-4bd8-9c09-57072078aedf",
           "nextNamespace": "Default"
         }
       ],
@@ -511,23 +481,18 @@
           "parameters": {}
         },
         "initialNodes": [
-          "91dd05fe-b155-4c9d-8d03-0d0ca7bda12d"
+          "d0bde8f2-8a47-4caa-810d-5a4a1d617148"
         ],
         "nodes": {
-          "91dd05fe-b155-4c9d-8d03-0d0ca7bda12d": {
-            "nodeType": ".v1.ValueFilter",
-            "name": "排除 Ship_Mode:Same Day",
-            "id": "91dd05fe-b155-4c9d-8d03-0d0ca7bda12d",
+          "d0bde8f2-8a47-4caa-810d-5a4a1d617148": {
+            "nodeType": ".v1.FilterOperation",
+            "name": "Exclude Ship_Mode:Same Day",
+            "id": "d0bde8f2-8a47-4caa-810d-5a4a1d617148",
             "baseType": "transform",
             "nextNodes": [],
             "serialize": false,
             "description": null,
-            "exclude": true,
-            "values": {
-              "Ship_Mode": [
-                "Same Day"
-              ]
-            }
+            "filterExpression": "NOT ((([Ship_Mode] == 'Same Day') AND NOT (ISNULL([Ship_Mode]))))"
           }
         },
         "connections": {},
@@ -539,27 +504,27 @@
       },
       "namespacesToInput": {
         "Default": {
-          "nodeId": "91dd05fe-b155-4c9d-8d03-0d0ca7bda12d",
+          "nodeId": "d0bde8f2-8a47-4caa-810d-5a4a1d617148",
           "namespace": "Default"
         }
       },
       "namespacesToOutput": {
         "Default": {
-          "nodeId": "91dd05fe-b155-4c9d-8d03-0d0ca7bda12d",
+          "nodeId": "d0bde8f2-8a47-4caa-810d-5a4a1d617148",
           "namespace": "Default"
         }
       },
       "providedParameters": null
     },
-    "b43e8e1a-2218-404d-b2fd-777241965b02": {
+    "ac49f654-83be-4bd8-9c09-57072078aedf": {
       "nodeType": ".v1.Container",
       "name": "Calc_Profit_Rate",
-      "id": "b43e8e1a-2218-404d-b2fd-777241965b02",
+      "id": "ac49f654-83be-4bd8-9c09-57072078aedf",
       "baseType": "container",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "064d367b-cabd-4737-8275-79d59bdba35b",
+          "nextNodeId": "f736f346-7896-4d0d-94c7-f4233944ed25",
           "nextNamespace": "Default"
         }
       ],
@@ -570,15 +535,15 @@
           "parameters": {}
         },
         "initialNodes": [
-          "b28f7201-0cbc-4ef4-8478-d50b52cc8f42"
+          "09bfdb52-8ef9-4390-a5ee-995b770c0139"
         ],
         "nodes": {
-          "b28f7201-0cbc-4ef4-8478-d50b52cc8f42": {
+          "09bfdb52-8ef9-4390-a5ee-995b770c0139": {
             "nodeType": ".v1.AddColumn",
             "columnName": "Profit_Rate",
             "expression": "IF [sales] = 0 THEN 0 ELSE [profit] / [sales] END",
             "name": "Add Profit_Rate",
-            "id": "b28f7201-0cbc-4ef4-8478-d50b52cc8f42",
+            "id": "09bfdb52-8ef9-4390-a5ee-995b770c0139",
             "baseType": "transform",
             "nextNodes": [],
             "serialize": false,
@@ -594,27 +559,27 @@
       },
       "namespacesToInput": {
         "Default": {
-          "nodeId": "b28f7201-0cbc-4ef4-8478-d50b52cc8f42",
+          "nodeId": "09bfdb52-8ef9-4390-a5ee-995b770c0139",
           "namespace": "Default"
         }
       },
       "namespacesToOutput": {
         "Default": {
-          "nodeId": "b28f7201-0cbc-4ef4-8478-d50b52cc8f42",
+          "nodeId": "09bfdb52-8ef9-4390-a5ee-995b770c0139",
           "namespace": "Default"
         }
       },
       "providedParameters": null
     },
-    "064d367b-cabd-4737-8275-79d59bdba35b": {
+    "f736f346-7896-4d0d-94c7-f4233944ed25": {
       "nodeType": ".v1.Container",
       "name": "Calc_Order_Level",
-      "id": "064d367b-cabd-4737-8275-79d59bdba35b",
+      "id": "f736f346-7896-4d0d-94c7-f4233944ed25",
       "baseType": "container",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "ed241bdf-98ab-49b4-bb65-6cff51bc9f84",
+          "nextNodeId": "b25bd20d-0a65-4620-96b0-5a0501e67680",
           "nextNamespace": "Default"
         }
       ],
@@ -625,15 +590,15 @@
           "parameters": {}
         },
         "initialNodes": [
-          "aa57e4a4-dd27-4277-8bd4-5ab774400c9d"
+          "57eccbaa-6da0-4f9d-8658-19918568b2a2"
         ],
         "nodes": {
-          "aa57e4a4-dd27-4277-8bd4-5ab774400c9d": {
+          "57eccbaa-6da0-4f9d-8658-19918568b2a2": {
             "nodeType": ".v1.AddColumn",
             "columnName": "Order_Level",
             "expression": "IF [sales] >= 500 THEN 'High' ELSEIF [sales] >= 100 THEN 'Medium' ELSE 'Low' END",
             "name": "Add Order_Level",
-            "id": "aa57e4a4-dd27-4277-8bd4-5ab774400c9d",
+            "id": "57eccbaa-6da0-4f9d-8658-19918568b2a2",
             "baseType": "transform",
             "nextNodes": [],
             "serialize": false,
@@ -649,27 +614,27 @@
       },
       "namespacesToInput": {
         "Default": {
-          "nodeId": "aa57e4a4-dd27-4277-8bd4-5ab774400c9d",
+          "nodeId": "57eccbaa-6da0-4f9d-8658-19918568b2a2",
           "namespace": "Default"
         }
       },
       "namespacesToOutput": {
         "Default": {
-          "nodeId": "aa57e4a4-dd27-4277-8bd4-5ab774400c9d",
+          "nodeId": "57eccbaa-6da0-4f9d-8658-19918568b2a2",
           "namespace": "Default"
         }
       },
       "providedParameters": null
     },
-    "ed241bdf-98ab-49b4-bb65-6cff51bc9f84": {
+    "b25bd20d-0a65-4620-96b0-5a0501e67680": {
       "nodeType": ".v1.Container",
       "name": "Filter_Profitable",
-      "id": "ed241bdf-98ab-49b4-bb65-6cff51bc9f84",
+      "id": "b25bd20d-0a65-4620-96b0-5a0501e67680",
       "baseType": "container",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "51c27e29-4ebe-4500-a9fe-b0e54f7d4985",
+          "nextNodeId": "191c300b-9cc7-404a-84fc-69a422ab1433",
           "nextNamespace": "Default"
         }
       ],
@@ -680,13 +645,13 @@
           "parameters": {}
         },
         "initialNodes": [
-          "771a0dfb-cf00-4a01-a37a-98184d13c43b"
+          "4d153ec3-c45d-441b-acfd-f41086e73f1d"
         ],
         "nodes": {
-          "771a0dfb-cf00-4a01-a37a-98184d13c43b": {
+          "4d153ec3-c45d-441b-acfd-f41086e73f1d": {
             "nodeType": ".v1.FilterOperation",
             "name": "筛选器",
-            "id": "771a0dfb-cf00-4a01-a37a-98184d13c43b",
+            "id": "4d153ec3-c45d-441b-acfd-f41086e73f1d",
             "baseType": "transform",
             "nextNodes": [],
             "serialize": false,
@@ -703,27 +668,27 @@
       },
       "namespacesToInput": {
         "Default": {
-          "nodeId": "771a0dfb-cf00-4a01-a37a-98184d13c43b",
+          "nodeId": "4d153ec3-c45d-441b-acfd-f41086e73f1d",
           "namespace": "Default"
         }
       },
       "namespacesToOutput": {
         "Default": {
-          "nodeId": "771a0dfb-cf00-4a01-a37a-98184d13c43b",
+          "nodeId": "4d153ec3-c45d-441b-acfd-f41086e73f1d",
           "namespace": "Default"
         }
       },
       "providedParameters": null
     },
-    "51c27e29-4ebe-4500-a9fe-b0e54f7d4985": {
+    "191c300b-9cc7-404a-84fc-69a422ab1433": {
       "nodeType": ".v1.Container",
       "name": "Remove_IDs",
-      "id": "51c27e29-4ebe-4500-a9fe-b0e54f7d4985",
+      "id": "191c300b-9cc7-404a-84fc-69a422ab1433",
       "baseType": "container",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "5b756db4-a7a3-4fac-b697-d59d3673a01d",
+          "nextNodeId": "eecb31d1-9a13-4b84-856c-d21c2aa400e5",
           "nextNamespace": "Default"
         }
       ],
@@ -734,13 +699,13 @@
           "parameters": {}
         },
         "initialNodes": [
-          "0dec2a72-59f7-4dbd-bbbf-9379c9418e4f"
+          "7f3fb35e-2b57-4bef-952b-58f91e2e8f9d"
         ],
         "nodes": {
-          "0dec2a72-59f7-4dbd-bbbf-9379c9418e4f": {
+          "7f3fb35e-2b57-4bef-952b-58f91e2e8f9d": {
             "nodeType": ".v1.RemoveColumns",
             "name": "移除 order_id + 另外 2 个",
-            "id": "0dec2a72-59f7-4dbd-bbbf-9379c9418e4f",
+            "id": "7f3fb35e-2b57-4bef-952b-58f91e2e8f9d",
             "baseType": "transform",
             "nextNodes": [],
             "serialize": false,
@@ -761,27 +726,27 @@
       },
       "namespacesToInput": {
         "Default": {
-          "nodeId": "0dec2a72-59f7-4dbd-bbbf-9379c9418e4f",
+          "nodeId": "7f3fb35e-2b57-4bef-952b-58f91e2e8f9d",
           "namespace": "Default"
         }
       },
       "namespacesToOutput": {
         "Default": {
-          "nodeId": "0dec2a72-59f7-4dbd-bbbf-9379c9418e4f",
+          "nodeId": "7f3fb35e-2b57-4bef-952b-58f91e2e8f9d",
           "namespace": "Default"
         }
       },
       "providedParameters": null
     },
-    "5b756db4-a7a3-4fac-b697-d59d3673a01d": {
+    "eecb31d1-9a13-4b84-856c-d21c2aa400e5": {
       "nodeType": ".v1.Container",
       "name": "Data_Validation",
-      "id": "5b756db4-a7a3-4fac-b697-d59d3673a01d",
+      "id": "eecb31d1-9a13-4b84-856c-d21c2aa400e5",
       "baseType": "container",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "7512faaa-9f8d-4ea6-9367-690f2fdcd716",
+          "nextNodeId": "852f8956-d71c-44ae-bbc6-011a96ca73ab",
           "nextNamespace": "Default"
         }
       ],
@@ -804,15 +769,15 @@
       "namespacesToOutput": {},
       "providedParameters": null
     },
-    "7512faaa-9f8d-4ea6-9367-690f2fdcd716": {
+    "852f8956-d71c-44ae-bbc6-011a96ca73ab": {
       "nodeType": ".v2018_2_3.SuperAggregate",
       "name": "Aggregate_By_Region",
-      "id": "7512faaa-9f8d-4ea6-9367-690f2fdcd716",
+      "id": "852f8956-d71c-44ae-bbc6-011a96ca73ab",
       "baseType": "superNode",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "7349ffda-121e-4195-9a6c-e7cebe3114e1",
+          "nextNodeId": "21928472-17df-4d96-8a3d-4532afb054d1",
           "nextNamespace": "Default"
         }
       ],
@@ -823,7 +788,7 @@
       "actionNode": {
         "nodeType": ".v1.Aggregate",
         "name": "Aggregate_By_Region",
-        "id": "139d61ca-cf88-4fd8-adab-9a500ea1af4c",
+        "id": "9d5aae1d-513a-43a7-be2b-f731d3ec5cf6",
         "baseType": "transform",
         "nextNodes": [],
         "serialize": false,
@@ -876,15 +841,15 @@
         ]
       }
     },
-    "7349ffda-121e-4195-9a6c-e7cebe3114e1": {
+    "21928472-17df-4d96-8a3d-4532afb054d1": {
       "nodeType": ".v2018_3_3.SuperPivot",
       "name": "Pivot_Monthly",
-      "id": "7349ffda-121e-4195-9a6c-e7cebe3114e1",
+      "id": "21928472-17df-4d96-8a3d-4532afb054d1",
       "baseType": "superNode",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "7f3f0f5d-5a98-489e-9ef6-c9591ad47868",
+          "nextNodeId": "a06e91aa-6084-488f-9d64-9473a90e0380",
           "nextNamespace": "Default"
         }
       ],
@@ -895,7 +860,7 @@
       "actionNode": {
         "nodeType": ".v2018_3_3.Pivot",
         "name": "Month 1",
-        "id": "7a464ce4-ae2c-47af-94d0-7db3d12a9582",
+        "id": "81e8c516-3c05-48ca-a5c1-f370238462a9",
         "baseType": "transform",
         "nextNodes": [],
         "serialize": false,
@@ -917,15 +882,15 @@
         ]
       }
     },
-    "7f3f0f5d-5a98-489e-9ef6-c9591ad47868": {
+    "a06e91aa-6084-488f-9d64-9473a90e0380": {
       "nodeType": ".v2018_2_3.SuperUnpivot",
       "name": "Unpivot_Months",
-      "id": "7f3f0f5d-5a98-489e-9ef6-c9591ad47868",
+      "id": "a06e91aa-6084-488f-9d64-9473a90e0380",
       "baseType": "superNode",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "df5426ab-996b-4cf6-beeb-0eb4f54238ca",
+          "nextNodeId": "13c5aada-9b2b-4387-bed8-a2ff7409ccac",
           "nextNamespace": "Default"
         }
       ],
@@ -936,7 +901,7 @@
       "actionNode": {
         "nodeType": ".v1.Unpivot",
         "name": "Unpivot_Months",
-        "id": "3b8161f5-cd65-4df3-9b8b-71adcbccab93",
+        "id": "ba8ee12d-8120-4bb7-a8a8-c86ff4d63b51",
         "baseType": "transform",
         "nextNodes": [],
         "serialize": false,
@@ -978,10 +943,10 @@
         ]
       }
     },
-    "df5426ab-996b-4cf6-beeb-0eb4f54238ca": {
+    "13c5aada-9b2b-4387-bed8-a2ff7409ccac": {
       "nodeType": ".v1.PublishExtract",
       "name": "Sales_Analysis_Output",
-      "id": "df5426ab-996b-4cf6-beeb-0eb4f54238ca",
+      "id": "13c5aada-9b2b-4387-bed8-a2ff7409ccac",
       "baseType": "output",
       "nextNodes": [],
       "serialize": false,
@@ -994,9 +959,9 @@
     }
   },
   "connections": {
-    "88d62779-20eb-4a60-bfc5-ee9774587125": {
+    "bfb05df0-a399-4ef4-b781-fd5a1ca8fe72": {
       "connectionType": ".v1.SqlConnection",
-      "id": "88d62779-20eb-4a60-bfc5-ee9774587125",
+      "id": "bfb05df0-a399-4ef4-b781-fd5a1ca8fe72",
       "name": "localhost",
       "isPackaged": false,
       "connectionAttributes": {
@@ -1023,11 +988,11 @@
   },
   "dataConnections": {},
   "connectionIds": [
-    "88d62779-20eb-4a60-bfc5-ee9774587125"
+    "bfb05df0-a399-4ef4-b781-fd5a1ca8fe72"
   ],
   "dataConnectionIds": [],
   "nodeProperties": {
-    "be3983d7-3e6a-402e-a0ed-72b4743ac89f": {
+    "34549d4f-71ea-4ec3-a915-4be2a6521364": {
       "com.tableau.loom.doc.fileformat.v2019_1_3.PrimaryKey": {
         "nodePropertyType": ".v2019_1_3.PrimaryKey",
         "empty": false,
@@ -1036,7 +1001,7 @@
         ]
       }
     },
-    "c9c0f8cd-775d-49e2-a109-8ac8b70984b8": {
+    "f3be775e-d732-480d-b26f-436f54766252": {
       "com.tableau.loom.doc.fileformat.v2019_1_3.PrimaryKey": {
         "nodePropertyType": ".v2019_1_3.PrimaryKey",
         "empty": false,
@@ -1050,6 +1015,6 @@
   "selection": [],
   "majorVersion": 1,
   "minorVersion": 4,
-  "documentId": "c33caced-be54-47f4-b593-efb6a5a8e091",
-  "obfuscatorId": "60be0418-9f11-47a3-8b34-703f13556dc6"
+  "documentId": "e1916740-5981-49fe-8341-718a39bc9d5d",
+  "obfuscatorId": "bb58de68-06a4-4941-838e-3c3f86bdbaca"
 }
