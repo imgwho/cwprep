@@ -1,51 +1,51 @@
-# cwprep 示例目录
+# cwprep Examples Directory
 
-本目录包含 cwprep SDK 的使用示例，基于 **Sample Superstore** 数据集。
+This directory contains usage examples for the cwprep SDK, based on the **Sample Superstore** dataset.
 
-## 快速开始
+## Quick Start
 
-### 1. 初始化示例数据库
+### 1. Initialize Example Database
 
-在 MySQL 客户端中执行：
+Execute in your MySQL client:
 
 ```sql
 examples/demo_data/init_superstore.sql
 ```
 
-### 2. 运行示例脚本
+### 2. Run Example Scripts
 
 ```bash
-# 基础功能（输入、联接、输出）
+# Basic features (Input, Join, Output)
 python examples/demo_basic.py
 
-# 数据清理（筛选、重命名、计算）
+# Data cleaning (Filter, Rename, Calculation)
 python examples/demo_cleaning.py
 
-# 聚合转置（并集、聚合、Pivot）
+# Aggregation and Transpose (Union, Aggregate, Pivot)
 python examples/demo_aggregation.py
 
-# 综合演示（覆盖全部 15 个 SDK 方法）
+# Comprehensive demo (Covers all 15 SDK methods)
 python examples/demo_comprehensive.py
 ```
 
-### 3. 验证结果
+### 3. Verify Results
 
-用 Tableau Prep 打开 `demo_output/` 目录下生成的 `.tfl` 文件。
+Open the generated `.tfl` files in the `demo_output/` directory using Tableau Prep.
 
 ---
 
-## 示例脚本说明
+## Example Scripts Description
 
-| 脚本 | 功能覆盖 | 业务场景 |
+| Script | Feature Coverage | Business Scenario |
 |------|----------|----------|
-| `demo_basic.py` | 输入、联接、输出 | 客户订单关联 |
-| `demo_cleaning.py` | 筛选、保留、重命名、计算 | 盈利订单分析 |
-| `demo_aggregation.py` | 并集、聚合、Pivot/Unpivot | 区域月度对比 |
-| `demo_comprehensive.py` | **全部 15 个 SDK 方法** | 完整销售分析 |
+| `demo_basic.py` | Input, Join, Output | Customer and Order mapping |
+| `demo_cleaning.py` | Filter, Keep, Rename, Calculation | Profitable order analysis |
+| `demo_aggregation.py` | Union, Aggregate, Pivot/Unpivot | Regional monthly comparison |
+| `demo_comprehensive.py` | **Full 15 SDK Methods** | Complete sales analysis |
 
 ---
 
-## 数据模型
+## Data Model
 
 ```
                     ┌─────────────┐
@@ -56,14 +56,14 @@ python examples/demo_comprehensive.py
                     │ manager_name│
                     └──────┬──────┘
                            │
-┌─────────────┐    ┌───────┴───────┐    ┌─────────────┐
-│  customers  │    │    orders     │    │  products   │
-├─────────────┤    ├───────────────┤    ├─────────────┤
-│ customer_id │◄───│ customer_id   │───►│ product_id  │
-│ customer_name│   │ region_id     │    │ product_name│
-│ segment     │    │ product_id    │    │ category    │
-└─────────────┘    │ sales/profit  │    │ sub_category│
-                   └───────┬───────┘    └─────────────┘
+ ┌─────────────┐    ┌───────┴───────┐    ┌─────────────┐
+ │  customers  │    │    orders     │    │  products   │
+ ├─────────────┤    ├───────────────┤    ├─────────────┤
+ │ customer_id │◄───│ customer_id   │───►│ product_id  │
+ │ customer_name│   │ region_id     │    │ product_name│
+ │ segment     │    │ product_id    │    │ category    │
+ └─────────────┘    │ sales/profit  │    │ sub_category│
+                    └───────┬───────┘    └─────────────┘
                            │
                     ┌──────┴──────┐
                     │   returns   │
@@ -75,7 +75,7 @@ python examples/demo_comprehensive.py
 
 ---
 
-## 数据库配置
+## Database Configuration
 
 ```python
 DB_CONFIG = {
