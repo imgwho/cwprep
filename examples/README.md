@@ -36,12 +36,71 @@ Open the generated `.tfl` files in the `demo_output/` directory using Tableau Pr
 
 ## Example Scripts Description
 
-| Script | Feature Coverage | Business Scenario |
-|------|----------|----------|
-| `demo_basic.py` | Input, Join, Output | Customer and Order mapping |
-| `demo_cleaning.py` | Filter, Keep, Rename, Calculation | Profitable order analysis |
-| `demo_aggregation.py` | Union, Aggregate, Pivot/Unpivot | Regional monthly comparison |
-| `demo_comprehensive.py` | **Full 15 SDK Methods** | Complete sales analysis |
+### demo_basic.py - Customer Orders Join
+**Business Requirement**: Join orders table with customers table to display customer purchase records
+
+**Data Flow**:
+```
+Orders + Customers → Left Join (customer_id) → Server Output
+```
+
+**Features Covered**: `add_input_sql`, `add_join`, `add_output_server`
+
+---
+
+### demo_cleaning.py - Profitable Orders Analysis
+**Business Requirement**: Filter profitable orders, calculate profit rate, and classify order levels
+
+**Data Flow**:
+```
+Orders+Products → Filter profit>0 → Filter ship mode → Keep core fields 
+               → Rename → Calculate profit rate → Calculate order level → Remove customer ID → Output
+```
+
+**Features Covered**: `add_filter`, `add_value_filter`, `add_keep_only`, `add_rename`, `add_calculation`, `add_remove_columns`
+
+---
+
+### demo_aggregation.py - Regional Monthly Sales Analysis
+**Business Requirement**: Merge Jan-Feb orders, aggregate sales metrics by region, generate monthly comparison report
+
+**Data Flow**:
+```
+Jan Orders + Feb Orders → Union → Aggregate by region/month (SUM/COUNT/AVG)
+                       → Rename → Pivot (month) → Unpivot → Output
+```
+
+**Features Covered**: `add_union`, `add_aggregate`, `add_pivot`, `add_unpivot`, `add_rename`
+
+---
+
+### demo_comprehensive.py - Complete Sales Analysis Flow
+**Business Requirements**:
+- Merge January and February order data
+- Join with customer and region information
+- Calculate profit rate and order level
+- Filter profitable orders only
+- Summarize by region and month
+- Generate monthly comparison report
+
+**Data Flow**:
+```
+Jan Orders ─┬─ Union → Join Customers → Join Regions → Keep Core Fields → Rename
+Feb Orders ─┘
+            → Exclude Same Day → Calc Profit Rate → Calc Order Level → Filter Profitable
+            → Remove IDs → Data Validation → Aggregate by Region → Pivot → Unpivot → Output
+```
+
+**Covers all 15 SDK methods**: Complete demonstration of cwprep core functionality
+
+---
+
+| Script | Feature Count | Difficulty |
+|------|:---:|:---:|
+| `demo_basic.py` | 3 | ⭐ Beginner |
+| `demo_cleaning.py` | 6 | ⭐⭐ Basic |
+| `demo_aggregation.py` | 5 | ⭐⭐ Basic |
+| `demo_comprehensive.py` | 15 | ⭐⭐⭐ Advanced |
 
 ---
 
