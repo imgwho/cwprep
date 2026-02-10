@@ -70,10 +70,26 @@ class TFLConfig:
 
 # ============ 配置加载函数 ============
 
-def _find_project_root() -> Path:
-    """查找项目根目录（包含 config.yaml 的目录）"""
-    # 从 src/cwprep/ 向上两级到项目根目录
-    current = Path(__file__).parent.parent.parent
+def _find_config_path() -> Path:
+    """查找配置文件路径
+    
+    搜索顺序：
+    1. 当前工作目录
+    2. 从当前目录向上查找包含 config.yaml 的目录
+    """
+    # 从当前工作目录开始搜索
+    current = Path.cwd()
+    
+    # 先检查当前目录
+    if (current / "config.yaml").exists():
+        return current
+    
+    # 向上遍历查找
+    for parent in current.parents:
+        if (parent / "config.yaml").exists():
+            return parent
+    
+    # 找不到时返回当前目录
     return current
 
 
@@ -93,18 +109,18 @@ def load_config(
     Returns:
         TFLConfig: 配置对象
     """
-    project_root = _find_project_root()
+    config_dir = _find_config_path()
     
     # 1. 加载 .env 文件
     if auto_load_env and HAS_DOTENV:
-        env_file = Path(env_path) if env_path else project_root / ".env"
+        env_file = Path(env_path) if env_path else config_dir / ".env"
         if env_file.exists():
             load_dotenv(env_file)
     
     # 2. 加载 YAML 配置
     yaml_data = {}
     if HAS_YAML:
-        yaml_file = Path(yaml_path) if yaml_path else project_root / "config.yaml"
+        yaml_file = Path(yaml_path) if yaml_path else config_dir / "config.yaml"
         if yaml_file.exists():
             with open(yaml_file, "r", encoding="utf-8") as f:
                 yaml_data = yaml.safe_load(f) or {}
@@ -142,36 +158,12 @@ def load_config(
     )
 
 
-# ============ 默认配置（向后兼容） ============
-
 # 预加载默认配置
 try:
     DEFAULT_CONFIG = load_config()
 except Exception:
-    # 如果加载失败，使用硬编码默认值（本地开发环境）
+    # 如果加载失败，使用空配置（用户需要显式配置）
     DEFAULT_CONFIG = TFLConfig(
         server=TableauServerConfig(),
-        database=DatabaseConfig(
-            host="localhost",
-            port="3306",
-            username="root",
-            dbname="demo",
-            db_class="mysql"
-        )
+        database=None
     )
-
-# 本地测试配置
-LOCAL_CONFIG = TFLConfig(
-    server=TableauServerConfig(
-        server_url="http://localhost",
-        default_project="测试项目",
-        project_luid=""
-    ),
-    database=DatabaseConfig(
-        host="localhost",
-        port="3306",
-        username="root",
-        dbname="test",
-        db_class="mysql"
-    )
-)

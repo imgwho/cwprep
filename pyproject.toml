@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cwprep"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Tableau Prep 数据流程 SDK - 程序化生成 .tfl 文件"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.8"
 authors = [
-    { name = "imgwho" }
+    { name = "cooper wenhua" }
 ]
 keywords = [
     "tableau",
@@ -63,6 +63,9 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/cwprep"]
+
+[tool.hatch.version]
+path = "src/cwprep/__init__.py"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

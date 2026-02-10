@@ -107,7 +107,7 @@ tableau_server:
 
 ## Changelog
 
-See [CHANGELOG.md](CHANGELOG.md) for version history.
+See [changelog.md](changelog.md) for version history.
 
 ## License
 

@@ -23,12 +23,11 @@ from .config import (
     DatabaseConfig, 
     TableauServerConfig, 
     load_config,
-    DEFAULT_CONFIG,
-    LOCAL_CONFIG
+    DEFAULT_CONFIG
 )
 
 __version__ = "0.1.0"
-__author__ = "imgwho"
+__author__ = "cooper wenhua"
 __all__ = [
     "TFLBuilder", 
     "TFLPackager", 
@@ -37,6 +36,5 @@ __all__ = [
     "TableauServerConfig", 
     "load_config",
     "DEFAULT_CONFIG",
-    "LOCAL_CONFIG",
     "__version__"
 ]

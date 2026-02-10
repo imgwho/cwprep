@@ -9,7 +9,7 @@
 在 MySQL 客户端中执行：
 
 ```sql
-source C:/Users/imgwho/Desktop/projects/20260203-tflgenerator/examples/demo_data/init_superstore.sql
+examples/demo_data/init_superstore.sql
 ```
 
 ### 2. 运行示例脚本

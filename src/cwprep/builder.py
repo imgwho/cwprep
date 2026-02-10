@@ -30,7 +30,7 @@ class TFLBuilder:
         config: TFL 配置对象，默认使用 DEFAULT_CONFIG
     """
     
-    def __init__(self, flow_name: str = "订单员工", config: Optional[TFLConfig] = None):
+    def __init__(self, flow_name: str = "Untitled Flow", config: Optional[TFLConfig] = None):
         self.flow_name = flow_name
         self.config = config or DEFAULT_CONFIG
         
@@ -145,7 +145,7 @@ class TFLBuilder:
         self._node_order.append({"id": node_id, "type": "input", "y_hint": self._input_count})
         
         # 从连接对象中获取数据库名
-        dbname = "voxadmin"
+        dbname = ""
         if connection_id in self.connections:
             conn_attrs = self.connections[connection_id].get("connectionAttributes", {})
             dbname = conn_attrs.get("dbname", dbname)
@@ -183,7 +183,7 @@ class TFLBuilder:
         self._node_order.append({"id": node_id, "type": "input", "y_hint": self._input_count})
         
         # 从连接对象中获取数据库名
-        dbname = "voxadmin"
+        dbname = ""
         if connection_id in self.connections:
             conn_attrs = self.connections[connection_id].get("connectionAttributes", {})
             dbname = conn_attrs.get("dbname", dbname)
