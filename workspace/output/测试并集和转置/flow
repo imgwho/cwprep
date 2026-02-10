@@ -1,0 +1,270 @@
+{
+  "parameters": {
+    "parameters": {}
+  },
+  "initialNodes": [
+    "7aa7a79c-6e0a-4729-9f36-70b0d24372c9",
+    "d6f5a9ce-d0cb-4ffb-a2f1-fb85bcef22b4"
+  ],
+  "nodes": {
+    "7aa7a79c-6e0a-4729-9f36-70b0d24372c9": {
+      "nodeType": ".v1.LoadSql",
+      "name": "消息表_202601",
+      "id": "7aa7a79c-6e0a-4729-9f36-70b0d24372c9",
+      "baseType": "input",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "967c9fbc-6d2c-45f7-9146-12efa2399fa1",
+          "nextNamespace": "Union-Namespace-555e7751-890b-4374-bcf1-6d1c06a6d8dc"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "connectionId": "6b6132d1-76d4-4ecb-95a8-6431c8c94127",
+      "connectionAttributes": {
+        "dbname": "voxadmin"
+      },
+      "fields": null,
+      "actions": [],
+      "debugModeRowLimit": null,
+      "originalDataTypes": {},
+      "randomSampling": null,
+      "updateTimestamp": null,
+      "restrictedFields": {},
+      "userRenamedFields": {},
+      "selectedFields": null,
+      "samplingType": null,
+      "groupByFields": null,
+      "filters": [],
+      "relation": {
+        "type": "query",
+        "query": "\n        SELECT \n            '2026-01' AS month_label,\n            id,\n            UserName AS staff_wechat_id,\n            Talker AS customer_wechat_id,\n            HOUR(FROM_UNIXTIME(`Time`)) AS hour_of_day\n        FROM e_vdata_message_202601\n        LIMIT 100\n        "
+      }
+    },
+    "d6f5a9ce-d0cb-4ffb-a2f1-fb85bcef22b4": {
+      "nodeType": ".v1.LoadSql",
+      "name": "消息表_202602",
+      "id": "d6f5a9ce-d0cb-4ffb-a2f1-fb85bcef22b4",
+      "baseType": "input",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "967c9fbc-6d2c-45f7-9146-12efa2399fa1",
+          "nextNamespace": "Union-Namespace-f11f0ef3-55b6-4a05-8e95-4bd62d796801"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "connectionId": "6b6132d1-76d4-4ecb-95a8-6431c8c94127",
+      "connectionAttributes": {
+        "dbname": "voxadmin"
+      },
+      "fields": null,
+      "actions": [],
+      "debugModeRowLimit": null,
+      "originalDataTypes": {},
+      "randomSampling": null,
+      "updateTimestamp": null,
+      "restrictedFields": {},
+      "userRenamedFields": {},
+      "selectedFields": null,
+      "samplingType": null,
+      "groupByFields": null,
+      "filters": [],
+      "relation": {
+        "type": "query",
+        "query": "\n        SELECT \n            '2026-02' AS month_label,\n            id,\n            UserName AS staff_wechat_id,\n            Talker AS customer_wechat_id,\n            HOUR(FROM_UNIXTIME(`Time`)) AS hour_of_day\n        FROM e_vdata_message_202602\n        LIMIT 100\n        "
+      }
+    },
+    "967c9fbc-6d2c-45f7-9146-12efa2399fa1": {
+      "nodeType": ".v2018_2_3.SuperUnion",
+      "name": "合并1月2月数据",
+      "id": "967c9fbc-6d2c-45f7-9146-12efa2399fa1",
+      "baseType": "superNode",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "bb3951a1-9359-48c5-94e1-12e4d12a8ec4",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "beforeActionAnnotations": [],
+      "afterActionAnnotations": [],
+      "actionNode": {
+        "nodeType": ".v1.SimpleUnion",
+        "name": "合并1月2月数据",
+        "id": "a2916213-4077-4514-b954-d27e90090e5d",
+        "baseType": "transform",
+        "nextNodes": [],
+        "serialize": false,
+        "description": null,
+        "namespaceFieldMappings": [
+          {
+            "namespaceName": "Union-Namespace-555e7751-890b-4374-bcf1-6d1c06a6d8dc",
+            "fieldMappings": {}
+          },
+          {
+            "namespaceName": "Union-Namespace-f11f0ef3-55b6-4a05-8e95-4bd62d796801",
+            "fieldMappings": {}
+          }
+        ]
+      }
+    },
+    "bb3951a1-9359-48c5-94e1-12e4d12a8ec4": {
+      "nodeType": ".v2018_3_3.SuperPivot",
+      "name": "按月份统计消息数",
+      "id": "bb3951a1-9359-48c5-94e1-12e4d12a8ec4",
+      "baseType": "superNode",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "f4290857-a76b-4fda-8e4b-90a8a841fbf9",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "beforeActionAnnotations": [],
+      "afterActionAnnotations": [],
+      "actionNode": {
+        "nodeType": ".v2018_3_3.Pivot",
+        "name": "month_label 1",
+        "id": "1e964de6-71d1-438c-88d1-969212e2f45d",
+        "baseType": "transform",
+        "nextNodes": [],
+        "serialize": false,
+        "description": null,
+        "defaultAggregation": "COUNT",
+        "aggregateColumnName": "id",
+        "pivotColumnName": "month_label",
+        "pivotGroupingColumns": [],
+        "newPivotColumns": [
+          {
+            "newColumnName": "2026-01"
+          },
+          {
+            "newColumnName": "2026-02"
+          }
+        ]
+      }
+    },
+    "f4290857-a76b-4fda-8e4b-90a8a841fbf9": {
+      "nodeType": ".v2018_2_3.SuperUnpivot",
+      "name": "微信ID列转行",
+      "id": "f4290857-a76b-4fda-8e4b-90a8a841fbf9",
+      "baseType": "superNode",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "26b81094-4823-4b8b-9916-6253b9a7a8f3",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "beforeActionAnnotations": [],
+      "afterActionAnnotations": [],
+      "actionNode": {
+        "nodeType": ".v1.Unpivot",
+        "name": "微信ID列转行",
+        "id": "1c091351-8d91-48c6-b737-968df2eb6ec5",
+        "baseType": "transform",
+        "nextNodes": [],
+        "serialize": false,
+        "description": null,
+        "usesSmartDefaults": true,
+        "unpivotGroups": [
+          {
+            "expressions": [
+              {
+                "bindings": [
+                  {
+                    "bindingType": "literal",
+                    "newColumnName": "月份",
+                    "groupName": "2026-01"
+                  },
+                  {
+                    "bindingType": "column",
+                    "newColumnName": "消息数",
+                    "columnName": "2026-01"
+                  }
+                ]
+              },
+              {
+                "bindings": [
+                  {
+                    "bindingType": "literal",
+                    "newColumnName": "月份",
+                    "groupName": "2026-02"
+                  },
+                  {
+                    "bindingType": "column",
+                    "newColumnName": "消息数",
+                    "columnName": "2026-02"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "26b81094-4823-4b8b-9916-6253b9a7a8f3": {
+      "nodeType": ".v1.PublishExtract",
+      "name": "输出",
+      "id": "26b81094-4823-4b8b-9916-6253b9a7a8f3",
+      "baseType": "output",
+      "nextNodes": [],
+      "serialize": false,
+      "description": null,
+      "projectName": "数据源",
+      "projectLuid": "7fa01ebc-72f4-4fd0-a27f-f8ac1e30ac20",
+      "datasourceName": "测试并集和转置",
+      "datasourceDescription": "",
+      "serverUrl": "http://win-picvs30bivi"
+    }
+  },
+  "connections": {
+    "6b6132d1-76d4-4ecb-95a8-6431c8c94127": {
+      "connectionType": ".v1.SqlConnection",
+      "id": "6b6132d1-76d4-4ecb-95a8-6431c8c94127",
+      "name": "rm-uf661w842h18w326nvo.mysql.rds.aliyuncs.com",
+      "isPackaged": false,
+      "connectionAttributes": {
+        "sslmode": "",
+        "odbc-connect-string-extras": "",
+        "server": "rm-uf661w842h18w326nvo.mysql.rds.aliyuncs.com",
+        "prep-protocol-role": ":prep-protocol-reader",
+        ":flow-name": "测试并集和转置",
+        "odbc-dbms-name": "",
+        ":use-allowlist": "false",
+        "dbname": "voxadmin",
+        "port": "3306",
+        ":protocol-customizations": "",
+        "source-charset": "",
+        "sslcert": "",
+        "odbc-native-protocol": "",
+        "expected-driver-version": "",
+        "class": "mysql",
+        "one-time-sql": "",
+        "authentication": "",
+        "username": "link_BI"
+      }
+    }
+  },
+  "dataConnections": {},
+  "connectionIds": [
+    "6b6132d1-76d4-4ecb-95a8-6431c8c94127"
+  ],
+  "dataConnectionIds": [],
+  "nodeProperties": {},
+  "extensibility": {},
+  "selection": [],
+  "majorVersion": 1,
+  "minorVersion": 4,
+  "documentId": "cbfcdd78-83ff-4010-b200-e89bc557a382",
+  "obfuscatorId": "4be52713-8780-4103-a702-224394344366"
+}

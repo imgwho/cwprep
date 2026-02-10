@@ -218,6 +218,198 @@ class TFLBuilder:
         self.nodes[right_id]["nextNodes"].append({"namespace": "Default", "nextNodeId": node_id, "nextNamespace": "Right"})
         return node_id
 
+    def add_union(
+        self,
+        name: str,
+        parent_ids: List[str]
+    ) -> str:
+        """
+        添加并集节点（合并多个结构相同的数据源）
+        
+        Args:
+            name: 并集节点名称
+            parent_ids: 上游节点 ID 列表（至少2个）
+            
+        Returns:
+            str: 并集节点 ID
+        """
+        if len(parent_ids) < 2:
+            raise ValueError("并集至少需要2个数据源")
+        
+        node_id = str(uuid.uuid4())
+        self._node_order.append({"id": node_id, "type": "union"})
+        
+        # 为每个输入创建唯一的 namespace
+        namespace_mappings = []
+        for parent_id in parent_ids:
+            namespace_id = f"Union-Namespace-{str(uuid.uuid4())}"
+            namespace_mappings.append({
+                "namespaceName": namespace_id,
+                "fieldMappings": {}
+            })
+            # 连接上游节点到并集节点
+            self.nodes[parent_id]["nextNodes"].append({
+                "namespace": "Default",
+                "nextNodeId": node_id,
+                "nextNamespace": namespace_id
+            })
+        
+        self.nodes[node_id] = {
+            "nodeType": ".v2018_2_3.SuperUnion",
+            "name": name,
+            "id": node_id,
+            "baseType": "superNode",
+            "nextNodes": [],
+            "serialize": False,
+            "description": None,
+            "beforeActionAnnotations": [],
+            "afterActionAnnotations": [],
+            "actionNode": {
+                "nodeType": ".v1.SimpleUnion",
+                "name": name,
+                "id": str(uuid.uuid4()),
+                "baseType": "transform",
+                "nextNodes": [],
+                "serialize": False,
+                "description": None,
+                "namespaceFieldMappings": namespace_mappings
+            }
+        }
+        return node_id
+
+    def add_pivot(
+        self,
+        name: str,
+        parent_id: str,
+        pivot_column: str,
+        aggregate_column: str,
+        new_columns: List[str],
+        group_by: List[str] = None,
+        aggregation: str = "COUNT"
+    ) -> str:
+        """
+        添加行转列（Pivot）节点
+        
+        Args:
+            name: 转置节点名称
+            parent_id: 上游节点 ID
+            pivot_column: 作为列头的字段名
+            aggregate_column: 要聚合的字段名
+            new_columns: 新列名列表（如 ["2026-01", "2026-02"]）
+            group_by: 分组字段列表（可选）
+            aggregation: 聚合函数（COUNT, SUM, AVG, MIN, MAX）
+            
+        Returns:
+            str: 转置节点 ID
+        """
+        node_id = str(uuid.uuid4())
+        self._node_order.append({"id": node_id, "type": "pivot"})
+        
+        self.nodes[node_id] = {
+            "nodeType": ".v2018_3_3.SuperPivot",
+            "name": name,
+            "id": node_id,
+            "baseType": "superNode",
+            "nextNodes": [],
+            "serialize": False,
+            "description": None,
+            "beforeActionAnnotations": [],
+            "afterActionAnnotations": [],
+            "actionNode": {
+                "nodeType": ".v2018_3_3.Pivot",
+                "name": f"{pivot_column} 1",
+                "id": str(uuid.uuid4()),
+                "baseType": "transform",
+                "nextNodes": [],
+                "serialize": False,
+                "description": None,
+                "defaultAggregation": aggregation,
+                "aggregateColumnName": aggregate_column,
+                "pivotColumnName": pivot_column,
+                "pivotGroupingColumns": group_by or [],
+                "newPivotColumns": [{"newColumnName": col} for col in new_columns]
+            }
+        }
+        
+        self.nodes[parent_id]["nextNodes"].append({
+            "namespace": "Default",
+            "nextNodeId": node_id,
+            "nextNamespace": "Default"
+        })
+        return node_id
+
+    def add_unpivot(
+        self,
+        name: str,
+        parent_id: str,
+        columns_to_unpivot: List[str],
+        name_column: str = "名称",
+        value_column: str = "值"
+    ) -> str:
+        """
+        添加列转行（Unpivot）节点
+        
+        Args:
+            name: 转置节点名称
+            parent_id: 上游节点 ID
+            columns_to_unpivot: 要转为行的列名列表（如 ["staff_wechat_id", "customer_wechat_id"]）
+            name_column: 存放列名的新字段名（默认"名称"）
+            value_column: 存放值的新字段名（默认"值"）
+            
+        Returns:
+            str: 转置节点 ID
+        """
+        node_id = str(uuid.uuid4())
+        self._node_order.append({"id": node_id, "type": "unpivot"})
+        
+        # 构建 unpivotGroups
+        expressions = []
+        for col in columns_to_unpivot:
+            expressions.append({
+                "bindings": [
+                    {
+                        "bindingType": "literal",
+                        "newColumnName": name_column,
+                        "groupName": col
+                    },
+                    {
+                        "bindingType": "column",
+                        "newColumnName": value_column,
+                        "columnName": col
+                    }
+                ]
+            })
+        
+        self.nodes[node_id] = {
+            "nodeType": ".v2018_2_3.SuperUnpivot",
+            "name": name,
+            "id": node_id,
+            "baseType": "superNode",
+            "nextNodes": [],
+            "serialize": False,
+            "description": None,
+            "beforeActionAnnotations": [],
+            "afterActionAnnotations": [],
+            "actionNode": {
+                "nodeType": ".v1.Unpivot",
+                "name": name,
+                "id": str(uuid.uuid4()),
+                "baseType": "transform",
+                "nextNodes": [],
+                "serialize": False,
+                "description": None,
+                "usesSmartDefaults": True,
+                "unpivotGroups": [{"expressions": expressions}]
+            }
+        }
+        
+        self.nodes[parent_id]["nextNodes"].append({
+            "namespace": "Default",
+            "nextNodeId": node_id,
+            "nextNamespace": "Default"
+        })
+        return node_id
+
     def add_output_server(
         self, 
         name: str, 

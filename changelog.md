@@ -1,7 +1,19 @@
 # 项目更新日志 (Changelog)
 
 ### 当前状态
-SDK v1.3 - 新增计算字段、移除列、值筛选功能，支持完整的 Tableau 公式语法。
+SDK v1.4 - 新增并集（Union）、行转列（Pivot）、列转行（Unpivot）功能，覆盖了 Tableau Prep 核心数据处理能力。
+
+---
+
+## v1.4 (2026-02-08 16:10)
+
+### 新增功能
+- **并集** `add_union`：合并多个结构相同的数据源
+- **行转列** `add_pivot`：Pivot 功能，按维度字段展开为列
+- **列转行** `add_unpivot`：Unpivot 功能，将多列转换为行
+
+### 测试
+- 新增 `test_union_pivot.py`：验证并集和转置功能
 
 ---
 

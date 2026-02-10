@@ -84,6 +84,9 @@ builder = TFLBuilder(flow_name="流程名", config=my_config)
 | `add_connection_from_config()` | 无 | 使用默认配置连接 |
 | `add_input_sql(name, sql, conn_id)` | 节点名, SQL, 连接ID | 添加 SQL 输入 |
 | `add_join(name, left_id, right_id, left_col, right_col, join_type)` | 联接参数 | 添加联接 |
+| `add_union(name, parent_ids)` | 名称, ID列表 | 添加并集 |
+| `add_pivot(name, parent_id, pivot_column, aggregate_column, ...)` | 转置参数 | 行转列 |
+| `add_unpivot(name, parent_id, columns_to_unpivot, ...)` | 转置参数 | 列转行 |
 | `add_clean_step(name, parent_id, actions)` | 步骤名, 上游ID, 操作列表 | 添加清理步骤 |
 | `add_keep_only(name, parent_id, columns)` | 步骤名, 上游ID, 列名列表 | 只保留指定列 |
 | `add_remove_columns(name, parent_id, columns)` | 步骤名, 上游ID, 列名列表 | 移除指定列 |
