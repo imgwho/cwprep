@@ -1,0 +1,376 @@
+{
+  "majorVersion": 1,
+  "minorVersion": 0,
+  "flowDisplaySettings": {
+    "flowGroupNodeDisplay": {},
+    "flowSelection": {
+      "type": "nothing",
+      "selectedNodePath": null,
+      "selectedType": null
+    },
+    "flowNodeDisplaySettings": {
+      "ee3eeae8-d4d9-4b96-8b7e-94428052b03c": {
+        "color": {
+          "hexCss": "#EFC637",
+          "rgba": [
+            "239",
+            "198",
+            "55",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 0,
+          "y": 1
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "7cf87bbf-2f9d-4174-a863-cdcb38409826": {
+        "color": {
+          "hexCss": "#EFC637",
+          "rgba": [
+            "239",
+            "198",
+            "55",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 0,
+          "y": 2
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "4ef9478d-5340-4c23-8b45-0cf7e7901b48": {
+        "color": {
+          "hexCss": "#EFC637",
+          "rgba": [
+            "239",
+            "198",
+            "55",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 0,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "44fbfc52-fbd4-4194-a102-f50578cca2ca": {
+        "color": {
+          "hexCss": "#EFC637",
+          "rgba": [
+            "239",
+            "198",
+            "55",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 0,
+          "y": 4
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "261250cc-639e-4346-8f5c-c9ba267b1251": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 1,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "6c664402-7a14-4b78-8e46-5550faddfa50": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 2,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "2b4fc1e7-ffe9-4639-9313-4bc18ab1f1a2": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 3,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "1dca6a79-41a5-4aab-9190-3b69a995a50e": {
+        "color": {
+          "hexCss": "#499893",
+          "rgba": [
+            "73",
+            "152",
+            "147",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 4,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "5d3e6f26-e26f-47c8-aaed-8d5d9d17fa82": {
+        "color": {
+          "hexCss": "#499893",
+          "rgba": [
+            "73",
+            "152",
+            "147",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 5,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "d21b338b-5c7e-4208-a7f7-1a4dc492e132": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 6,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "bbd97cc9-a067-4af0-b518-21b73b8a1665": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 7,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "96f1a023-828a-4ed6-9514-3b2f8fec21a3": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 8,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "62216cc1-0e4d-409a-a611-67533e31a490": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 9,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "9aa8f151-b8b1-4e06-9ae6-ec0be1ce8271": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 10,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "5b4a5d47-4d49-47cf-b5f7-2e814372f328": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 11,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "6bb0a085-622f-405a-9342-7efa0c862abf": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 12,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "bfd2aa2a-5f94-487f-b148-0cd10aa96569": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 13,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "73939a1e-a885-42a0-b46e-763005db0e9b": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 14,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "b2eeda03-84b2-4ce6-b51c-aa8bb268d560": {
+        "color": {
+          "hexCss": "#E76E50",
+          "rgba": [
+            "231",
+            "110",
+            "80",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 15,
+          "y": 3
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      }
+    }
+  },
+  "hiddenColumns": []
+}

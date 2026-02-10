@@ -165,6 +165,44 @@ class TFLBuilder:
         self.initial_nodes.append(node_id)
         return node_id
 
+    def add_input_table(self, name: str, table_name: str, connection_id: str) -> str:
+        """
+        添加表输入节点（直接连接数据库表，不使用自定义 SQL）
+        
+        Args:
+            name: 节点名称（通常与表名相同）
+            table_name: 数据库表名
+            connection_id: 数据库连接 ID
+            
+        Returns:
+            str: 节点 ID，供后续操作引用
+        """
+        node_id = str(uuid.uuid4())
+        self._input_count += 1
+        self._node_order.append({"id": node_id, "type": "input", "y_hint": self._input_count})
+        
+        # 获取默认数据库名
+        default_dbname = "voxadmin"
+        if self.config.database:
+            default_dbname = self.config.database.dbname
+        
+        self.nodes[node_id] = {
+            "nodeType": ".v1.LoadSql", "name": name, "id": node_id,
+            "baseType": "input", "nextNodes": [], "serialize": False, "description": None,
+            "connectionId": connection_id, 
+            "connectionAttributes": {"dbname": default_dbname},
+            "fields": None, "actions": [], "debugModeRowLimit": None,
+            "originalDataTypes": {}, "randomSampling": None,
+            "updateTimestamp": None,
+            "restrictedFields": {}, "userRenamedFields": {},
+            "selectedFields": None, "samplingType": None,
+            "groupByFields": None, "filters": [],
+            "relation": {"type": "table", "table": f"[{table_name}]"}
+        }
+        self.initial_nodes.append(node_id)
+        return node_id
+
+
     def add_join(
         self, 
         name: str, 
