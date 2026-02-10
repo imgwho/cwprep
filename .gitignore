@@ -2,6 +2,13 @@
 .env
 !.env.example
 
+# 本地配置文件（包含敏感信息）
+config.yaml
+!config.example.yaml
+
+# 私有测试（包含公司业务逻辑）
+tests/private/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -35,16 +42,12 @@ Desktop.ini
 # Jupyter
 .ipynb_checkpoints/
 
-# # TFL Generator - 生成的输出文件
-# workspace/output/
+# 工作目录（生成的产物）
+workspace/
 
 # 备份文件
 backup/
 *.bak
-
-# # 解压后的 TFL 文件夹（保留 .tfl 文件本身作为示例）
-# dataflow */
-# 订单员工/
 
 # 日志
 *.log
@@ -53,3 +56,4 @@ logs/
 # 临时文件
 *.tmp
 *.temp
+

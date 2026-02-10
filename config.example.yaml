@@ -1,0 +1,22 @@
+# cwprep 配置文件
+# 复制此文件为 config.yaml 并填入实际值
+
+# Tableau Prep 版本信息
+prep:
+  version: "2019.1.3"
+  year: 2019
+  quarter: 1
+  release: 3
+
+# Tableau Server 配置
+tableau_server:
+  url: "http://your-tableau-server"
+  default_project: "Default"
+  project_luid: ""
+
+# 默认数据库配置
+database:
+  host: "localhost"
+  port: 3306
+  dbname: "your_database"
+  type: "mysql"       # mysql, postgres, oracle, sqlserver

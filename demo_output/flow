@@ -1,0 +1,288 @@
+{
+  "parameters": {
+    "parameters": {}
+  },
+  "initialNodes": [
+    "e79835a2-e446-4939-8897-5f5e1125a78c",
+    "7ef19f54-a0e2-42e2-97d4-9e04ec74f0b5"
+  ],
+  "nodes": {
+    "e79835a2-e446-4939-8897-5f5e1125a78c": {
+      "nodeType": ".v1.LoadSql",
+      "name": "Users",
+      "id": "e79835a2-e446-4939-8897-5f5e1125a78c",
+      "baseType": "input",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "80460879-3d1a-4d5b-b15a-88c7f06153de",
+          "nextNamespace": "Left"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "connectionId": "6dda0d9a-dcf8-43f0-aab7-67cb65c8085b",
+      "connectionAttributes": {
+        "dbname": "voxadmin"
+      },
+      "fields": null,
+      "actions": [],
+      "debugModeRowLimit": null,
+      "originalDataTypes": {},
+      "randomSampling": null,
+      "updateTimestamp": null,
+      "restrictedFields": {},
+      "userRenamedFields": {},
+      "selectedFields": null,
+      "samplingType": null,
+      "groupByFields": null,
+      "filters": [],
+      "relation": {
+        "type": "query",
+        "query": "SELECT id, name, email, created_at FROM users"
+      }
+    },
+    "7ef19f54-a0e2-42e2-97d4-9e04ec74f0b5": {
+      "nodeType": ".v1.LoadSql",
+      "name": "Orders",
+      "id": "7ef19f54-a0e2-42e2-97d4-9e04ec74f0b5",
+      "baseType": "input",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "80460879-3d1a-4d5b-b15a-88c7f06153de",
+          "nextNamespace": "Right"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "connectionId": "6dda0d9a-dcf8-43f0-aab7-67cb65c8085b",
+      "connectionAttributes": {
+        "dbname": "voxadmin"
+      },
+      "fields": null,
+      "actions": [],
+      "debugModeRowLimit": null,
+      "originalDataTypes": {},
+      "randomSampling": null,
+      "updateTimestamp": null,
+      "restrictedFields": {},
+      "userRenamedFields": {},
+      "selectedFields": null,
+      "samplingType": null,
+      "groupByFields": null,
+      "filters": [],
+      "relation": {
+        "type": "query",
+        "query": "SELECT id, user_id, amount, status FROM orders"
+      }
+    },
+    "80460879-3d1a-4d5b-b15a-88c7f06153de": {
+      "nodeType": ".v2018_2_3.SuperJoin",
+      "name": "Users + Orders",
+      "id": "80460879-3d1a-4d5b-b15a-88c7f06153de",
+      "baseType": "superNode",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "669d50f9-809c-4cde-9277-fb2a3cb91672",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "beforeActionAnnotations": [],
+      "afterActionAnnotations": [],
+      "actionNode": {
+        "nodeType": ".v1.SimpleJoin",
+        "name": "Users + Orders",
+        "id": "84baba76-d756-4488-8e5a-baff411f8a3d",
+        "baseType": "transform",
+        "nextNodes": [],
+        "serialize": false,
+        "description": null,
+        "conditions": [
+          {
+            "leftExpression": "[id]",
+            "rightExpression": "[user_id]",
+            "comparator": "=="
+          }
+        ],
+        "joinType": "left"
+      }
+    },
+    "669d50f9-809c-4cde-9277-fb2a3cb91672": {
+      "nodeType": ".v1.Container",
+      "name": "过滤有效订单",
+      "id": "669d50f9-809c-4cde-9277-fb2a3cb91672",
+      "baseType": "container",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "eb22301f-214d-473f-91ae-30eda2117b58",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "loomContainer": {
+        "parameters": {
+          "parameters": {}
+        },
+        "initialNodes": [
+          "3413639e-c226-4466-b645-2e2d4d1d1fc8"
+        ],
+        "nodes": {
+          "3413639e-c226-4466-b645-2e2d4d1d1fc8": {
+            "nodeType": ".v1.FilterOperation",
+            "name": "筛选器",
+            "id": "3413639e-c226-4466-b645-2e2d4d1d1fc8",
+            "baseType": "transform",
+            "nextNodes": [],
+            "serialize": false,
+            "description": null,
+            "filterExpression": "[status] = 'completed'"
+          }
+        },
+        "connections": {},
+        "dataConnections": {},
+        "connectionIds": [],
+        "dataConnectionIds": [],
+        "nodeProperties": {},
+        "extensibility": null
+      },
+      "namespacesToInput": {
+        "Default": {
+          "nodeId": "3413639e-c226-4466-b645-2e2d4d1d1fc8",
+          "namespace": "Default"
+        }
+      },
+      "namespacesToOutput": {
+        "Default": {
+          "nodeId": "3413639e-c226-4466-b645-2e2d4d1d1fc8",
+          "namespace": "Default"
+        }
+      },
+      "providedParameters": null
+    },
+    "eb22301f-214d-473f-91ae-30eda2117b58": {
+      "nodeType": ".v1.Container",
+      "name": "订单等级",
+      "id": "eb22301f-214d-473f-91ae-30eda2117b58",
+      "baseType": "container",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "692bde0a-9a0a-4c71-8f3c-8ab05d12e6b0",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "loomContainer": {
+        "parameters": {
+          "parameters": {}
+        },
+        "initialNodes": [
+          "d8b1ce3d-e5d5-40e8-aa18-bd96f6173460"
+        ],
+        "nodes": {
+          "d8b1ce3d-e5d5-40e8-aa18-bd96f6173460": {
+            "nodeType": ".v1.AddColumn",
+            "columnName": "order_level",
+            "expression": "IF [amount] >= 1000 THEN 'High' ELSEIF [amount] >= 100 THEN 'Medium' ELSE 'Low' END",
+            "name": "Add order_level",
+            "id": "d8b1ce3d-e5d5-40e8-aa18-bd96f6173460",
+            "baseType": "transform",
+            "nextNodes": [],
+            "serialize": false,
+            "description": null
+          }
+        },
+        "connections": {},
+        "dataConnections": {},
+        "connectionIds": [],
+        "dataConnectionIds": [],
+        "nodeProperties": {},
+        "extensibility": null
+      },
+      "namespacesToInput": {
+        "Default": {
+          "nodeId": "d8b1ce3d-e5d5-40e8-aa18-bd96f6173460",
+          "namespace": "Default"
+        }
+      },
+      "namespacesToOutput": {
+        "Default": {
+          "nodeId": "d8b1ce3d-e5d5-40e8-aa18-bd96f6173460",
+          "namespace": "Default"
+        }
+      },
+      "providedParameters": null
+    },
+    "692bde0a-9a0a-4c71-8f3c-8ab05d12e6b0": {
+      "nodeType": ".v1.PublishExtract",
+      "name": "Output",
+      "id": "692bde0a-9a0a-4c71-8f3c-8ab05d12e6b0",
+      "baseType": "output",
+      "nextNodes": [],
+      "serialize": false,
+      "description": null,
+      "projectName": "数据源",
+      "projectLuid": "7fa01ebc-72f4-4fd0-a27f-f8ac1e30ac20",
+      "datasourceName": "Demo_Output",
+      "datasourceDescription": "",
+      "serverUrl": "http://win-picvs30bivi"
+    }
+  },
+  "connections": {
+    "6dda0d9a-dcf8-43f0-aab7-67cb65c8085b": {
+      "connectionType": ".v1.SqlConnection",
+      "id": "6dda0d9a-dcf8-43f0-aab7-67cb65c8085b",
+      "name": "localhost",
+      "isPackaged": false,
+      "connectionAttributes": {
+        "sslmode": "",
+        "odbc-connect-string-extras": "",
+        "server": "localhost",
+        "prep-protocol-role": ":prep-protocol-reader",
+        ":flow-name": "Demo Flow",
+        "odbc-dbms-name": "",
+        ":use-allowlist": "false",
+        "dbname": "demo_db",
+        "port": "3306",
+        ":protocol-customizations": "",
+        "source-charset": "",
+        "sslcert": "",
+        "odbc-native-protocol": "",
+        "expected-driver-version": "",
+        "class": "mysql",
+        "one-time-sql": "",
+        "authentication": "",
+        "username": "root"
+      }
+    }
+  },
+  "dataConnections": {},
+  "connectionIds": [
+    "6dda0d9a-dcf8-43f0-aab7-67cb65c8085b"
+  ],
+  "dataConnectionIds": [],
+  "nodeProperties": {
+    "80460879-3d1a-4d5b-b15a-88c7f06153de": {
+      "com.tableau.loom.doc.fileformat.v2019_1_3.PrimaryKey": {
+        "nodePropertyType": ".v2019_1_3.PrimaryKey",
+        "empty": false,
+        "fieldNames": [
+          "id"
+        ]
+      }
+    }
+  },
+  "extensibility": {},
+  "selection": [],
+  "majorVersion": 1,
+  "minorVersion": 4,
+  "documentId": "71e93e38-2939-4137-b036-f3333ea3e22c",
+  "obfuscatorId": "96125b51-1619-4639-844c-e165ec70f0b4"
+}

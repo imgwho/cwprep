@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cwprep"
+version = "0.1.0"
+description = "Tableau Prep 数据流程 SDK - 程序化生成 .tfl 文件"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.8"
+authors = [
+    { name = "imgwho" }
+]
+keywords = [
+    "tableau",
+    "tableau-prep",
+    "etl",
+    "data-pipeline",
+    "tfl",
+    "data-engineering"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Database",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = []
+
+[project.optional-dependencies]
+yaml = ["pyyaml>=6.0"]
+dotenv = ["python-dotenv>=1.0"]
+all = ["pyyaml>=6.0", "python-dotenv>=1.0"]
+dev = [
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+    "pytest>=7.0",
+    "build>=1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/imgwho/cwprep"
+Documentation = "https://github.com/imgwho/cwprep#readme"
+Repository = "https://github.com/imgwho/cwprep.git"
+Issues = "https://github.com/imgwho/cwprep/issues"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/README.md",
+    "/LICENSE",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cwprep"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
