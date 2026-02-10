@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "cwprep"
 dynamic = ["version"]
-description = "Tableau Prep 数据流程 SDK - 程序化生成 .tfl 文件"
+description = "Tableau Prep Flow SDK - Programmatically generate .tfl files"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.8"

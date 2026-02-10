@@ -1,19 +1,19 @@
 """
-cwprep 配置模块
+cwprep Configuration Module
 
-支持三种配置来源（优先级从高到低）：
-1. 代码中直接传入的参数
-2. 环境变量 (.env 文件)
-3. YAML 配置文件 (config.yaml)
+Supports three configuration sources (priority from high to low):
+1. Parameters passed directly in code
+2. Environment variables (.env file)
+3. YAML configuration file (config.yaml)
 
-使用示例：
+Usage:
     from cwprep import load_config, TFLBuilder
     
-    # 自动加载 config.yaml 和 .env
+    # Auto-load config.yaml and .env
     config = load_config()
     
-    # 使用配置
-    builder = TFLBuilder(flow_name="流程", config=config)
+    # Use configuration
+    builder = TFLBuilder(flow_name="MyFlow", config=config)
 """
 
 import os
@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 from pathlib import Path
 
-# 尝试导入可选依赖
+# Try to import optional dependencies
 try:
     import yaml
     HAS_YAML = True
@@ -36,11 +36,11 @@ except ImportError:
     HAS_DOTENV = False
 
 
-# ============ 数据类定义 ============
+# ============ Dataclass Definitions ============
 
 @dataclass
 class DatabaseConfig:
-    """数据库连接配置"""
+    """Database connection configuration"""
     host: str = ""
     port: str = "3306"
     username: str = ""
@@ -51,7 +51,7 @@ class DatabaseConfig:
 
 @dataclass
 class TableauServerConfig:
-    """Tableau Server 配置"""
+    """Tableau Server configuration"""
     server_url: str = "http://localhost"
     default_project: str = "Default"
     project_luid: str = ""
@@ -59,7 +59,7 @@ class TableauServerConfig:
 
 @dataclass
 class TFLConfig:
-    """TFL 生成器主配置"""
+    """TFL Generator main configuration"""
     server: TableauServerConfig = field(default_factory=TableauServerConfig)
     database: Optional[DatabaseConfig] = None
     prep_version: str = "2019.1.3"
@@ -68,28 +68,28 @@ class TFLConfig:
     prep_release: int = 3
 
 
-# ============ 配置加载函数 ============
+# ============ Configuration Loading Functions ============
 
 def _find_config_path() -> Path:
-    """查找配置文件路径
+    """Find configuration file path
     
-    搜索顺序：
-    1. 当前工作目录
-    2. 从当前目录向上查找包含 config.yaml 的目录
+    Search order:
+    1. Current working directory
+    2. Search upward from current directory for config.yaml
     """
-    # 从当前工作目录开始搜索
+    # Start searching from current working directory
     current = Path.cwd()
     
-    # 先检查当前目录
+    # First check current directory
     if (current / "config.yaml").exists():
         return current
     
-    # 向上遍历查找
+    # Traverse upward
     for parent in current.parents:
         if (parent / "config.yaml").exists():
             return parent
     
-    # 找不到时返回当前目录
+    # Return current directory if not found
     return current
 
 
@@ -99,25 +99,25 @@ def load_config(
     auto_load_env: bool = True
 ) -> TFLConfig:
     """
-    加载配置
+    Load configuration
     
     Args:
-        yaml_path: YAML 配置文件路径（默认自动查找 config.yaml）
-        env_path: .env 文件路径（默认自动查找 .env）
-        auto_load_env: 是否自动加载 .env 文件
+        yaml_path: YAML config file path (defaults to auto-find config.yaml)
+        env_path: .env file path (defaults to auto-find .env)
+        auto_load_env: Whether to auto-load .env file
         
     Returns:
-        TFLConfig: 配置对象
+        TFLConfig: Configuration object
     """
     config_dir = _find_config_path()
     
-    # 1. 加载 .env 文件
+    # 1. Load .env file
     if auto_load_env and HAS_DOTENV:
         env_file = Path(env_path) if env_path else config_dir / ".env"
         if env_file.exists():
             load_dotenv(env_file)
     
-    # 2. 加载 YAML 配置
+    # 2. Load YAML configuration
     yaml_data = {}
     if HAS_YAML:
         yaml_file = Path(yaml_path) if yaml_path else config_dir / "config.yaml"
@@ -125,8 +125,8 @@ def load_config(
             with open(yaml_file, "r", encoding="utf-8") as f:
                 yaml_data = yaml.safe_load(f) or {}
     
-    # 3. 构建配置对象
-    # Tableau Server 配置
+    # 3. Build configuration object
+    # Tableau Server configuration
     server_yaml = yaml_data.get("tableau_server", {})
     server_config = TableauServerConfig(
         server_url=server_yaml.get("url", "http://localhost"),
@@ -134,7 +134,7 @@ def load_config(
         project_luid=server_yaml.get("project_luid", "")
     )
     
-    # 数据库配置（YAML + 环境变量）
+    # Database configuration (YAML + environment variables)
     db_yaml = yaml_data.get("database", {})
     db_config = DatabaseConfig(
         host=db_yaml.get("host", ""),
@@ -145,7 +145,7 @@ def load_config(
         db_class=db_yaml.get("type", "mysql")
     )
     
-    # Prep 版本配置
+    # Prep version configuration
     prep_yaml = yaml_data.get("prep", {})
     
     return TFLConfig(
@@ -158,11 +158,11 @@ def load_config(
     )
 
 
-# 预加载默认配置
+# Pre-load default configuration
 try:
     DEFAULT_CONFIG = load_config()
 except Exception:
-    # 如果加载失败，使用空配置（用户需要显式配置）
+    # If loading fails, use empty config (user needs to configure explicitly)
     DEFAULT_CONFIG = TFLConfig(
         server=TableauServerConfig(),
         database=None

@@ -1,15 +1,15 @@
 """
-cwprep - Tableau Prep 数据流程 SDK
+cwprep - Tableau Prep Flow SDK
 
-用于程序化生成 Tableau Prep 数据流程文件 (.tfl)。
+Programmatically generate Tableau Prep data flow files (.tfl).
 
-使用示例:
+Usage:
     from cwprep import TFLBuilder, TFLPackager
     
-    builder = TFLBuilder(flow_name="我的流程")
+    builder = TFLBuilder(flow_name="My Flow")
     conn_id = builder.add_connection(host="localhost", username="root", dbname="mydb")
     input1 = builder.add_input_sql("Users", "SELECT * FROM users", conn_id)
-    builder.add_output_server("Output", input1, "数据源名")
+    builder.add_output_server("Output", input1, "Datasource Name")
     
     flow, display, meta = builder.build()
     TFLPackager.save_to_folder("./output", flow, display, meta)

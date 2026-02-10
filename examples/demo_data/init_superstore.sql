@@ -1,11 +1,11 @@
 -- ============================================
--- cwprep Superstore 示例数据库
+-- cwprep Superstore Sample Database
 -- ============================================
--- 基于 Tableau Sample - Superstore 数据集
--- 规范化拆分为 5 张关系表，适合演示 Tableau Prep 的联接和数据处理
+-- Based on Tableau Sample - Superstore dataset
+-- Normalized into 5 relational tables for Tableau Prep join and data processing demos
 --
--- 使用方法：
---   在 MySQL 客户端中执行：source init_superstore.sql
+-- Usage:
+--   In MySQL client: source init_superstore.sql
 -- ============================================
 
 CREATE DATABASE IF NOT EXISTS superstore 
@@ -15,14 +15,14 @@ CREATE DATABASE IF NOT EXISTS superstore
 USE superstore;
 
 -- ============================================
--- 1. 区域表 (regions)
+-- 1. Regions table
 -- ============================================
 DROP TABLE IF EXISTS regions;
 CREATE TABLE regions (
     region_id INT PRIMARY KEY AUTO_INCREMENT,
-    region_name VARCHAR(50) NOT NULL COMMENT '区域名称',
-    manager_name VARCHAR(100) NOT NULL COMMENT '区域经理'
-) COMMENT='区域与经理对照表';
+    region_name VARCHAR(50) NOT NULL COMMENT 'Region name',
+    manager_name VARCHAR(100) NOT NULL COMMENT 'Regional manager'
+) COMMENT='Regions and managers lookup table';
 
 INSERT INTO regions (region_id, region_name, manager_name) VALUES
 (1, 'West', 'Sadie Pawthorne'),
@@ -31,14 +31,14 @@ INSERT INTO regions (region_id, region_name, manager_name) VALUES
 (4, 'South', 'Fred Suzuki');
 
 -- ============================================
--- 2. 客户表 (customers)
+-- 2. Customers table
 -- ============================================
 DROP TABLE IF EXISTS customers;
 CREATE TABLE customers (
-    customer_id VARCHAR(20) PRIMARY KEY COMMENT '客户编号',
-    customer_name VARCHAR(100) NOT NULL COMMENT '客户姓名',
-    segment ENUM('Consumer', 'Corporate', 'Home Office') NOT NULL COMMENT '客户类型'
-) COMMENT='客户主数据';
+    customer_id VARCHAR(20) PRIMARY KEY COMMENT 'Customer ID',
+    customer_name VARCHAR(100) NOT NULL COMMENT 'Customer name',
+    segment ENUM('Consumer', 'Corporate', 'Home Office') NOT NULL COMMENT 'Customer segment'
+) COMMENT='Customer master data';
 
 INSERT INTO customers (customer_id, customer_name, segment) VALUES
 ('CG-12520', 'Claire Gute', 'Consumer'),
@@ -58,15 +58,15 @@ INSERT INTO customers (customer_id, customer_name, segment) VALUES
 ('KG-16585', 'Kevin Graham', 'Corporate');
 
 -- ============================================
--- 3. 产品表 (products)
+-- 3. Products table
 -- ============================================
 DROP TABLE IF EXISTS products;
 CREATE TABLE products (
-    product_id VARCHAR(20) PRIMARY KEY COMMENT '产品编号',
-    product_name VARCHAR(255) NOT NULL COMMENT '产品名称',
-    category ENUM('Furniture', 'Office Supplies', 'Technology') NOT NULL COMMENT '大类',
-    sub_category VARCHAR(50) NOT NULL COMMENT '子类'
-) COMMENT='产品主数据';
+    product_id VARCHAR(20) PRIMARY KEY COMMENT 'Product ID',
+    product_name VARCHAR(255) NOT NULL COMMENT 'Product name',
+    category ENUM('Furniture', 'Office Supplies', 'Technology') NOT NULL COMMENT 'Category',
+    sub_category VARCHAR(50) NOT NULL COMMENT 'Sub-category'
+) COMMENT='Product master data';
 
 INSERT INTO products (product_id, product_name, category, sub_category) VALUES
 ('FUR-BO-10001798', 'Bush Somerset Collection Bookcase', 'Furniture', 'Bookcases'),
@@ -86,34 +86,34 @@ INSERT INTO products (product_id, product_name, category, sub_category) VALUES
 ('FUR-FU-10001889', 'Eldon File Cart', 'Furniture', 'Furnishings');
 
 -- ============================================
--- 4. 订单表 (orders)
+-- 4. Orders table
 -- ============================================
 DROP TABLE IF EXISTS orders;
 CREATE TABLE orders (
     row_id INT PRIMARY KEY AUTO_INCREMENT,
-    order_id VARCHAR(20) NOT NULL COMMENT '订单编号',
-    order_date DATE NOT NULL COMMENT '订单日期',
-    ship_date DATE COMMENT '发货日期',
-    ship_mode ENUM('Standard Class', 'Second Class', 'First Class', 'Same Day') NOT NULL COMMENT '配送方式',
-    customer_id VARCHAR(20) NOT NULL COMMENT '客户编号',
-    region_id INT NOT NULL COMMENT '区域编号',
-    city VARCHAR(100) COMMENT '城市',
-    state VARCHAR(100) COMMENT '州/省',
-    postal_code VARCHAR(20) COMMENT '邮编',
-    product_id VARCHAR(20) NOT NULL COMMENT '产品编号',
-    sales DECIMAL(12,4) NOT NULL COMMENT '销售额',
-    quantity INT NOT NULL COMMENT '数量',
-    discount DECIMAL(5,2) DEFAULT 0 COMMENT '折扣率',
-    profit DECIMAL(12,4) NOT NULL COMMENT '利润',
+    order_id VARCHAR(20) NOT NULL COMMENT 'Order ID',
+    order_date DATE NOT NULL COMMENT 'Order date',
+    ship_date DATE COMMENT 'Ship date',
+    ship_mode ENUM('Standard Class', 'Second Class', 'First Class', 'Same Day') NOT NULL COMMENT 'Shipping mode',
+    customer_id VARCHAR(20) NOT NULL COMMENT 'Customer ID',
+    region_id INT NOT NULL COMMENT 'Region ID',
+    city VARCHAR(100) COMMENT 'City',
+    state VARCHAR(100) COMMENT 'State',
+    postal_code VARCHAR(20) COMMENT 'Postal code',
+    product_id VARCHAR(20) NOT NULL COMMENT 'Product ID',
+    sales DECIMAL(12,4) NOT NULL COMMENT 'Sales amount',
+    quantity INT NOT NULL COMMENT 'Quantity',
+    discount DECIMAL(5,2) DEFAULT 0 COMMENT 'Discount rate',
+    profit DECIMAL(12,4) NOT NULL COMMENT 'Profit',
     INDEX idx_order_date (order_date),
     INDEX idx_customer (customer_id),
     INDEX idx_region (region_id),
     FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
     FOREIGN KEY (region_id) REFERENCES regions(region_id),
     FOREIGN KEY (product_id) REFERENCES products(product_id)
-) COMMENT='订单明细表';
+) COMMENT='Order details table';
 
--- 2024年1月订单
+-- January 2024 orders
 INSERT INTO orders (order_id, order_date, ship_date, ship_mode, customer_id, region_id, city, state, postal_code, product_id, sales, quantity, discount, profit) VALUES
 ('US-2024-100001', '2024-01-03', '2024-01-07', 'Standard Class', 'CG-12520', 1, 'Los Angeles', 'California', '90001', 'FUR-BO-10001798', 261.96, 2, 0.00, 41.91),
 ('US-2024-100002', '2024-01-04', '2024-01-08', 'Second Class', 'DV-13045', 2, 'New York', 'New York', '10001', 'OFF-LA-10000240', 14.62, 2, 0.00, 6.87),
@@ -131,7 +131,7 @@ INSERT INTO orders (order_id, order_date, ship_date, ship_mode, customer_id, reg
 ('US-2024-100014', '2024-01-26', '2024-01-30', 'Second Class', 'RW-19450', 2, 'Miami', 'Florida', '33101', 'FUR-FU-10001889', 407.98, 3, 0.00, 81.60),
 ('US-2024-100015', '2024-01-28', '2024-01-30', 'Same Day', 'KG-16585', 3, 'Denver', 'Colorado', '80201', 'OFF-AR-10002833', 9.94, 2, 0.00, 2.98);
 
--- 2024年2月订单（业绩增长）
+-- February 2024 orders (growth)
 INSERT INTO orders (order_id, order_date, ship_date, ship_mode, customer_id, region_id, city, state, postal_code, product_id, sales, quantity, discount, profit) VALUES
 ('US-2024-100016', '2024-02-02', '2024-02-06', 'Standard Class', 'CG-12520', 1, 'Los Angeles', 'California', '90001', 'TEC-PH-10002275', 1089.18, 6, 0.10, 130.70),
 ('US-2024-100017', '2024-02-03', '2024-02-07', 'Second Class', 'DV-13045', 2, 'New York', 'New York', '10001', 'FUR-CH-10000454', 487.96, 2, 0.00, 146.39),
@@ -150,46 +150,46 @@ INSERT INTO orders (order_id, order_date, ship_date, ship_mode, customer_id, reg
 ('US-2024-100030', '2024-02-28', '2024-02-28', 'Same Day', 'KG-16585', 3, 'Denver', 'Colorado', '80201', 'OFF-EN-10001990', 19.44, 6, 0.00, 9.33);
 
 -- ============================================
--- 5. 退货表 (returns)
+-- 5. Returns table
 -- ============================================
 DROP TABLE IF EXISTS returns;
 CREATE TABLE returns (
     return_id INT PRIMARY KEY AUTO_INCREMENT,
-    order_id VARCHAR(20) NOT NULL COMMENT '订单编号',
-    returned ENUM('Yes', 'No') DEFAULT 'Yes' COMMENT '是否退货'
-) COMMENT='退货记录表';
+    order_id VARCHAR(20) NOT NULL COMMENT 'Order ID',
+    returned ENUM('Yes', 'No') DEFAULT 'Yes' COMMENT 'Returned flag'
+) COMMENT='Returns records table';
 
 INSERT INTO returns (order_id, returned) VALUES
-('US-2024-100004', 'Yes'),  -- BH-11710 的负利润订单
-('US-2024-100006', 'Yes'),  -- 小额订单退货
-('US-2024-100020', 'Yes');  -- 2月订单退货
+('US-2024-100004', 'Yes'),  -- BH-11710's negative profit order
+('US-2024-100006', 'Yes'),  -- Small order return
+('US-2024-100020', 'Yes');  -- February order return
 
 -- ============================================
--- 验证数据
+-- Verify data
 -- ============================================
-SELECT '区域表' AS table_name, COUNT(*) AS row_count FROM regions
-UNION ALL SELECT '客户表', COUNT(*) FROM customers
-UNION ALL SELECT '产品表', COUNT(*) FROM products
-UNION ALL SELECT '订单表', COUNT(*) FROM orders
-UNION ALL SELECT '退货表', COUNT(*) FROM returns;
+SELECT 'regions' AS table_name, COUNT(*) AS row_count FROM regions
+UNION ALL SELECT 'customers', COUNT(*) FROM customers
+UNION ALL SELECT 'products', COUNT(*) FROM products
+UNION ALL SELECT 'orders', COUNT(*) FROM orders
+UNION ALL SELECT 'returns', COUNT(*) FROM returns;
 
--- 按区域汇总销售
+-- Sales summary by region
 SELECT 
-    r.region_name AS 区域,
-    r.manager_name AS 区域经理,
-    COUNT(o.row_id) AS 订单数,
-    ROUND(SUM(o.sales), 2) AS 销售额,
-    ROUND(SUM(o.profit), 2) AS 利润
+    r.region_name AS Region,
+    r.manager_name AS Manager,
+    COUNT(o.row_id) AS Orders,
+    ROUND(SUM(o.sales), 2) AS Sales,
+    ROUND(SUM(o.profit), 2) AS Profit
 FROM orders o
 JOIN regions r ON o.region_id = r.region_id
 GROUP BY r.region_id
-ORDER BY 销售额 DESC;
+ORDER BY Sales DESC;
 
--- 按月份汇总
+-- Monthly summary
 SELECT 
-    DATE_FORMAT(order_date, '%Y-%m') AS 月份,
-    COUNT(*) AS 订单数,
-    ROUND(SUM(sales), 2) AS 销售额,
-    ROUND(SUM(profit), 2) AS 利润
+    DATE_FORMAT(order_date, '%Y-%m') AS Month,
+    COUNT(*) AS Orders,
+    ROUND(SUM(sales), 2) AS Sales,
+    ROUND(SUM(profit), 2) AS Profit
 FROM orders
 GROUP BY DATE_FORMAT(order_date, '%Y-%m');

@@ -1,5 +1,5 @@
-# TFL Generator 依赖
+# cwprep dependencies
 
-# 配置文件支持
+# Configuration file support
 pyyaml>=6.0
 python-dotenv>=1.0

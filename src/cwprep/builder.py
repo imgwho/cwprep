@@ -1,17 +1,17 @@
 """
-cwprep - Tableau Prep 数据流程 SDK
+cwprep - Tableau Prep Flow SDK
 
-用于程序化生成 Tableau Prep 数据流程文件。
+Programmatically generate Tableau Prep data flow files.
 
-使用示例:
+Usage:
     from cwprep import TFLBuilder, TFLPackager
     
-    builder = TFLBuilder(flow_name="我的流程")
+    builder = TFLBuilder(flow_name="My Flow")
     conn_id = builder.add_connection("host", "user", "db")
-    input1 = builder.add_input_sql("表1", "SELECT * FROM t1", conn_id)
-    input2 = builder.add_input_sql("表2", "SELECT * FROM t2", conn_id)
-    join = builder.add_join("联接", input1, input2, "id", "t1_id")
-    builder.add_output_server("输出", join, "数据源名")
+    input1 = builder.add_input_sql("Table1", "SELECT * FROM t1", conn_id)
+    input2 = builder.add_input_sql("Table2", "SELECT * FROM t2", conn_id)
+    join = builder.add_join("Join", input1, input2, "id", "t1_id")
+    builder.add_output_server("Output", join, "Datasource Name")
     flow, display, meta = builder.build()
 """
 
@@ -23,11 +23,11 @@ from .config import TFLConfig, DEFAULT_CONFIG, DatabaseConfig
 
 class TFLBuilder:
     """
-    TFL 构建器
+    TFL Builder
     
     Args:
-        flow_name: 流程名称，将显示在 Tableau Prep 中
-        config: TFL 配置对象，默认使用 DEFAULT_CONFIG
+        flow_name: Flow name, displayed in Tableau Prep
+        config: TFL config object, defaults to DEFAULT_CONFIG
     """
     
     def __init__(self, flow_name: str = "Untitled Flow", config: Optional[TFLConfig] = None):
@@ -42,7 +42,7 @@ class TFLBuilder:
         self.obfuscator_id = str(uuid.uuid4())
         self.features = {"document.v2019_1_3.Flow", "nodeProperty.v2019_1_3.PrimaryKey"}
         
-        # 布局跟踪
+        # Layout tracking
         self._node_order: List[Dict] = []
         self._input_count = 0
 
@@ -56,22 +56,22 @@ class TFLBuilder:
         **kwargs
     ) -> str:
         """
-        添加数据库连接
+        Add database connection
         
         Args:
-            host: 数据库主机地址
-            username: 用户名
-            dbname: 数据库名称
-            port: 端口号（默认从配置读取）
-            db_class: 数据库类型 mysql/postgres/oracle（默认从配置读取）
-            **kwargs: 其他连接属性
+            host: Database host address
+            username: Username
+            dbname: Database name
+            port: Port number (defaults to config value)
+            db_class: Database type mysql/postgres/oracle (defaults to config value)
+            **kwargs: Other connection attributes
             
         Returns:
-            str: 连接 ID，供后续输入节点引用
+            str: Connection ID, used by subsequent input nodes
         """
         conn_id = str(uuid.uuid4())
         
-        # 使用传入参数或配置默认值
+        # Use passed parameters or config defaults
         default_db = self.config.database or DatabaseConfig()
         actual_port = port or default_db.port or "3306"
         actual_class = db_class or default_db.db_class or "mysql"
@@ -108,16 +108,16 @@ class TFLBuilder:
 
     def add_connection_from_config(self) -> str:
         """
-        使用配置文件中的默认数据库连接
+        Use default database connection from config file
         
         Returns:
-            str: 连接 ID
+            str: Connection ID
             
         Raises:
-            ValueError: 如果配置中没有数据库设置
+            ValueError: If no database settings in config
         """
         if not self.config.database:
-            raise ValueError("配置中没有默认数据库设置")
+            raise ValueError("No default database settings in config")
         
         db = self.config.database
         return self.add_connection(
@@ -130,21 +130,21 @@ class TFLBuilder:
 
     def add_input_sql(self, name: str, sql: str, connection_id: str) -> str:
         """
-        添加 SQL 输入节点
+        Add SQL input node
         
         Args:
-            name: 节点名称（通常是表名）
-            sql: SQL 查询语句
-            connection_id: 数据库连接 ID
+            name: Node name (usually table name)
+            sql: SQL query statement
+            connection_id: Database connection ID
             
         Returns:
-            str: 节点 ID，供后续操作引用
+            str: Node ID, used by subsequent operations
         """
         node_id = str(uuid.uuid4())
         self._input_count += 1
         self._node_order.append({"id": node_id, "type": "input", "y_hint": self._input_count})
         
-        # 从连接对象中获取数据库名
+        # Get database name from connection object
         dbname = ""
         if connection_id in self.connections:
             conn_attrs = self.connections[connection_id].get("connectionAttributes", {})
@@ -168,21 +168,21 @@ class TFLBuilder:
 
     def add_input_table(self, name: str, table_name: str, connection_id: str) -> str:
         """
-        添加表输入节点（直接连接数据库表，不使用自定义 SQL）
+        Add table input node (direct table connection, no custom SQL)
         
         Args:
-            name: 节点名称（通常与表名相同）
-            table_name: 数据库表名
-            connection_id: 数据库连接 ID
+            name: Node name (usually same as table name)
+            table_name: Database table name
+            connection_id: Database connection ID
             
         Returns:
-            str: 节点 ID，供后续操作引用
+            str: Node ID, used by subsequent operations
         """
         node_id = str(uuid.uuid4())
         self._input_count += 1
         self._node_order.append({"id": node_id, "type": "input", "y_hint": self._input_count})
         
-        # 从连接对象中获取数据库名
+        # Get database name from connection object
         dbname = ""
         if connection_id in self.connections:
             conn_attrs = self.connections[connection_id].get("connectionAttributes", {})
@@ -215,24 +215,24 @@ class TFLBuilder:
         join_type: str = "left"
     ) -> str:
         """
-        添加联接节点
+        Add join node
         
         Args:
-            name: 联接节点名称
-            left_id: 左表节点 ID
-            right_id: 右表节点 ID
-            left_col: 左表关联列名
-            right_col: 右表关联列名
-            join_type: 联接类型 ("left", "right", "inner", "full")
+            name: Join node name
+            left_id: Left table node ID
+            right_id: Right table node ID
+            left_col: Left table join column name
+            right_col: Right table join column name
+            join_type: Join type ("left", "right", "inner", "full")
             
         Returns:
-            str: 联接节点 ID
+            str: Join node ID
         """
         node_id = str(uuid.uuid4())
         self.features.add("node.v2018_2_3.SuperJoin")
         self._node_order.append({"id": node_id, "type": "join"})
         
-        # 必须在这里注册 PrimaryKey
+        # Register PrimaryKey here
         self.node_properties[node_id] = {
             "com.tableau.loom.doc.fileformat.v2019_1_3.PrimaryKey": {
                 "nodePropertyType": ".v2019_1_3.PrimaryKey",
@@ -263,22 +263,22 @@ class TFLBuilder:
         parent_ids: List[str]
     ) -> str:
         """
-        添加并集节点（合并多个结构相同的数据源）
+        Add union node (merge multiple data sources with same structure)
         
         Args:
-            name: 并集节点名称
-            parent_ids: 上游节点 ID 列表（至少2个）
+            name: Union node name
+            parent_ids: List of upstream node IDs (at least 2)
             
         Returns:
-            str: 并集节点 ID
+            str: Union node ID
         """
         if len(parent_ids) < 2:
-            raise ValueError("并集至少需要2个数据源")
+            raise ValueError("Union requires at least 2 data sources")
         
         node_id = str(uuid.uuid4())
         self._node_order.append({"id": node_id, "type": "union"})
         
-        # 为每个输入创建唯一的 namespace
+        # Create unique namespace for each input
         namespace_mappings = []
         for parent_id in parent_ids:
             namespace_id = f"Union-Namespace-{str(uuid.uuid4())}"
@@ -286,7 +286,7 @@ class TFLBuilder:
                 "namespaceName": namespace_id,
                 "fieldMappings": {}
             })
-            # 连接上游节点到并集节点
+            # Connect upstream node to union node
             self.nodes[parent_id]["nextNodes"].append({
                 "namespace": "Default",
                 "nextNodeId": node_id,
@@ -327,19 +327,19 @@ class TFLBuilder:
         aggregation: str = "COUNT"
     ) -> str:
         """
-        添加行转列（Pivot）节点
+        Add rows to columns (Pivot) node
         
         Args:
-            name: 转置节点名称
-            parent_id: 上游节点 ID
-            pivot_column: 作为列头的字段名
-            aggregate_column: 要聚合的字段名
-            new_columns: 新列名列表（如 ["2026-01", "2026-02"]）
-            group_by: 分组字段列表（可选）
-            aggregation: 聚合函数（COUNT, SUM, AVG, MIN, MAX）
+            name: Pivot node name
+            parent_id: Upstream node ID
+            pivot_column: Field name to use as column headers
+            aggregate_column: Field name to aggregate
+            new_columns: List of new column names (e.g. ["2026-01", "2026-02"])
+            group_by: List of grouping fields (optional)
+            aggregation: Aggregation function (COUNT, SUM, AVG, MIN, MAX)
             
         Returns:
-            str: 转置节点 ID
+            str: Pivot node ID
         """
         node_id = str(uuid.uuid4())
         self._node_order.append({"id": node_id, "type": "pivot"})
@@ -382,26 +382,26 @@ class TFLBuilder:
         name: str,
         parent_id: str,
         columns_to_unpivot: List[str],
-        name_column: str = "名称",
-        value_column: str = "值"
+        name_column: str = "Name",
+        value_column: str = "Value"
     ) -> str:
         """
-        添加列转行（Unpivot）节点
+        Add columns to rows (Unpivot) node
         
         Args:
-            name: 转置节点名称
-            parent_id: 上游节点 ID
-            columns_to_unpivot: 要转为行的列名列表（如 ["staff_wechat_id", "customer_wechat_id"]）
-            name_column: 存放列名的新字段名（默认"名称"）
-            value_column: 存放值的新字段名（默认"值"）
+            name: Unpivot node name
+            parent_id: Upstream node ID
+            columns_to_unpivot: List of column names to unpivot (e.g. ["staff_wechat_id", "customer_wechat_id"])
+            name_column: New field name for column names (default "Name")
+            value_column: New field name for values (default "Value")
             
         Returns:
-            str: 转置节点 ID
+            str: Unpivot node ID
         """
         node_id = str(uuid.uuid4())
         self._node_order.append({"id": node_id, "type": "unpivot"})
         
-        # 构建 unpivotGroups
+        # Build unpivotGroups
         expressions = []
         for col in columns_to_unpivot:
             expressions.append({
@@ -458,22 +458,22 @@ class TFLBuilder:
         server_url: str = None
     ) -> str:
         """
-        添加服务器输出节点
+        Add server output node
         
         Args:
-            name: 输出节点名称
-            parent_id: 上游节点 ID 
-            datasource_name: 发布后的数据源名称
-            project_name: Tableau Server 上的项目名称（默认从配置读取）
-            server_url: Tableau Server URL（默认从配置读取）
+            name: Output node name
+            parent_id: Upstream node ID 
+            datasource_name: Published datasource name
+            project_name: Project name on Tableau Server (defaults to config value)
+            server_url: Tableau Server URL (defaults to config value)
             
         Returns:
-            str: 输出节点 ID
+            str: Output node ID
         """
         node_id = str(uuid.uuid4())
         self._node_order.append({"id": node_id, "type": "output"})
         
-        # 使用传入参数或配置默认值
+        # Use passed parameters or config defaults
         actual_project = project_name or self.config.server.default_project
         actual_server = server_url or self.config.server.server_url
         actual_luid = self.config.server.project_luid
@@ -497,22 +497,22 @@ class TFLBuilder:
         actions: List[Dict[str, Any]] = None
     ) -> str:
         """
-        添加清理步骤（Container）
+        Add clean step (Container)
         
         Args:
-            name: 清理步骤名称
-            parent_id: 上游节点 ID
-            actions: 清理操作列表，每个操作是一个字典，包含：
-                - type: 操作类型 (rename, keep_only, remove, 等)
-                - 其他参数取决于操作类型
+            name: Clean step name
+            parent_id: Upstream node ID
+            actions: List of clean operations, each is a dict containing:
+                - type: Operation type (rename, keep_only, remove, etc.)
+                - Other parameters depend on operation type
             
         Returns:
-            str: 清理步骤节点 ID
+            str: Clean step node ID
         """
         node_id = str(uuid.uuid4())
         self._node_order.append({"id": node_id, "type": "clean"})
         
-        # 构建内部节点
+        # Build inner nodes
         inner_nodes = {}
         initial_node_id = None
         prev_node_id = None
@@ -569,13 +569,13 @@ class TFLBuilder:
         return node_id
     
     def _create_action_node(self, action: Dict[str, Any], node_id: str) -> Dict[str, Any]:
-        """创建单个清理操作节点"""
+        """Create single clean action node"""
         action_type = action.get("type")
         
         if action_type == "keep_only":
             return {
                 "nodeType": ".v2019_2_2.KeepOnlyColumns",
-                "name": f"只保留 {action['columns'][0]} + 另外 {len(action['columns'])-1} 个",
+                "name": f"Keep only {action['columns'][0]} + {len(action['columns'])-1} more",
                 "id": node_id,
                 "baseType": "transform",
                 "nextNodes": [],
@@ -588,7 +588,7 @@ class TFLBuilder:
                 "nodeType": ".v1.RenameColumn",
                 "columnName": action["from"],
                 "rename": action["to"],
-                "name": f"将 {action['from']} 重命名为 {action['to']}",
+                "name": f"Rename {action['from']} to {action['to']}",
                 "id": node_id,
                 "baseType": "transform",
                 "nextNodes": [],
@@ -598,7 +598,7 @@ class TFLBuilder:
         elif action_type == "remove":
             return {
                 "nodeType": ".v1.RemoveColumns",
-                "name": f"移除 {action['columns'][0]} + 另外 {len(action['columns'])-1} 个",
+                "name": f"Remove {action['columns'][0]} + {len(action['columns'])-1} more",
                 "id": node_id,
                 "baseType": "transform",
                 "nextNodes": [],
@@ -607,19 +607,19 @@ class TFLBuilder:
                 "columnNames": action["columns"]
             }
         else:
-            raise ValueError(f"不支持的操作类型: {action_type}")
+            raise ValueError(f"Unsupported action type: {action_type}")
     
     def add_remove_columns(self, name: str, parent_id: str, columns: List[str]) -> str:
         """
-        添加"移除列"操作
+        Add "remove columns" operation
         
         Args:
-            name: 步骤名称
-            parent_id: 上游节点 ID
-            columns: 要移除的列名列表
+            name: Step name
+            parent_id: Upstream node ID
+            columns: List of column names to remove
             
         Returns:
-            str: 节点 ID
+            str: Node ID
         """
         return self.add_clean_step(name, parent_id, [{"type": "remove", "columns": columns}])
     
@@ -719,20 +719,20 @@ class TFLBuilder:
         formula: str
     ) -> str:
         """
-        添加计算字段
+        Add calculated field
         
         Args:
-            name: 清理步骤名称
-            parent_id: 上游节点 ID
-            column_name: 新计算字段的名称
-            formula: Tableau 计算公式，支持：
-                - 条件: IF [金额] > 99 THEN 1 ELSE 0 END
-                - 字符串: UPPER([名称])
-                - 数学: [价格] * [数量]
-                - 日期: DATEPART('year', [下单日期])
+            name: Clean step name
+            parent_id: Upstream node ID
+            column_name: New calculated field name
+            formula: Tableau calculation formula, supports:
+                - Conditional: IF [Amount] > 99 THEN 1 ELSE 0 END
+                - String: UPPER([Name])
+                - Math: [Price] * [Quantity]
+                - Date: DATEPART('year', [Order Date])
             
         Returns:
-            str: 清理步骤节点 ID
+            str: Clean step node ID
         """
         node_id = str(uuid.uuid4())
         calc_node_id = str(uuid.uuid4())
@@ -783,28 +783,28 @@ class TFLBuilder:
 
     def add_keep_only(self, name: str, parent_id: str, columns: List[str]) -> str:
         """
-        添加"只保留列"操作（快捷方法）
+        Add "keep only columns" operation (shortcut method)
         
         Args:
-            name: 步骤名称
-            parent_id: 上游节点 ID
-            columns: 要保留的列名列表
+            name: Step name
+            parent_id: Upstream node ID
+            columns: List of column names to keep
             
         Returns:
-            str: 节点 ID
+            str: Node ID
         """
         return self.add_clean_step(name, parent_id, [{"type": "keep_only", "columns": columns}])
     
     def add_rename(self, parent_id: str, renames: Dict[str, str]) -> str:
         """
-        添加重命名列操作（快捷方法）
+        Add rename columns operation (shortcut method)
         
         Args:
-            parent_id: 上游节点 ID
-            renames: 重命名映射 {旧列名: 新列名}
+            parent_id: Upstream node ID
+            renames: Rename mapping {old_column_name: new_column_name}
             
         Returns:
-            str: 节点 ID
+            str: Node ID
         """
         actions = [{"type": "rename", "from": old, "to": new} for old, new in renames.items()]
         return self.add_clean_step("rename", parent_id, actions)
@@ -816,18 +816,18 @@ class TFLBuilder:
         expression: str
     ) -> str:
         """
-        添加筛选器节点
+        Add filter node
         
         Args:
-            name: 筛选器名称
-            parent_id: 上游节点 ID
-            expression: 筛选表达式（Tableau 计算语法）
-                示例: "[金额] > 100"
-                示例: "NOT ISNULL([客户名])"
-                示例: "[状态] = \"已完成\" OR [状态] = \"进行中\""
+            name: Filter name
+            parent_id: Upstream node ID
+            expression: Filter expression (Tableau calculation syntax)
+                Example: "[Amount] > 100"
+                Example: "NOT ISNULL([Customer Name])"
+                Example: "[Status] = \"Completed\" OR [Status] = \"In Progress\""
             
         Returns:
-            str: 筛选器节点 ID
+            str: Filter node ID
         """
         node_id = str(uuid.uuid4())
         filter_node_id = str(uuid.uuid4())
@@ -847,7 +847,7 @@ class TFLBuilder:
                 "nodes": {
                     filter_node_id: {
                         "nodeType": ".v1.FilterOperation",
-                        "name": "筛选器",
+                        "name": "Filter",
                         "id": filter_node_id,
                         "baseType": "transform",
                         "nextNodes": [],
@@ -883,26 +883,26 @@ class TFLBuilder:
         aggregations: List[Dict[str, str]] = None
     ) -> str:
         """
-        添加聚合步骤
+        Add aggregate step
         
         Args:
-            name: 聚合步骤名称
-            parent_id: 上游节点 ID
-            group_by: 分组字段列表
-            aggregations: 聚合字段列表，每个元素是字典：
-                - field: 字段名
-                - function: 聚合函数 (SUM, AVG, COUNT, MIN, MAX, MEDIAN, COUNTD, STDEV, VAR)
-                - output_name: 输出列名（可选）
+            name: Aggregate step name
+            parent_id: Upstream node ID
+            group_by: List of grouping fields
+            aggregations: List of aggregation fields, each element is a dict:
+                - field: Field name
+                - function: Aggregation function (SUM, AVG, COUNT, MIN, MAX, MEDIAN, COUNTD, STDEV, VAR)
+                - output_name: Output column name (optional)
             
         Returns:
-            str: 聚合步骤节点 ID
+            str: Aggregate step node ID
         """
         node_id = str(uuid.uuid4())
         action_node_id = str(uuid.uuid4())
         self._node_order.append({"id": node_id, "type": "aggregate"})
         self.features.add("node.v2018_2_3.SuperAggregate")
         
-        # 构建分组字段
+        # Build grouping fields
         group_by_fields = [
             {
                 "columnName": col,
@@ -913,7 +913,7 @@ class TFLBuilder:
             for col in group_by
         ]
         
-        # 构建聚合字段
+        # Build aggregation fields
         aggregate_fields = []
         if aggregations:
             for agg in aggregations:
@@ -955,10 +955,10 @@ class TFLBuilder:
         return node_id
 
     def _calculate_layout(self) -> Dict[str, Any]:
-        """计算节点布局"""
+        """Calculate node layout"""
         layout = {}
         
-        # 输入节点垂直排列
+        # Input nodes arranged vertically
         input_nodes = [n for n in self._node_order if n["type"] == "input"]
         for i, node_info in enumerate(input_nodes):
             layout[node_info["id"]] = {
@@ -967,7 +967,7 @@ class TFLBuilder:
                 "size": {"width": 1, "height": 1}
             }
         
-        # 其他节点水平排列
+        # Other nodes arranged horizontally
         other_nodes = [n for n in self._node_order if n["type"] != "input"]
         mid_y = len(input_nodes) // 2 + 1 if input_nodes else 1
         
@@ -989,10 +989,10 @@ class TFLBuilder:
 
     def build(self) -> tuple:
         """
-        构建最终的 TFL 文件组件
+        Build final TFL file components
         
         Returns:
-            tuple: (flow, displaySettings, maestroMetadata) 三个 JSON 对象
+            tuple: (flow, displaySettings, maestroMetadata) three JSON objects
         """
         connection_ids = list(self.connections.keys())
         
@@ -1023,7 +1023,7 @@ class TFLBuilder:
             "hiddenColumns": []
         }
         
-        # 使用配置中的版本信息
+        # Use version info from config
         v = {
             "year": self.config.prep_year, 
             "quarterOfYear": self.config.prep_quarter, 
