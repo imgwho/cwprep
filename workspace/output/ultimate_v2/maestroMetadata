@@ -6,7 +6,8 @@
   "isPackagedMaestroDocument": false,
   "documentFeaturesUsedInDocument": [
     {
-      "id": "node.v2018_2_3.SuperJoin",
+      "id": "document.v2019_1_3.Flow",
+      "featureName": "",
       "notSupportedMessages": [],
       "firstSoftwareVersionSupportedIn": {
         "year": 2019,
@@ -22,7 +23,8 @@
       }
     },
     {
-      "id": "document.v2019_1_3.Flow",
+      "id": "node.v2018_2_3.SuperJoin",
+      "featureName": "",
       "notSupportedMessages": [],
       "firstSoftwareVersionSupportedIn": {
         "year": 2019,
@@ -39,6 +41,7 @@
     },
     {
       "id": "nodeProperty.v2019_1_3.PrimaryKey",
+      "featureName": "",
       "notSupportedMessages": [],
       "firstSoftwareVersionSupportedIn": {
         "year": 2019,
