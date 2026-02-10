@@ -838,10 +838,26 @@
       "e6dce21c-e1a7-400d-b2ba-ea1a28c74f76-activityId" : 81600,
       "e6dce21c-e1a7-400d-b2ba-ea1a28c74f76-version" : 81700,
       "e6dce21c-e1a7-400d-b2ba-ea1a28c74f76-settlement" : 81800,
-      "e6dce21c-e1a7-400d-b2ba-ea1a28c74f76-usefor" : 81900
+      "e6dce21c-e1a7-400d-b2ba-ea1a28c74f76-usefor" : 81900,
+      "673bb633-eb35-48d1-9d02-2ce76b7e215b-gender" : 82000,
+      "673bb633-eb35-48d1-9d02-2ce76b7e215b-age" : 82100,
+      "673bb633-eb35-48d1-9d02-2ce76b7e215b-education" : 82200,
+      "673bb633-eb35-48d1-9d02-2ce76b7e215b-marital" : 82300,
+      "673bb633-eb35-48d1-9d02-2ce76b7e215b-role_group" : 82400,
+      "673bb633-eb35-48d1-9d02-2ce76b7e215b-job_status" : 82500,
+      "673bb633-eb35-48d1-9d02-2ce76b7e215b-entry_time" : 82600,
+      "673bb633-eb35-48d1-9d02-2ce76b7e215b-leave_time" : 82700,
+      "673bb633-eb35-48d1-9d02-2ce76b7e215b-work_days" : 82800,
+      "673bb633-eb35-48d1-9d02-2ce76b7e215b-self_type" : 82900,
+      "673bb633-eb35-48d1-9d02-2ce76b7e215b-admin_status" : 83000,
+      "673bb633-eb35-48d1-9d02-2ce76b7e215b-last_updated_at" : 83100,
+      "fd0d3389-e2fb-4a29-91af-e935e9481ae0-分公司" : -900,
+      "ac2aa249-df35-4c03-b251-777322ddd168-是否有效天（当天营业额>99）" : 62550,
+      "e2f56a89-3e16-4951-a5c4-b557bc83a986-是否签收有效天（当天签收额>99）" : -1000,
+      "68e7c984-d29e-4138-a5b9-9db2f7ad946e-签收营业额" : -1100
     },
-    "minOrdinal" : -800,
-    "maxOrdinal" : 81900
+    "minOrdinal" : -1100,
+    "maxOrdinal" : 83100
   },
   "flowDisplaySettings" : {
     "flowGroupNodeDisplay" : {
@@ -864,20 +880,6 @@
       "selectedType" : null
     },
     "flowNodeDisplaySettings" : {
-      "17d80921-406f-475c-a058-ca7175225eeb" : {
-        "color" : {
-          "hexCss" : "#3D7FA6",
-          "rgba" : [ "61", "127", "166", "1" ]
-        },
-        "position" : {
-          "x" : 1,
-          "y" : 1
-        },
-        "size" : {
-          "width" : 1,
-          "height" : 1
-        }
-      },
       "ad1ccc73-6514-4708-b9a4-ae18502aa2f6" : {
         "color" : {
           "hexCss" : "#B56252",
@@ -934,6 +936,20 @@
           "height" : 1
         }
       },
+      "a4b8ae96-9d53-47b8-97d0-fe9b97be9d96" : {
+        "color" : {
+          "hexCss" : "#F6A035",
+          "rgba" : [ "246", "160", "53", "1" ]
+        },
+        "position" : {
+          "x" : 3,
+          "y" : 4
+        },
+        "size" : {
+          "width" : 1,
+          "height" : 1
+        }
+      },
       "4e826d3c-b3ee-4bad-8876-cf6362e12030" : {
         "color" : {
           "hexCss" : "#3D7FA6",
@@ -948,27 +964,13 @@
           "height" : 1
         }
       },
-      "4ec10d18-67ea-44d4-b6c1-8a252e22e672" : {
-        "color" : {
-          "hexCss" : "#3D7FA6",
-          "rgba" : [ "61", "127", "166", "1" ]
-        },
-        "position" : {
-          "x" : 0,
-          "y" : 1
-        },
-        "size" : {
-          "width" : 1,
-          "height" : 1
-        }
-      },
       "673bb633-eb35-48d1-9d02-2ce76b7e215b" : {
         "color" : {
           "hexCss" : "#EFC637",
           "rgba" : [ "239", "198", "55", "1" ]
         },
         "position" : {
-          "x" : 1,
+          "x" : 2,
           "y" : 4
         },
         "size" : {
@@ -988,48 +990,6 @@
         "size" : {
           "width" : 1,
           "height" : 2
-        }
-      },
-      "96c08ba8-6577-4fd8-a86d-480ed64cd9b2" : {
-        "color" : {
-          "hexCss" : "#499893",
-          "rgba" : [ "73", "152", "147", "1" ]
-        },
-        "position" : {
-          "x" : 2,
-          "y" : 4
-        },
-        "size" : {
-          "width" : 1,
-          "height" : 1
-        }
-      },
-      "d80d33ce-5749-4cdc-bfaf-03de687a1236" : {
-        "color" : {
-          "hexCss" : "#86AF6A",
-          "rgba" : [ "134", "175", "106", "1" ]
-        },
-        "position" : {
-          "x" : 2,
-          "y" : 5
-        },
-        "size" : {
-          "width" : 1,
-          "height" : 1
-        }
-      },
-      "65333d89-8ca5-41d8-b7b3-fac5c68713af" : {
-        "color" : {
-          "hexCss" : "#499893",
-          "rgba" : [ "73", "152", "147", "1" ]
-        },
-        "position" : {
-          "x" : 3,
-          "y" : 4
-        },
-        "size" : {
-          "width" : 1,
-          "height" : 1
         }
       },
       "8ed39aac-ac20-4d19-acb8-d047071a54fe" : {
@@ -1054,20 +1014,6 @@
         "position" : {
           "x" : 0,
           "y" : 3
-        },
-        "size" : {
-          "width" : 1,
-          "height" : 1
-        }
-      },
-      "31d12ccd-7ad2-4db6-82b2-22d88e2022b2" : {
-        "color" : {
-          "hexCss" : "#86AF6A",
-          "rgba" : [ "134", "175", "106", "1" ]
-        },
-        "position" : {
-          "x" : 1,
-          "y" : 5
         },
         "size" : {
           "width" : 1,

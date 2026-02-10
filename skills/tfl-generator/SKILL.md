@@ -90,6 +90,7 @@ builder = TFLBuilder(flow_name="流程名", config=my_config)
 | `add_rename(parent_id, renames)` | 上游ID, 重命名映射 | 重命名列 |
 | `add_filter(name, parent_id, expression)` | 步骤名, 上游ID, 筛选表达式 | 表达式筛选 |
 | `add_value_filter(name, parent_id, field, values, exclude)` | 筛选参数 | 按值筛选 |
+| `add_calculation(name, parent_id, column_name, formula)` | 计算参数 | 添加计算字段 |
 | `add_aggregate(name, parent_id, group_by, aggregations)` | 聚合参数 | 添加聚合步骤 |
 | `add_output_server(name, parent_id, datasource_name, project_name, server_url)` | 输出参数 | 添加服务器输出 |
 | `build()` | 无 | 返回 (flow, display, meta) |

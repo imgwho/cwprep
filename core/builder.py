@@ -459,6 +459,76 @@ class TFLBuilder:
             "nextNamespace": "Default"
         })
         return node_id
+    
+    def add_calculation(
+        self,
+        name: str,
+        parent_id: str,
+        column_name: str,
+        formula: str
+    ) -> str:
+        """
+        添加计算字段
+        
+        Args:
+            name: 清理步骤名称
+            parent_id: 上游节点 ID
+            column_name: 新计算字段的名称
+            formula: Tableau 计算公式，支持：
+                - 条件: IF [金额] > 99 THEN 1 ELSE 0 END
+                - 字符串: UPPER([名称])
+                - 数学: [价格] * [数量]
+                - 日期: DATEPART('year', [下单日期])
+            
+        Returns:
+            str: 清理步骤节点 ID
+        """
+        node_id = str(uuid.uuid4())
+        calc_node_id = str(uuid.uuid4())
+        self._node_order.append({"id": node_id, "type": "clean"})
+        
+        self.nodes[node_id] = {
+            "nodeType": ".v1.Container",
+            "name": name,
+            "id": node_id,
+            "baseType": "container",
+            "nextNodes": [],
+            "serialize": False,
+            "description": None,
+            "loomContainer": {
+                "parameters": {"parameters": {}},
+                "initialNodes": [calc_node_id],
+                "nodes": {
+                    calc_node_id: {
+                        "nodeType": ".v1.AddColumn",
+                        "columnName": column_name,
+                        "expression": formula,
+                        "name": f"Add {column_name}",
+                        "id": calc_node_id,
+                        "baseType": "transform",
+                        "nextNodes": [],
+                        "serialize": False,
+                        "description": None
+                    }
+                },
+                "connections": {},
+                "dataConnections": {},
+                "connectionIds": [],
+                "dataConnectionIds": [],
+                "nodeProperties": {},
+                "extensibility": None
+            },
+            "namespacesToInput": {"Default": {"nodeId": calc_node_id, "namespace": "Default"}},
+            "namespacesToOutput": {"Default": {"nodeId": calc_node_id, "namespace": "Default"}},
+            "providedParameters": None
+        }
+        
+        self.nodes[parent_id]["nextNodes"].append({
+            "namespace": "Default",
+            "nextNodeId": node_id,
+            "nextNamespace": "Default"
+        })
+        return node_id
 
     def add_keep_only(self, name: str, parent_id: str, columns: List[str]) -> str:
         """

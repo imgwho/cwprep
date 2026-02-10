@@ -1,7 +1,23 @@
 # 项目更新日志 (Changelog)
 
 ### 当前状态
-SDK v1.2 - 支持清理步骤、筛选、聚合等数据处理操作，AI 可调用能力大幅增强。
+SDK v1.3 - 新增计算字段、移除列、值筛选功能，支持完整的 Tableau 公式语法。
+
+---
+
+## v1.3 (2026-02-08 12:05)
+
+### 新增功能
+- **计算字段** `add_calculation`：支持 Tableau 公式（IF/THEN/ELSE/ELSEIF）
+- **移除列** `add_remove_columns`：批量移除不需要的字段
+- **值筛选** `add_value_filter`：按值保留或排除记录
+
+### 修复
+- 修正计算字段节点类型：`.v1.CreateCalculatedColumn` → `.v1.AddColumn`
+
+### 测试
+- 新增 `test_calculation.py`：验证计算字段功能
+- 新增 `test_new_features_v2.py`：验证移除列和值筛选功能
 
 ---
 

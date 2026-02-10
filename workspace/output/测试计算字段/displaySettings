@@ -1,0 +1,129 @@
+{
+  "majorVersion": 1,
+  "minorVersion": 0,
+  "flowDisplaySettings": {
+    "flowGroupNodeDisplay": {},
+    "flowSelection": {
+      "type": "nothing",
+      "selectedNodePath": null,
+      "selectedType": null
+    },
+    "flowNodeDisplaySettings": {
+      "8aa0293e-0a49-4baa-af82-fbf56be3e331": {
+        "color": {
+          "hexCss": "#EFC637",
+          "rgba": [
+            "239",
+            "198",
+            "55",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 0,
+          "y": 1
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "41e76534-8c5d-4921-80f5-5abe9f549f64": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 1,
+          "y": 1
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "683b058b-3352-4c25-ac27-e1c16d0dd3f1": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 2,
+          "y": 1
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "eac40265-3195-4122-b46b-361062d02e83": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 3,
+          "y": 1
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "d38ed297-7b80-412b-9493-9cf163d555d1": {
+        "color": {
+          "hexCss": "#3D7FA6",
+          "rgba": [
+            "61",
+            "127",
+            "166",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 4,
+          "y": 1
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      },
+      "ca3eb33e-4e80-4e84-af15-c4577a07e2b8": {
+        "color": {
+          "hexCss": "#E76E50",
+          "rgba": [
+            "231",
+            "110",
+            "80",
+            "1"
+          ]
+        },
+        "position": {
+          "x": 5,
+          "y": 1
+        },
+        "size": {
+          "width": 1,
+          "height": 1
+        }
+      }
+    }
+  },
+  "hiddenColumns": []
+}

@@ -64,14 +64,16 @@
 | 服务器输出 | `add_output_server` | 发布到 Tableau Server |
 | 清理步骤 | `add_clean_step` | Container 容器 |
 | 只保留列 | `add_keep_only` | KeepOnlyColumns |
+| 移除列 | `add_remove_columns` | RemoveColumns |
 | 重命名列 | `add_rename` | RenameColumn |
-| 筛选器 | `add_filter` | FilterOperation |
+| 表达式筛选 | `add_filter` | FilterOperation |
+| 值筛选 | `add_value_filter` | ValueFilter |
+| 计算字段 | `add_calculation` | AddColumn (IF/THEN/ELSE) |
 | 聚合 | `add_aggregate` | SuperAggregate |
 
 ### 待实现 🔲
 | 功能 | 优先级 | 说明 |
 |------|--------|------|
-| 计算字段 | 🔴 高 | 支持 Tableau 公式语法 |
 | 并集 (Union) | 🟡 中 | 合并多个结构相同的表 |
 | 转置 (Pivot) | 🟡 中 | 行列转换 |
 | 文件输入 | 🟢 低 | CSV/Excel 输入 |
