@@ -3,25 +3,25 @@
     "parameters": {}
   },
   "initialNodes": [
-    "16329604-3be7-40ea-987b-35d0ff974bd2",
-    "5ab17f6b-715b-4ff6-a60e-c3235dfcf403"
+    "50509d77-4ba7-45ac-bfb4-dab44b0e02db",
+    "f5145cb9-8251-48f4-928f-f84b5717221e"
   ],
   "nodes": {
-    "16329604-3be7-40ea-987b-35d0ff974bd2": {
+    "50509d77-4ba7-45ac-bfb4-dab44b0e02db": {
       "nodeType": ".v1.LoadSql",
       "name": "e_product_order_list",
-      "id": "16329604-3be7-40ea-987b-35d0ff974bd2",
+      "id": "50509d77-4ba7-45ac-bfb4-dab44b0e02db",
       "baseType": "input",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "a0beb08f-00ef-4f5a-b806-10cf13198a53",
+          "nextNodeId": "0c944dc7-f34f-4fba-9e4e-6d49067250de",
           "nextNamespace": "Left"
         }
       ],
       "serialize": false,
       "description": null,
-      "connectionId": "db5c05be-6c0a-4848-b45f-f6a52519e7e8",
+      "connectionId": "734dd231-3e91-41a1-a9a9-36d405e6b36b",
       "connectionAttributes": {
         "dbname": "voxadmin"
       },
@@ -42,21 +42,21 @@
         "query": "SELECT o.user_id AS 客户ID, o.id AS 订单ID, o.acc AS 员工ID FROM e_product_order_list o WHERE trash = 0 LIMIT 100"
       }
     },
-    "5ab17f6b-715b-4ff6-a60e-c3235dfcf403": {
+    "f5145cb9-8251-48f4-928f-f84b5717221e": {
       "nodeType": ".v1.LoadSql",
       "name": "bi_e_admin",
-      "id": "5ab17f6b-715b-4ff6-a60e-c3235dfcf403",
+      "id": "f5145cb9-8251-48f4-928f-f84b5717221e",
       "baseType": "input",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "a0beb08f-00ef-4f5a-b806-10cf13198a53",
+          "nextNodeId": "0c944dc7-f34f-4fba-9e4e-6d49067250de",
           "nextNamespace": "Right"
         }
       ],
       "serialize": false,
       "description": null,
-      "connectionId": "db5c05be-6c0a-4848-b45f-f6a52519e7e8",
+      "connectionId": "734dd231-3e91-41a1-a9a9-36d405e6b36b",
       "connectionAttributes": {
         "dbname": "voxadmin"
       },
@@ -77,15 +77,15 @@
         "query": "SELECT id, username FROM bi_e_admin LIMIT 100"
       }
     },
-    "a0beb08f-00ef-4f5a-b806-10cf13198a53": {
+    "0c944dc7-f34f-4fba-9e4e-6d49067250de": {
       "nodeType": ".v2018_2_3.SuperJoin",
       "name": "联接 1",
-      "id": "a0beb08f-00ef-4f5a-b806-10cf13198a53",
+      "id": "0c944dc7-f34f-4fba-9e4e-6d49067250de",
       "baseType": "superNode",
       "nextNodes": [
         {
           "namespace": "Default",
-          "nextNodeId": "0332bb31-4d06-49b9-a759-92188b87d3b0",
+          "nextNodeId": "e571b4f5-bc71-4166-a1b8-e7be19f8837b",
           "nextNamespace": "Default"
         }
       ],
@@ -96,7 +96,7 @@
       "actionNode": {
         "nodeType": ".v1.SimpleJoin",
         "name": "联接 1",
-        "id": "6b0a4484-1f84-4971-ae6d-726f7143fd75",
+        "id": "dfe9a311-17ce-4a23-90a5-30e314ea6913",
         "baseType": "transform",
         "nextNodes": [],
         "serialize": false,
@@ -111,10 +111,10 @@
         "joinType": "left"
       }
     },
-    "0332bb31-4d06-49b9-a759-92188b87d3b0": {
+    "e571b4f5-bc71-4166-a1b8-e7be19f8837b": {
       "nodeType": ".v1.PublishExtract",
       "name": "输出",
-      "id": "0332bb31-4d06-49b9-a759-92188b87d3b0",
+      "id": "e571b4f5-bc71-4166-a1b8-e7be19f8837b",
       "baseType": "output",
       "nextNodes": [],
       "serialize": false,
@@ -127,9 +127,9 @@
     }
   },
   "connections": {
-    "db5c05be-6c0a-4848-b45f-f6a52519e7e8": {
+    "734dd231-3e91-41a1-a9a9-36d405e6b36b": {
       "connectionType": ".v1.SqlConnection",
-      "id": "db5c05be-6c0a-4848-b45f-f6a52519e7e8",
+      "id": "734dd231-3e91-41a1-a9a9-36d405e6b36b",
       "name": "rm-uf661w842h18w326nvo.mysql.rds.aliyuncs.com",
       "isPackaged": false,
       "connectionAttributes": {
@@ -156,11 +156,11 @@
   },
   "dataConnections": {},
   "connectionIds": [
-    "db5c05be-6c0a-4848-b45f-f6a52519e7e8"
+    "734dd231-3e91-41a1-a9a9-36d405e6b36b"
   ],
   "dataConnectionIds": [],
   "nodeProperties": {
-    "a0beb08f-00ef-4f5a-b806-10cf13198a53": {
+    "0c944dc7-f34f-4fba-9e4e-6d49067250de": {
       "com.tableau.loom.doc.fileformat.v2019_1_3.PrimaryKey": {
         "nodePropertyType": ".v2019_1_3.PrimaryKey",
         "empty": false,
@@ -174,6 +174,6 @@
   "selection": [],
   "majorVersion": 1,
   "minorVersion": 4,
-  "documentId": "718a72b1-af0c-4111-8c89-2e4806336b43",
-  "obfuscatorId": "aa4c4a52-ed89-4746-b003-93405392983d"
+  "documentId": "ef9bd255-da7a-4994-9326-1e13fe111ba1",
+  "obfuscatorId": "447335ac-599b-46c3-83ea-55bea53e80f5"
 }

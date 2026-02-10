@@ -1,0 +1,5 @@
+# TFL Generator 依赖
+
+# 配置文件支持
+pyyaml>=6.0
+python-dotenv>=1.0

@@ -1,43 +1,61 @@
+"""
+TFL (Tableau Prep Flow) 构建器 SDK
+
+用于程序化生成 Tableau Prep 数据流程文件。
+
+使用示例:
+    from core.builder import TFLBuilder
+    from core.config import DEFAULT_CONFIG
+    
+    builder = TFLBuilder(flow_name="我的流程", config=DEFAULT_CONFIG)
+    conn_id = builder.add_connection("host", "user", "db")
+    input1 = builder.add_input_sql("表1", "SELECT * FROM t1", conn_id)
+    input2 = builder.add_input_sql("表2", "SELECT * FROM t2", conn_id)
+    join = builder.add_join("联接", input1, input2, "id", "t1_id")
+    builder.add_output_server("输出", join, "数据源名")
+    flow, display, meta = builder.build()
+"""
+
 import uuid
-import json
-import time
+from typing import Optional, List, Dict, Any
+
+from .config import TFLConfig, DEFAULT_CONFIG, DatabaseConfig
+
 
 class TFLBuilder:
     """
-    TFL (Tableau Prep Flow) 构建器 SDK
+    TFL 构建器
     
-    用于程序化生成 Tableau Prep 数据流程文件。
-    
-    使用示例:
-        builder = TFLBuilder(flow_name="我的流程")
-        conn_id = builder.add_connection("host", "user", "db")
-        input1 = builder.add_input_sql("表1", "SELECT * FROM t1", conn_id)
-        input2 = builder.add_input_sql("表2", "SELECT * FROM t2", conn_id)
-        join = builder.add_join("联接", input1, input2, "id", "t1_id")
-        builder.add_output_server("输出", join, "数据源名")
-        flow, display, meta = builder.build()
+    Args:
+        flow_name: 流程名称，将显示在 Tableau Prep 中
+        config: TFL 配置对象，默认使用 DEFAULT_CONFIG
     """
     
-    def __init__(self, flow_name="订单员工"):
-        """
-        初始化 TFL 构建器
-        
-        Args:
-            flow_name: 流程名称，将显示在 Tableau Prep 中
-        """
+    def __init__(self, flow_name: str = "订单员工", config: Optional[TFLConfig] = None):
         self.flow_name = flow_name
-        self.nodes = {}
-        self.initial_nodes = []
-        self.connections = {}
-        self.node_properties = {}
+        self.config = config or DEFAULT_CONFIG
+        
+        self.nodes: Dict[str, Any] = {}
+        self.initial_nodes: List[str] = []
+        self.connections: Dict[str, Any] = {}
+        self.node_properties: Dict[str, Any] = {}
         self.doc_id = str(uuid.uuid4())
         self.obfuscator_id = str(uuid.uuid4())
         self.features = {"document.v2019_1_3.Flow", "nodeProperty.v2019_1_3.PrimaryKey"}
+        
         # 布局跟踪
-        self._node_order = []  # 记录节点添加顺序，用于布局计算
-        self._input_count = 0  # 输入节点计数，用于 Y 坐标分配
+        self._node_order: List[Dict] = []
+        self._input_count = 0
 
-    def add_connection(self, host, username, dbname):
+    def add_connection(
+        self, 
+        host: str, 
+        username: str, 
+        dbname: str,
+        port: str = None,
+        db_class: str = None,
+        **kwargs
+    ) -> str:
         """
         添加数据库连接
         
@@ -45,30 +63,73 @@ class TFLBuilder:
             host: 数据库主机地址
             username: 用户名
             dbname: 数据库名称
+            port: 端口号（默认从配置读取）
+            db_class: 数据库类型 mysql/postgres/oracle（默认从配置读取）
+            **kwargs: 其他连接属性
             
         Returns:
             str: 连接 ID，供后续输入节点引用
         """
         conn_id = str(uuid.uuid4())
+        
+        # 使用传入参数或配置默认值
+        default_db = self.config.database or DatabaseConfig()
+        actual_port = port or default_db.port or "3306"
+        actual_class = db_class or default_db.db_class or "mysql"
+        
+        connection_attrs = {
+            "sslmode": kwargs.get("sslmode", ""),
+            "odbc-connect-string-extras": "",
+            "server": host,
+            "prep-protocol-role": ":prep-protocol-reader",
+            ":flow-name": self.flow_name,
+            "odbc-dbms-name": "",
+            ":use-allowlist": "false",
+            "dbname": dbname,
+            "port": actual_port,
+            ":protocol-customizations": "",
+            "source-charset": kwargs.get("source_charset", ""),
+            "sslcert": "",
+            "odbc-native-protocol": "",
+            "expected-driver-version": "",
+            "class": actual_class,
+            "one-time-sql": "",
+            "authentication": kwargs.get("authentication", ""),
+            "username": username
+        }
+        
         self.connections[conn_id] = {
             "connectionType": ".v1.SqlConnection",
             "id": conn_id,
             "name": host,
             "isPackaged": False,
-            "connectionAttributes": {
-                "sslmode": "", "odbc-connect-string-extras": "",
-                "server": host, "prep-protocol-role": ":prep-protocol-reader",
-                ":flow-name": self.flow_name, "odbc-dbms-name": "",
-                ":use-allowlist": "false", "dbname": dbname, "port": "3306",
-                ":protocol-customizations": "", "source-charset": "",
-                "sslcert": "", "odbc-native-protocol": "",
-                "expected-driver-version": "", "class": "mysql",
-                "one-time-sql": "", "authentication": "", "username": username
-            }
+            "connectionAttributes": connection_attrs
         }
         return conn_id
 
-    def add_input_sql(self, name, sql, connection_id):
+    def add_connection_from_config(self) -> str:
+        """
+        使用配置文件中的默认数据库连接
+        
+        Returns:
+            str: 连接 ID
+            
+        Raises:
+            ValueError: 如果配置中没有数据库设置
+        """
+        if not self.config.database:
+            raise ValueError("配置中没有默认数据库设置")
+        
+        db = self.config.database
+        return self.add_connection(
+            host=db.host,
+            username=db.username,
+            dbname=db.dbname,
+            port=db.port,
+            db_class=db.db_class
+        )
+
+    def add_input_sql(self, name: str, sql: str, connection_id: str) -> str:
         """
         添加 SQL 输入节点
         
@@ -84,10 +145,16 @@ class TFLBuilder:
         self._input_count += 1
         self._node_order.append({"id": node_id, "type": "input", "y_hint": self._input_count})
         
+        # 获取默认数据库名
+        default_dbname = "voxadmin"
+        if self.config.database:
+            default_dbname = self.config.database.dbname
+        
         self.nodes[node_id] = {
             "nodeType": ".v1.LoadSql", "name": name, "id": node_id,
             "baseType": "input", "nextNodes": [], "serialize": False, "description": None,
-            "connectionId": connection_id, "connectionAttributes": {"dbname": "voxadmin"},
+            "connectionId": connection_id, 
+            "connectionAttributes": {"dbname": default_dbname},
             "fields": None, "actions": [], "debugModeRowLimit": None,
             "originalDataTypes": {}, "randomSampling": None,
             "updateTimestamp": None,
@@ -99,7 +166,15 @@ class TFLBuilder:
         self.initial_nodes.append(node_id)
         return node_id
 
-    def add_join(self, name, left_id, right_id, left_col, right_col, join_type="left"):
+    def add_join(
+        self, 
+        name: str, 
+        left_id: str, 
+        right_id: str, 
+        left_col: str, 
+        right_col: str, 
+        join_type: str = "left"
+    ) -> str:
         """
         添加联接节点
         
@@ -118,7 +193,7 @@ class TFLBuilder:
         self.features.add("node.v2018_2_3.SuperJoin")
         self._node_order.append({"id": node_id, "type": "join"})
         
-        # 必须在这里注册 PrimaryKey，Key 必须是 node_id
+        # 必须在这里注册 PrimaryKey
         self.node_properties[node_id] = {
             "com.tableau.loom.doc.fileformat.v2019_1_3.PrimaryKey": {
                 "nodePropertyType": ".v2019_1_3.PrimaryKey",
@@ -130,8 +205,8 @@ class TFLBuilder:
         self.nodes[node_id] = {
             "nodeType": ".v2018_2_3.SuperJoin", "name": name, "id": node_id,
             "baseType": "superNode", "nextNodes": [], "serialize": False, "description": None,
-            "beforeActionAnnotations": [],  # Tableau Prep 必需字段
-            "afterActionAnnotations": [],   # Tableau Prep 必需字段
+            "beforeActionAnnotations": [],
+            "afterActionAnnotations": [],
             "actionNode": {
                 "nodeType": ".v1.SimpleJoin", "name": name, "id": str(uuid.uuid4()),
                 "baseType": "transform", "nextNodes": [], "serialize": False, "description": None,
@@ -143,7 +218,14 @@ class TFLBuilder:
         self.nodes[right_id]["nextNodes"].append({"namespace": "Default", "nextNodeId": node_id, "nextNamespace": "Right"})
         return node_id
 
-    def add_output_server(self, name, parent_id, datasource_name, project_name="数据源"):
+    def add_output_server(
+        self, 
+        name: str, 
+        parent_id: str, 
+        datasource_name: str, 
+        project_name: str = None,
+        server_url: str = None
+    ) -> str:
         """
         添加服务器输出节点
         
@@ -151,7 +233,8 @@ class TFLBuilder:
             name: 输出节点名称
             parent_id: 上游节点 ID 
             datasource_name: 发布后的数据源名称
-            project_name: Tableau Server 上的项目名称
+            project_name: Tableau Server 上的项目名称（默认从配置读取）
+            server_url: Tableau Server URL（默认从配置读取）
             
         Returns:
             str: 输出节点 ID
@@ -159,46 +242,47 @@ class TFLBuilder:
         node_id = str(uuid.uuid4())
         self._node_order.append({"id": node_id, "type": "output"})
         
+        # 使用传入参数或配置默认值
+        actual_project = project_name or self.config.server.default_project
+        actual_server = server_url or self.config.server.server_url
+        actual_luid = self.config.server.project_luid
+        
         self.nodes[node_id] = {
             "nodeType": ".v1.PublishExtract", "name": name, "id": node_id,
             "baseType": "output", "nextNodes": [], "serialize": False, "description": None,
-            "projectName": project_name, "projectLuid": "7fa01ebc-72f4-4fd0-a27f-f8ac1e30ac20",
-            "datasourceName": datasource_name, "datasourceDescription": "",
-            "serverUrl": "http://win-picvs30bivi"
+            "projectName": actual_project, 
+            "projectLuid": actual_luid,
+            "datasourceName": datasource_name, 
+            "datasourceDescription": "",
+            "serverUrl": actual_server
         }
         self.nodes[parent_id]["nextNodes"].append({"namespace": "Default", "nextNodeId": node_id, "nextNamespace": "Default"})
         return node_id
 
-    def _calculate_layout(self):
-        """
-        计算节点布局
-        
-        输入节点垂直排列在 x=0
-        后续节点按添加顺序向右排列
-        """
+    def _calculate_layout(self) -> Dict[str, Any]:
+        """计算节点布局"""
         layout = {}
-        x_counter = 0
         
-        # 首先处理输入节点 - 垂直排列
+        # 输入节点垂直排列
         input_nodes = [n for n in self._node_order if n["type"] == "input"]
         for i, node_info in enumerate(input_nodes):
             layout[node_info["id"]] = {
-                "color": {"hexCss": "#EFC637", "rgba": ["239", "198", "55", "1"]},  # 黄色 - 输入
+                "color": {"hexCss": "#EFC637", "rgba": ["239", "198", "55", "1"]},
                 "position": {"x": 0, "y": i + 1},
                 "size": {"width": 1, "height": 1}
             }
         
-        # 处理非输入节点 - 水平排列
+        # 其他节点水平排列
         other_nodes = [n for n in self._node_order if n["type"] != "input"]
         mid_y = len(input_nodes) // 2 + 1 if input_nodes else 1
         
         for i, node_info in enumerate(other_nodes):
             if node_info["type"] == "join":
-                color = {"hexCss": "#499893", "rgba": ["73", "152", "147", "1"]}  # 青色 - 联接
+                color = {"hexCss": "#499893", "rgba": ["73", "152", "147", "1"]}
             elif node_info["type"] == "output":
-                color = {"hexCss": "#E76E50", "rgba": ["231", "110", "80", "1"]}  # 橙色 - 输出
+                color = {"hexCss": "#E76E50", "rgba": ["231", "110", "80", "1"]}
             else:
-                color = {"hexCss": "#3D7FA6", "rgba": ["61", "127", "166", "1"]}  # 蓝色 - 默认
+                color = {"hexCss": "#3D7FA6", "rgba": ["61", "127", "166", "1"]}
             
             layout[node_info["id"]] = {
                 "color": color,
@@ -208,33 +292,32 @@ class TFLBuilder:
         
         return layout
 
-    def build(self):
+    def build(self) -> tuple:
         """
         构建最终的 TFL 文件组件
         
         Returns:
             tuple: (flow, displaySettings, maestroMetadata) 三个 JSON 对象
         """
-        # 完整的 flow 结构 - 包含所有必需的顶级字段
         connection_ids = list(self.connections.keys())
+        
         flow = {
             "parameters": {"parameters": {}},
             "initialNodes": self.initial_nodes,
             "nodes": self.nodes,
             "connections": self.connections,
-            "dataConnections": {},  # 空对象，但必须存在
-            "connectionIds": connection_ids,  # 连接 ID 列表
-            "dataConnectionIds": [],  # 空列表
+            "dataConnections": {},
+            "connectionIds": connection_ids,
+            "dataConnectionIds": [],
             "nodeProperties": self.node_properties,
-            "extensibility": {},  # 空对象，但必须存在
-            "selection": [],  # 空列表
+            "extensibility": {},
+            "selection": [],
             "majorVersion": 1,
             "minorVersion": 4,
             "documentId": self.doc_id,
             "obfuscatorId": self.obfuscator_id
         }
         
-        # 改进的 displaySettings：使用智能布局
         display = {
             "majorVersion": 1, "minorVersion": 0,
             "flowDisplaySettings": {
@@ -245,8 +328,14 @@ class TFLBuilder:
             "hiddenColumns": []
         }
         
-        # maestroMetadata - 特性声明
-        v = {"year": 2019, "quarterOfYear": 1, "versionString": "2019.1.3", "indexOfRelease": 3}
+        # 使用配置中的版本信息
+        v = {
+            "year": self.config.prep_year, 
+            "quarterOfYear": self.config.prep_quarter, 
+            "versionString": self.config.prep_version, 
+            "indexOfRelease": self.config.prep_release
+        }
+        
         meta = {
             "majorVersion": 1, "minorVersion": 0,
             "flowEntryName": "flow", 
@@ -255,11 +344,11 @@ class TFLBuilder:
             "documentFeaturesUsedInDocument": [
                 {
                     "id": f, 
-                    "featureName": "",  # 添加空的 featureName
+                    "featureName": "",
                     "notSupportedMessages": [], 
                     "firstSoftwareVersionSupportedIn": v, 
                     "minimumCompatibleSoftwareVersion": v
-                } for f in sorted(self.features)  # 排序保证顺序一致
+                } for f in sorted(self.features)
             ]
         }
         return flow, display, meta

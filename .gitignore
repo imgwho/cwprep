@@ -1,0 +1,55 @@
+# 环境变量文件（包含敏感信息）
+.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Jupyter
+.ipynb_checkpoints/
+
+# # TFL Generator - 生成的输出文件
+# workspace/output/
+
+# 备份文件
+backup/
+*.bak
+
+# # 解压后的 TFL 文件夹（保留 .tfl 文件本身作为示例）
+# dataflow */
+# 订单员工/
+
+# 日志
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.temp

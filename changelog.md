@@ -1,7 +1,29 @@
 # 项目更新日志 (Changelog)
 
 ### 当前状态
-已完成 Tableau Prep (.tfl) 文件结构的逆向工程，并开发了可自动生成合规流程文件的 Python SDK。
+SDK v1.1 - 支持 YAML + .env 配置系统，具备基础的两表联接能力。
+
+---
+
+## v1.1 (2026-02-08)
+
+### 新增功能
+- **YAML 配置系统**：支持通过 `config.yaml` 配置 Tableau Server 和数据库连接
+- **环境变量支持**：敏感信息（密码）通过 `.env` 文件配置，自动被 gitignore 忽略
+- **配置加载函数**：`load_config()` 自动合并 YAML 和环境变量
+- **连接便捷方法**：`add_connection_from_config()` 直接使用默认配置
+
+### 改进
+- `TFLBuilder` 支持 `config` 参数注入，所有硬编码值已移除
+- `add_connection()` 支持自定义 `port` 和 `db_class` 参数
+- `add_output_server()` 支持自定义 `server_url` 参数
+- 添加类型注解，提升代码可读性
+
+### 新增文件
+- `config.yaml` - 非敏感配置
+- `.env` / `.env.example` - 环境变量配置
+- `requirements.txt` - 项目依赖
+- `.gitignore` - Git 忽略规则
 
 ---
 

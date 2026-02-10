@@ -1,34 +1,34 @@
 # TFL Generator Skill
 
-此技能允许 AI Agent 根据数据库表结构和业务逻辑，自动生成或修改 Tableau Prep 数据流程文件 (`.tfl`)。
+此技能允许 AI Agent 根据数据库表结构和业务逻辑，自动生成 Tableau Prep 数据流程文件 (`.tfl`)。
 
 ## 快速开始
 
 ```python
 from core.builder import TFLBuilder
 from core.packager import TFLPackager
+from core.config import DEFAULT_CONFIG
 
-# 1. 创建构建器
-builder = TFLBuilder(flow_name="我的数据流程")
+# 方式1: 使用默认配置
+builder = TFLBuilder(flow_name="我的流程")
+conn_id = builder.add_connection_from_config()
 
-# 2. 添加数据库连接
+# 方式2: 自定义连接
 conn_id = builder.add_connection(
-    host="your-mysql-host.com",
-    username="your_user", 
-    dbname="your_db"
+    host="your-host.com",
+    username="user",
+    dbname="mydb",
+    port="3306",       # 可选，默认 3306
+    db_class="mysql"   # 可选，支持 mysql/postgres/oracle
 )
 
-# 3. 添加输入节点
+# 添加输入和处理
 input1 = builder.add_input_sql("订单表", "SELECT * FROM orders", conn_id)
 input2 = builder.add_input_sql("客户表", "SELECT * FROM customers", conn_id)
-
-# 4. 添加联接
 join = builder.add_join("订单-客户联接", input1, input2, "customer_id", "id")
+builder.add_output_server("输出", join, "数据源名称")
 
-# 5. 添加输出
-builder.add_output_server("输出到Server", join, "订单分析数据源")
-
-# 6. 构建并打包
+# 构建并打包
 flow, display, meta = builder.build()
 TFLPackager.save_to_folder("workspace/output/my_flow", flow, display, meta)
 TFLPackager.pack_zip("workspace/output/my_flow", "workspace/output/my_flow.tfl")
@@ -36,77 +36,86 @@ TFLPackager.pack_zip("workspace/output/my_flow", "workspace/output/my_flow.tfl")
 
 ---
 
-## 核心 SDK 接口
+## 配置系统
+
+### 配置文件位置
+`core/config.py`
+
+### 预设配置
+
+| 配置名 | 说明 |
+|--------|------|
+| `DEFAULT_CONFIG` | 公司内部环境（默认） |
+| `LOCAL_CONFIG` | 本地测试环境 |
+
+### 自定义配置
+
+```python
+from core.config import TFLConfig, TableauServerConfig, DatabaseConfig
+
+my_config = TFLConfig(
+    server=TableauServerConfig(
+        server_url="https://my-tableau-server.com",
+        default_project="我的项目",
+        project_luid="..."
+    ),
+    database=DatabaseConfig(
+        host="my-database.com",
+        username="user",
+        dbname="mydb",
+        port="3306",
+        db_class="mysql"
+    )
+)
+
+builder = TFLBuilder(flow_name="流程名", config=my_config)
+```
+
+---
+
+## SDK API 参考
 
 ### `TFLBuilder` 类
 
-| 方法 | 参数 | 返回值 | 说明 |
-|------|------|--------|------|
-| `__init__(flow_name)` | `flow_name`: 流程名称 | - | 初始化构建器 |
-| `add_connection(host, username, dbname)` | 数据库连接信息 | `conn_id` | 添加 MySQL 数据库连接 |
-| `add_input_sql(name, sql, conn_id)` | 节点名, SQL查询, 连接ID | `node_id` | 添加自定义 SQL 输入节点 |
-| `add_join(name, left_id, right_id, left_col, right_col, join_type="left")` | 节点名, 左右表ID, 关联列 | `node_id` | 添加联接节点 |
-| `add_output_server(name, parent_id, datasource_name, project_name="数据源")` | 节点名, 上游节点ID, 数据源名 | `node_id` | 添加服务器发布输出 |
-| `build()` | - | `(flow, display, meta)` | 构建 TFL 组件 |
+| 方法 | 参数 | 说明 |
+|------|------|------|
+| `__init__(flow_name, config)` | 流程名, 配置对象(可选) | 初始化 |
+| `add_connection(host, username, dbname, port, db_class)` | 连接信息 | 手动添加连接 |
+| `add_connection_from_config()` | 无 | 使用默认配置连接 |
+| `add_input_sql(name, sql, conn_id)` | 节点名, SQL, 连接ID | 添加 SQL 输入 |
+| `add_join(name, left_id, right_id, left_col, right_col, join_type)` | 联接参数 | 添加联接 |
+| `add_output_server(name, parent_id, datasource_name, project_name, server_url)` | 输出参数 | 添加服务器输出 |
+| `build()` | 无 | 返回 (flow, display, meta) |
 
 ### `TFLPackager` 类
 
 | 方法 | 参数 | 说明 |
 |------|------|------|
-| `save_to_folder(folder, flow, display, meta)` | 输出文件夹, 三个JSON对象 | 保存为解压后的文件夹结构 |
-| `pack_zip(folder, output_tfl)` | 文件夹路径, 输出tfl路径 | 打包为 .tfl 文件 |
-
----
-
-## 构建指南
-
-1. **解析 Schema**: 优先读取 `docs/` 下的数据库结构database.md，识别每个表的主键字段。
-
-2. **构建流式逻辑**:
-   - **Step 1**: 创建 `TFLBuilder(flow_name="...")` 实例
-   - **Step 2**: 添加数据库连接
-   - **Step 3**: 为每个业务表添加 `add_input_sql`
-   - **Step 4**: 使用 `add_join` 处理表关系（左表和右表的关联键必须准确）
-   - **Step 5**: 添加 `add_output_server` 定义输出
-
-3. **遵循金标准**: 
-   - SDK 自动注册 `PrimaryKey` 元数据以防止文件损坏
-   - SDK 使用 `maestroMetadata` 的"空列表规则"保留版本校验结构
-   - SDK 自动添加所有必需的顶级字段
-
-4. **物理输出**: 调用 `TFLPackager` 将生成的 JSON 序列化并打包为 `.tfl`
+| `save_to_folder(folder, flow, display, meta)` | 保存路径, JSON对象 | 保存为文件夹 |
+| `pack_zip(folder, output_tfl)` | 文件夹, 输出路径 | 打包为 .tfl |
 
 ---
 
 ## 联接类型
 
-`add_join` 方法支持以下联接类型:
-
 | 类型 | 说明 |
 |------|------|
-| `"left"` | 左联接（默认） - 保留左表所有记录 |
-| `"right"` | 右联接 - 保留右表所有记录 |
-| `"inner"` | 内联接 - 只保留匹配记录 |
-| `"full"` | 全联接 - 保留两表所有记录 |
+| `"left"` | 左联接（默认） |
+| `"right"` | 右联接 |
+| `"inner"` | 内联接 |
+| `"full"` | 全联接 |
 
 ---
+
+## 构建指南
+
+1. **解析 Schema**: 读取 `docs/database.md` 了解表结构和关联关系
+2. **创建流程**: 按 输入→联接→输出 顺序构建
+3. **关联键**: 确保 left_col 和 right_col 正确匹配
+4. **验证**: 生成后用 Tableau Prep 打开验证
 
 ## 最佳实践
 
-- 流程命名应具有业务含义（如 "Order_Analysis_v1"）
-- 坐标计算由 SDK 自动完成，AI 无需手动指定 X/Y
-- 输入节点自动垂直排列，联接和输出节点水平排列
-- 所有输出文件统一放置在 `workspace/output/` 目录下
-- 生成后建议用 Tableau Prep 打开验证
-
----
-
-## 文件结构
-
-生成的 `.tfl` 文件是一个 ZIP 包，包含:
-
-| 文件 | 说明 |
-|------|------|
-| `flow` | 核心逻辑 JSON（节点、连接、转换） |
-| `displaySettings` | UI 布局（节点坐标、颜色） |
-| `maestroMetadata` | 版本特性声明 |
+- 输出统一放在 `workspace/output/`
+- 流程名使用业务含义（如 "Order_Analysis_v1"）
+- 布局由 SDK 自动计算
