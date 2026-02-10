@@ -1,7 +1,22 @@
 # 项目更新日志 (Changelog)
 
 ### 当前状态
-SDK v1.4 - 新增并集（Union）、行转列（Pivot）、列转行（Unpivot）功能，覆盖了 Tableau Prep 核心数据处理能力。
+SDK v1.5 - 完善综合测试脚本，添加 Tableau Prep 计算语法规则文档。
+
+---
+
+## v1.5 (2026-02-09 10:24)
+
+### 新增
+- **综合测试脚本** `test_comprehensive.py`：覆盖全部 14 个 SDK 方法
+- **Tableau Prep 计算语法规则**：添加到 SKILL.md
+
+### 修复
+- 员工表 SQL 字段名修正（username/filialename/filialeid/job_status）
+- 筛选表达式语法修正（字符串加引号、IN 改 OR）
+
+### 文档
+- 新增 `docs/tableau_prep_calculation.md`：完整函数参考
 
 ---
 

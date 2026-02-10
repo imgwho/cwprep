@@ -171,6 +171,45 @@ builder.add_aggregate(
 
 ---
 
+## Tableau Prep 计算语法规则
+
+> ⚠️ **重要**: Tableau Prep 的计算语法与 SQL 不同，以下规则必须遵守：
+
+### 不支持的语法
+| 不支持 | 替代方案 |
+|--------|----------|
+| `IN (1, 2, 3)` | 用 `OR` 连接多个条件 |
+| `BETWEEN a AND b` | 用 `>= a AND <= b` |
+| `!=` | 用 `<>` |
+
+### 字符串比较
+- 字符串必须用**单引号**：`[字段] = '值'`
+- 错误：`[name] == 总部` ❌
+- 正确：`[name] = '总部'` ✅
+
+### 逻辑表达式示例
+```
+# 多值判断（替代 IN）
+[status] = 2 OR [status] = 3 OR [status] = 4
+
+# 排除多个值
+NOT ([branch] = '总部' OR [branch] = '招商部')
+
+# 正则匹配
+REGEXP_MATCH(STR([status]), '^[2-8]$')
+```
+
+### 支持的函数分类
+- **数字**: ABS, ROUND, CEILING, FLOOR, POWER, SQRT
+- **字符串**: CONTAINS, LEFT, RIGHT, LEN, TRIM, UPPER, LOWER, SPLIT
+- **日期**: DATEADD, DATEDIFF, DATEPART, YEAR, MONTH, DAY, NOW, TODAY
+- **逻辑**: IF/THEN/ELSE/ELSEIF/END, CASE/WHEN, IIF, IFNULL, ISNULL, ZN
+- **类型转换**: INT, FLOAT, STR, DATE, DATETIME
+
+> 完整函数参考：`docs/tableau_prep_calculation.md`
+
+---
+
 ## 构建指南
 
 1. **解析 Schema**: 读取 `docs/database.md` 了解表结构和关联关系
