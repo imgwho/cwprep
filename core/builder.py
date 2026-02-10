@@ -364,9 +364,102 @@ class TFLBuilder:
                 "serialize": False,
                 "description": None
             }
+        elif action_type == "remove":
+            return {
+                "nodeType": ".v1.RemoveColumns",
+                "name": f"移除 {action['columns'][0]} + 另外 {len(action['columns'])-1} 个",
+                "id": node_id,
+                "baseType": "transform",
+                "nextNodes": [],
+                "serialize": False,
+                "description": None,
+                "columnNames": action["columns"]
+            }
         else:
             raise ValueError(f"不支持的操作类型: {action_type}")
     
+    def add_remove_columns(self, name: str, parent_id: str, columns: List[str]) -> str:
+        """
+        添加"移除列"操作
+        
+        Args:
+            name: 步骤名称
+            parent_id: 上游节点 ID
+            columns: 要移除的列名列表
+            
+        Returns:
+            str: 节点 ID
+        """
+        return self.add_clean_step(name, parent_id, [{"type": "remove", "columns": columns}])
+    
+    def add_value_filter(
+        self,
+        name: str,
+        parent_id: str,
+        field: str,
+        values: List[str],
+        exclude: bool = False
+    ) -> str:
+        """
+        添加值筛选操作（按值保留或排除）
+        
+        Args:
+            name: 步骤名称
+            parent_id: 上游节点 ID
+            field: 要筛选的字段名
+            values: 要保留（或排除）的值列表
+            exclude: 如果为 True，则排除这些值；False 则只保留这些值
+            
+        Returns:
+            str: 节点 ID
+        """
+        node_id = str(uuid.uuid4())
+        filter_node_id = str(uuid.uuid4())
+        self._node_order.append({"id": node_id, "type": "clean"})
+        
+        self.nodes[node_id] = {
+            "nodeType": ".v1.Container",
+            "name": name,
+            "id": node_id,
+            "baseType": "container",
+            "nextNodes": [],
+            "serialize": False,
+            "description": None,
+            "loomContainer": {
+                "parameters": {"parameters": {}},
+                "initialNodes": [filter_node_id],
+                "nodes": {
+                    filter_node_id: {
+                        "nodeType": ".v1.ValueFilter",
+                        "name": f"{'排除' if exclude else '只保留'} {field}:{values[0]}",
+                        "id": filter_node_id,
+                        "baseType": "transform",
+                        "nextNodes": [],
+                        "serialize": False,
+                        "description": None,
+                        "exclude": exclude,
+                        "values": {field: [str(v) for v in values]}
+                    }
+                },
+                "connections": {},
+                "dataConnections": {},
+                "connectionIds": [],
+                "dataConnectionIds": [],
+                "nodeProperties": {},
+                "extensibility": None
+            },
+            "namespacesToInput": {"Default": {"nodeId": filter_node_id, "namespace": "Default"}},
+            "namespacesToOutput": {"Default": {"nodeId": filter_node_id, "namespace": "Default"}},
+            "providedParameters": None
+        }
+        
+        self.nodes[parent_id]["nextNodes"].append({
+            "namespace": "Default",
+            "nextNodeId": node_id,
+            "nextNamespace": "Default"
+        })
+        return node_id
+
     def add_keep_only(self, name: str, parent_id: str, columns: List[str]) -> str:
         """
         添加"只保留列"操作（快捷方法）

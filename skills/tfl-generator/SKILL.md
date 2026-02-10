@@ -86,8 +86,10 @@ builder = TFLBuilder(flow_name="流程名", config=my_config)
 | `add_join(name, left_id, right_id, left_col, right_col, join_type)` | 联接参数 | 添加联接 |
 | `add_clean_step(name, parent_id, actions)` | 步骤名, 上游ID, 操作列表 | 添加清理步骤 |
 | `add_keep_only(name, parent_id, columns)` | 步骤名, 上游ID, 列名列表 | 只保留指定列 |
+| `add_remove_columns(name, parent_id, columns)` | 步骤名, 上游ID, 列名列表 | 移除指定列 |
 | `add_rename(parent_id, renames)` | 上游ID, 重命名映射 | 重命名列 |
-| `add_filter(name, parent_id, expression)` | 步骤名, 上游ID, 筛选表达式 | 添加筛选器 |
+| `add_filter(name, parent_id, expression)` | 步骤名, 上游ID, 筛选表达式 | 表达式筛选 |
+| `add_value_filter(name, parent_id, field, values, exclude)` | 筛选参数 | 按值筛选 |
 | `add_aggregate(name, parent_id, group_by, aggregations)` | 聚合参数 | 添加聚合步骤 |
 | `add_output_server(name, parent_id, datasource_name, project_name, server_url)` | 输出参数 | 添加服务器输出 |
 | `build()` | 无 | 返回 (flow, display, meta) |
