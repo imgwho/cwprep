@@ -1,0 +1,1129 @@
+{
+  "parameters": {
+    "parameters": {}
+  },
+  "initialNodes": [
+    "673bb633-eb35-48d1-9d02-2ce76b7e215b",
+    "e530fcad-aeea-4998-a61e-0bf1f1e1a223",
+    "31d12ccd-7ad2-4db6-82b2-22d88e2022b2"
+  ],
+  "nodes": {
+    "039599d9-5809-4cad-b310-42a3052f5138": {
+      "nodeType": ".v2018_2_3.SuperAggregate",
+      "name": "聚合 1",
+      "id": "039599d9-5809-4cad-b310-42a3052f5138",
+      "baseType": "superNode",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "65333d89-8ca5-41d8-b7b3-fac5c68713af",
+          "nextNamespace": "Right"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "beforeActionAnnotations": [],
+      "afterActionAnnotations": [],
+      "actionNode": {
+        "nodeType": ".v1.Aggregate",
+        "name": "聚合 1",
+        "id": "4ff64bbb-918f-4406-b2ab-9c0fb9bea2a4",
+        "baseType": "transform",
+        "nextNodes": [],
+        "serialize": false,
+        "description": null,
+        "groupByFields": [
+          {
+            "columnName": "filialeid",
+            "function": "GroupBy",
+            "newColumnName": null,
+            "specialFieldType": null
+          },
+          {
+            "columnName": "filialename",
+            "function": "GroupBy",
+            "newColumnName": null,
+            "specialFieldType": null
+          }
+        ],
+        "aggregateFields": []
+      }
+    },
+    "673bb633-eb35-48d1-9d02-2ce76b7e215b": {
+      "nodeType": ".v1.LoadSql",
+      "name": "e_admin",
+      "id": "673bb633-eb35-48d1-9d02-2ce76b7e215b",
+      "baseType": "input",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "96c08ba8-6577-4fd8-a86d-480ed64cd9b2",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "connectionId": "b688372d-1ab9-414f-9e5b-e213bfb55643",
+      "connectionAttributes": {
+        "dbname": "voxadmin"
+      },
+      "fields": [
+        {
+          "name": "id",
+          "type": "real",
+          "collation": null,
+          "caption": "",
+          "ordinal": 1,
+          "isGenerated": false
+        },
+        {
+          "name": "gid",
+          "type": "real",
+          "collation": null,
+          "caption": "",
+          "ordinal": 2,
+          "isGenerated": false
+        },
+        {
+          "name": "bid",
+          "type": "real",
+          "collation": null,
+          "caption": "",
+          "ordinal": 3,
+          "isGenerated": false
+        },
+        {
+          "name": "oid",
+          "type": "real",
+          "collation": null,
+          "caption": "",
+          "ordinal": 4,
+          "isGenerated": false
+        },
+        {
+          "name": "auth",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 5,
+          "isGenerated": false
+        },
+        {
+          "name": "username",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 6,
+          "isGenerated": false
+        },
+        {
+          "name": "nickname",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 7,
+          "isGenerated": false
+        },
+        {
+          "name": "password",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 8,
+          "isGenerated": false
+        },
+        {
+          "name": "salt",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 9,
+          "isGenerated": false
+        },
+        {
+          "name": "avatar",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 10,
+          "isGenerated": false
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 11,
+          "isGenerated": false
+        },
+        {
+          "name": "mobile",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 12,
+          "isGenerated": false
+        },
+        {
+          "name": "loginfailure",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 13,
+          "isGenerated": false
+        },
+        {
+          "name": "logintime",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 14,
+          "isGenerated": false
+        },
+        {
+          "name": "createtime",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 15,
+          "isGenerated": false
+        },
+        {
+          "name": "updatetime",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 16,
+          "isGenerated": false
+        },
+        {
+          "name": "token",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 17,
+          "isGenerated": false
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 18,
+          "isGenerated": false
+        },
+        {
+          "name": "check",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 19,
+          "isGenerated": false
+        },
+        {
+          "name": "position",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 20,
+          "isGenerated": false
+        },
+        {
+          "name": "notify",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 21,
+          "isGenerated": false
+        },
+        {
+          "name": "number",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 22,
+          "isGenerated": false
+        },
+        {
+          "name": "classid",
+          "type": "real",
+          "collation": null,
+          "caption": "",
+          "ordinal": 23,
+          "isGenerated": false
+        },
+        {
+          "name": "classname",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 24,
+          "isGenerated": false
+        },
+        {
+          "name": "groupid",
+          "type": "real",
+          "collation": null,
+          "caption": "",
+          "ordinal": 25,
+          "isGenerated": false
+        },
+        {
+          "name": "groupname",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 26,
+          "isGenerated": false
+        },
+        {
+          "name": "departmentid",
+          "type": "real",
+          "collation": null,
+          "caption": "",
+          "ordinal": 27,
+          "isGenerated": false
+        },
+        {
+          "name": "departmentname",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 28,
+          "isGenerated": false
+        },
+        {
+          "name": "filialeid",
+          "type": "real",
+          "collation": null,
+          "caption": "",
+          "ordinal": 29,
+          "isGenerated": false
+        },
+        {
+          "name": "filialename",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 30,
+          "isGenerated": false
+        },
+        {
+          "name": "lock",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 31,
+          "isGenerated": false
+        }
+      ],
+      "actions": [],
+      "debugModeRowLimit": 393216,
+      "originalDataTypes": {},
+      "randomSampling": null,
+      "updateTimestamp": 1754377981299,
+      "restrictedFields": {},
+      "userRenamedFields": {},
+      "selectedFields": null,
+      "samplingType": null,
+      "groupByFields": null,
+      "filters": [],
+      "relation": {
+        "type": "table",
+        "table": "[e_admin]"
+      }
+    },
+    "46240063-aa4f-44c2-bb7c-89b910ddd1f9": {
+      "nodeType": ".v2018_2_3.SuperJoin",
+      "name": "订单+员工",
+      "id": "46240063-aa4f-44c2-bb7c-89b910ddd1f9",
+      "baseType": "superNode",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "343e1cf2-fc8e-45f2-8be3-ab5e170f4684",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": "取公司名",
+      "beforeActionAnnotations": [
+        {
+          "namespace": "Right",
+          "annotationNode": {
+            "nodeType": ".v1.RenameColumn",
+            "columnName": "组织表name",
+            "rename": "分公司",
+            "name": "将 组织表name 重命名为 分公司 1",
+            "id": "fd0d3389-e2fb-4a29-91af-e935e9481ae0",
+            "baseType": "transform",
+            "nextNodes": [],
+            "serialize": false,
+            "description": null
+          }
+        },
+        {
+          "namespace": "Left",
+          "annotationNode": {
+            "nodeType": ".v1.RenameColumn",
+            "columnName": "下单日期",
+            "rename": "日期",
+            "name": "将 下单日期 重命名为 日期 1",
+            "id": "c0956788-933c-4284-916f-105e4c6a8160",
+            "baseType": "transform",
+            "nextNodes": [],
+            "serialize": false,
+            "description": null
+          }
+        }
+      ],
+      "afterActionAnnotations": [
+        {
+          "namespace": "Default",
+          "annotationNode": {
+            "nodeType": ".v1.FilterOperation",
+            "name": "筛选器",
+            "id": "5bf7799b-b96d-48e9-b8aa-73e2eddcba5c",
+            "baseType": "transform",
+            "nextNodes": [],
+            "serialize": false,
+            "description": null,
+            "filterExpression": "(\n    NOT (\n        [分公司] = \"贵州犇富分公司\" OR\n        [分公司] = \"南宁分公司\" OR\n        [分公司] = \"四川创泽团队\" OR\n        [分公司] = \"总部定制酒招商\" OR\n        [分公司] = \"总部行政\" OR\n        [分公司] = \"总部招商\" OR\n        [分公司] = \"贵阳旅游项目\" OR\n        [分公司] = \"旅游公司\" OR\n        [分公司] = \"深圳新媒体\" OR\n        [分公司] = \"招商部\" OR\n        [分公司] = \"总部私域团队\" OR\n        [分公司] = \"总部外呼业务部\"\n    )\n)\nOR ISNULL([分公司])"
+          }
+        }
+      ],
+      "actionNode": {
+        "nodeType": ".v1.SimpleJoin",
+        "name": "联接 3",
+        "id": "a82d5bdb-b05f-4bc0-b638-e4882954d6d8",
+        "baseType": "transform",
+        "nextNodes": [],
+        "serialize": false,
+        "description": null,
+        "conditions": [
+          {
+            "leftExpression": "[公司ID]",
+            "rightExpression": "[filialeid]",
+            "comparator": "=="
+          }
+        ],
+        "joinType": "inner"
+      }
+    },
+    "96c08ba8-6577-4fd8-a86d-480ed64cd9b2": {
+      "nodeType": ".v1.Container",
+      "name": "清理 6",
+      "id": "96c08ba8-6577-4fd8-a86d-480ed64cd9b2",
+      "baseType": "container",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "039599d9-5809-4cad-b310-42a3052f5138",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "loomContainer": {
+        "parameters": {
+          "parameters": {}
+        },
+        "initialNodes": [
+          "162b24ef-95dd-4212-a082-a34e27846f2f"
+        ],
+        "nodes": {
+          "162b24ef-95dd-4212-a082-a34e27846f2f": {
+            "nodeType": ".v2019_2_2.KeepOnlyColumns",
+            "name": "只保留 filialeid + 另外 1 个 1",
+            "id": "162b24ef-95dd-4212-a082-a34e27846f2f",
+            "baseType": "transform",
+            "nextNodes": [],
+            "serialize": false,
+            "description": null,
+            "columnNames": [
+              "filialeid",
+              "filialename"
+            ]
+          }
+        },
+        "connections": {},
+        "dataConnections": {},
+        "connectionIds": [],
+        "dataConnectionIds": [],
+        "nodeProperties": {},
+        "extensibility": null
+      },
+      "namespacesToInput": {
+        "Default": {
+          "nodeId": "162b24ef-95dd-4212-a082-a34e27846f2f",
+          "namespace": "Default"
+        }
+      },
+      "namespacesToOutput": {
+        "Default": {
+          "nodeId": "162b24ef-95dd-4212-a082-a34e27846f2f",
+          "namespace": "Default"
+        }
+      },
+      "providedParameters": null
+    },
+    "d80d33ce-5749-4cdc-bfaf-03de687a1236": {
+      "nodeType": ".v1.Container",
+      "name": "清理 3",
+      "id": "d80d33ce-5749-4cdc-bfaf-03de687a1236",
+      "baseType": "container",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "65333d89-8ca5-41d8-b7b3-fac5c68713af",
+          "nextNamespace": "Left"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "loomContainer": {
+        "parameters": {
+          "parameters": {}
+        },
+        "initialNodes": [
+          "142f6756-4f16-40eb-9548-55fff7783157"
+        ],
+        "nodes": {
+          "142f6756-4f16-40eb-9548-55fff7783157": {
+            "nodeType": ".v2019_2_2.KeepOnlyColumns",
+            "name": "只保留 id + 另外 2 个 1",
+            "id": "142f6756-4f16-40eb-9548-55fff7783157",
+            "baseType": "transform",
+            "nextNodes": [
+              {
+                "namespace": "Default",
+                "nextNodeId": "c8c7aa53-e718-492d-a8fa-167f4a792fb9",
+                "nextNamespace": "Default"
+              }
+            ],
+            "serialize": false,
+            "description": null,
+            "columnNames": [
+              "id",
+              "name",
+              "attr"
+            ]
+          },
+          "d8bf2f46-9b74-4e53-b0a7-593bf72bc0f5": {
+            "nodeType": ".v1.RenameColumn",
+            "columnName": "name",
+            "rename": "组织表name",
+            "name": "将 name 重命名为 组织表name 1",
+            "id": "d8bf2f46-9b74-4e53-b0a7-593bf72bc0f5",
+            "baseType": "transform",
+            "nextNodes": [
+              {
+                "namespace": "Default",
+                "nextNodeId": "53c1382f-471b-4d40-848b-5c9f082a5a5a",
+                "nextNamespace": "Default"
+              }
+            ],
+            "serialize": false,
+            "description": null
+          },
+          "c8c7aa53-e718-492d-a8fa-167f4a792fb9": {
+            "nodeType": ".v1.RenameColumn",
+            "columnName": "id",
+            "rename": "分公司id",
+            "name": "将 id 重命名为 分公司id 1",
+            "id": "c8c7aa53-e718-492d-a8fa-167f4a792fb9",
+            "baseType": "transform",
+            "nextNodes": [
+              {
+                "namespace": "Default",
+                "nextNodeId": "d8bf2f46-9b74-4e53-b0a7-593bf72bc0f5",
+                "nextNamespace": "Default"
+              }
+            ],
+            "serialize": false,
+            "description": null
+          },
+          "53c1382f-471b-4d40-848b-5c9f082a5a5a": {
+            "nodeType": ".v1.RenameColumn",
+            "columnName": "分公司id",
+            "rename": "组织表id",
+            "name": "将 分公司id 重命名为 组织表id 1",
+            "id": "53c1382f-471b-4d40-848b-5c9f082a5a5a",
+            "baseType": "transform",
+            "nextNodes": [],
+            "serialize": false,
+            "description": null
+          }
+        },
+        "connections": {},
+        "dataConnections": {},
+        "connectionIds": [],
+        "dataConnectionIds": [],
+        "nodeProperties": {},
+        "extensibility": null
+      },
+      "namespacesToInput": {
+        "Default": {
+          "nodeId": "142f6756-4f16-40eb-9548-55fff7783157",
+          "namespace": "Default"
+        }
+      },
+      "namespacesToOutput": {
+        "Default": {
+          "nodeId": "53c1382f-471b-4d40-848b-5c9f082a5a5a",
+          "namespace": "Default"
+        }
+      },
+      "providedParameters": null
+    },
+    "65333d89-8ca5-41d8-b7b3-fac5c68713af": {
+      "nodeType": ".v2018_2_3.SuperJoin",
+      "name": "联接 2",
+      "id": "65333d89-8ca5-41d8-b7b3-fac5c68713af",
+      "baseType": "superNode",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "46240063-aa4f-44c2-bb7c-89b910ddd1f9",
+          "nextNamespace": "Right"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "beforeActionAnnotations": [],
+      "afterActionAnnotations": [],
+      "actionNode": {
+        "nodeType": ".v1.SimpleJoin",
+        "name": "联接 2",
+        "id": "0a1fe84a-8ece-4bbd-93ab-5f8abd3c56c8",
+        "baseType": "transform",
+        "nextNodes": [],
+        "serialize": false,
+        "description": null,
+        "conditions": [
+          {
+            "leftExpression": "[组织表name]",
+            "rightExpression": "[filialename]",
+            "comparator": "=="
+          }
+        ],
+        "joinType": "inner"
+      }
+    },
+    "e530fcad-aeea-4998-a61e-0bf1f1e1a223": {
+      "nodeType": ".v1.LoadSql",
+      "name": "e_product_order_list",
+      "id": "e530fcad-aeea-4998-a61e-0bf1f1e1a223",
+      "baseType": "input",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "46240063-aa4f-44c2-bb7c-89b910ddd1f9",
+          "nextNamespace": "Left"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "connectionId": "b688372d-1ab9-414f-9e5b-e213bfb55643",
+      "connectionAttributes": {
+        "dbname": "voxadmin"
+      },
+      "fields": [
+        {
+          "name": "客户ID",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 1,
+          "isGenerated": false
+        },
+        {
+          "name": "订单oid",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 2,
+          "isGenerated": false
+        },
+        {
+          "name": "加微状态",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 3,
+          "isGenerated": false
+        },
+        {
+          "name": "订单状态",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 4,
+          "isGenerated": false
+        },
+        {
+          "name": "公司ID",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 5,
+          "isGenerated": false
+        },
+        {
+          "name": "订单ID",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 6,
+          "isGenerated": false
+        },
+        {
+          "name": "员工ID",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 7,
+          "isGenerated": false
+        },
+        {
+          "name": "用户ID",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 8,
+          "isGenerated": false
+        },
+        {
+          "name": "套餐名",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 9,
+          "isGenerated": false
+        },
+        {
+          "name": "下单时间",
+          "type": "datetime",
+          "collation": null,
+          "caption": "",
+          "ordinal": 10,
+          "isGenerated": false
+        },
+        {
+          "name": "员工编码",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 11,
+          "isGenerated": false
+        },
+        {
+          "name": "下单日期",
+          "type": "date",
+          "collation": null,
+          "caption": "",
+          "ordinal": 12,
+          "isGenerated": false
+        },
+        {
+          "name": "订单号",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 13,
+          "isGenerated": false
+        },
+        {
+          "name": "订单营业额",
+          "type": "real",
+          "collation": null,
+          "caption": "",
+          "ordinal": 14,
+          "isGenerated": false
+        },
+        {
+          "name": "province",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 15,
+          "isGenerated": false
+        },
+        {
+          "name": "city",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 16,
+          "isGenerated": false
+        },
+        {
+          "name": "area",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 17,
+          "isGenerated": false
+        }
+      ],
+      "actions": [],
+      "debugModeRowLimit": null,
+      "originalDataTypes": {},
+      "randomSampling": null,
+      "updateTimestamp": 1754377982261,
+      "restrictedFields": {},
+      "userRenamedFields": {},
+      "selectedFields": null,
+      "samplingType": null,
+      "groupByFields": null,
+      "filters": [],
+      "relation": {
+        "type": "query",
+        "query": "SELECT o.user_id                                                                AS 客户ID,\n       o.oid                                                                    AS 订单oid,\n       o.wechat_add                                                             AS 加微状态,\n       o.status                                                                 AS 订单状态,\n       o.company_id                                                             AS 公司ID,\n       o.id                                                                     AS 订单ID,\n       o.acc                                                                    AS 员工ID,\n       o.user_id                                                                AS 用户ID,\n       o.combo                                                                  AS 套餐名,\n       FROM_UNIXTIME(o.check_time)                                              AS 下单时间,\n       o.acc_number                                                             AS 员工编码,\n       DATE(FROM_UNIXTIME(o.check_time))                                        AS 下单日期,\n       o.order_sn                                                               AS 订单号,\n       o.total_price / 1000000 + o.raise_price / 1000000 - o.discount / 1000000 AS 订单营业额,\n       o.province,\n       o.city,\n       o.area\nFROM e_product_order_list o\nWHERE o.check_time >>= UNIX_TIMESTAMP(DATE_SUB(CURDATE(), INTERVAL 2 YEAR))\n  AND trash = 0\n  AND is_self_buy = 0\n  AND status in (2,3,4,5,6,7,8,10,11,14,15,16,17)"
+      }
+    },
+    "31d12ccd-7ad2-4db6-82b2-22d88e2022b2": {
+      "nodeType": ".v1.LoadSql",
+      "name": "e_account_organization",
+      "id": "31d12ccd-7ad2-4db6-82b2-22d88e2022b2",
+      "baseType": "input",
+      "nextNodes": [
+        {
+          "namespace": "Default",
+          "nextNodeId": "d80d33ce-5749-4cdc-bfaf-03de687a1236",
+          "nextNamespace": "Default"
+        }
+      ],
+      "serialize": false,
+      "description": null,
+      "connectionId": "b688372d-1ab9-414f-9e5b-e213bfb55643",
+      "connectionAttributes": {
+        "dbname": "voxadmin"
+      },
+      "fields": [
+        {
+          "name": "id",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 1,
+          "isGenerated": false
+        },
+        {
+          "name": "enable",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 2,
+          "isGenerated": false
+        },
+        {
+          "name": "pid",
+          "type": "real",
+          "collation": null,
+          "caption": "",
+          "ordinal": 3,
+          "isGenerated": false
+        },
+        {
+          "name": "gid",
+          "type": "real",
+          "collation": null,
+          "caption": "",
+          "ordinal": 4,
+          "isGenerated": false
+        },
+        {
+          "name": "bid",
+          "type": "real",
+          "collation": null,
+          "caption": "",
+          "ordinal": 5,
+          "isGenerated": false
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 6,
+          "isGenerated": false
+        },
+        {
+          "name": "tele",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 7,
+          "isGenerated": false
+        },
+        {
+          "name": "father",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 8,
+          "isGenerated": false
+        },
+        {
+          "name": "child",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 9,
+          "isGenerated": false
+        },
+        {
+          "name": "special",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 10,
+          "isGenerated": false
+        },
+        {
+          "name": "serial",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 11,
+          "isGenerated": false
+        },
+        {
+          "name": "seal",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 12,
+          "isGenerated": false
+        },
+        {
+          "name": "remark",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 13,
+          "isGenerated": false
+        },
+        {
+          "name": "nature",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 14,
+          "isGenerated": false
+        },
+        {
+          "name": "level",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 15,
+          "isGenerated": false
+        },
+        {
+          "name": "attr",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 16,
+          "isGenerated": false
+        },
+        {
+          "name": "createtime",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 17,
+          "isGenerated": false
+        },
+        {
+          "name": "updatetime",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 18,
+          "isGenerated": false
+        },
+        {
+          "name": "view_info_cfg",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 19,
+          "isGenerated": false
+        },
+        {
+          "name": "pay_type",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 20,
+          "isGenerated": false
+        },
+        {
+          "name": "attr2",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 21,
+          "isGenerated": false
+        },
+        {
+          "name": "data_type",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 22,
+          "isGenerated": false
+        },
+        {
+          "name": "city",
+          "type": "string",
+          "collation": "LROOT_S2",
+          "caption": "",
+          "ordinal": 23,
+          "isGenerated": false
+        },
+        {
+          "name": "run_status",
+          "type": "integer",
+          "collation": null,
+          "caption": "",
+          "ordinal": 24,
+          "isGenerated": false
+        }
+      ],
+      "actions": [],
+      "debugModeRowLimit": 393216,
+      "originalDataTypes": {},
+      "randomSampling": null,
+      "updateTimestamp": 1754377982475,
+      "restrictedFields": {},
+      "userRenamedFields": {},
+      "selectedFields": null,
+      "samplingType": null,
+      "groupByFields": null,
+      "filters": [],
+      "relation": {
+        "type": "table",
+        "table": "[e_account_organization]"
+      }
+    },
+    "343e1cf2-fc8e-45f2-8be3-ab5e170f4684": {
+      "nodeType": ".v1.PublishExtract",
+      "name": "dataflow 18.客户价值",
+      "id": "343e1cf2-fc8e-45f2-8be3-ab5e170f4684",
+      "baseType": "output",
+      "nextNodes": [],
+      "serialize": false,
+      "description": null,
+      "projectName": "数据源",
+      "projectLuid": "7fa01ebc-72f4-4fd0-a27f-f8ac1e30ac20",
+      "datasourceName": "data 18.客户价值",
+      "datasourceDescription": "",
+      "serverUrl": "http://win-picvs30bivi"
+    }
+  },
+  "connections": {
+    "b688372d-1ab9-414f-9e5b-e213bfb55643": {
+      "connectionType": ".v1.SqlConnection",
+      "id": "b688372d-1ab9-414f-9e5b-e213bfb55643",
+      "name": "rm-uf661w842h18w326nvo.mysql.rds.aliyuncs.com",
+      "isPackaged": false,
+      "connectionAttributes": {
+        "sslmode": "",
+        "odbc-connect-string-extras": "",
+        "server": "rm-uf661w842h18w326nvo.mysql.rds.aliyuncs.com",
+        "prep-protocol-role": ":prep-protocol-reader",
+        ":flow-name": "流程 1",
+        "odbc-dbms-name": "",
+        "workgroup-auth-mode": "",
+        "use-allowlist": "false",
+        "site": "1",
+        "dbname": "",
+        "port": "3306",
+        ":protocol-customizations": "",
+        "source-charset": "",
+        "sslcert": "",
+        "one-time-sql": "",
+        "odbc-native-protocol": "",
+        "class": "mysql",
+        "expected-driver-version": "",
+        "authentication": "",
+        "username": "link_BI"
+      }
+    }
+  },
+  "dataConnections": {},
+  "connectionIds": [
+    "b688372d-1ab9-414f-9e5b-e213bfb55643"
+  ],
+  "dataConnectionIds": [],
+  "nodeProperties": {
+    "039599d9-5809-4cad-b310-42a3052f5138": {
+      "com.tableau.loom.doc.fileformat.v2019_1_3.PrimaryKey": {
+        "nodePropertyType": ".v2019_1_3.PrimaryKey",
+        "empty": true,
+        "fieldNames": []
+      }
+    },
+    "673bb633-eb35-48d1-9d02-2ce76b7e215b": {
+      "com.tableau.loom.doc.fileformat.v2019_1_3.PrimaryKey": {
+        "nodePropertyType": ".v2019_1_3.PrimaryKey",
+        "empty": false,
+        "fieldNames": [
+          "id"
+        ]
+      }
+    },
+    "46240063-aa4f-44c2-bb7c-89b910ddd1f9": {
+      "com.tableau.loom.doc.fileformat.v2019_1_3.PrimaryKey": {
+        "nodePropertyType": ".v2019_1_3.PrimaryKey",
+        "empty": true,
+        "fieldNames": []
+      }
+    },
+    "96c08ba8-6577-4fd8-a86d-480ed64cd9b2": {
+      "com.tableau.loom.doc.fileformat.v2019_1_3.PrimaryKey": {
+        "nodePropertyType": ".v2019_1_3.PrimaryKey",
+        "empty": false,
+        "fieldNames": [
+          "id"
+        ]
+      }
+    },
+    "d80d33ce-5749-4cdc-bfaf-03de687a1236": {
+      "com.tableau.loom.doc.fileformat.v2019_1_3.PrimaryKey": {
+        "nodePropertyType": ".v2019_1_3.PrimaryKey",
+        "empty": false,
+        "fieldNames": [
+          "id"
+        ]
+      }
+    },
+    "65333d89-8ca5-41d8-b7b3-fac5c68713af": {
+      "com.tableau.loom.doc.fileformat.v2019_1_3.PrimaryKey": {
+        "nodePropertyType": ".v2019_1_3.PrimaryKey",
+        "empty": true,
+        "fieldNames": []
+      }
+    },
+    "e530fcad-aeea-4998-a61e-0bf1f1e1a223": {},
+    "31d12ccd-7ad2-4db6-82b2-22d88e2022b2": {
+      "com.tableau.loom.doc.fileformat.v2019_1_3.PrimaryKey": {
+        "nodePropertyType": ".v2019_1_3.PrimaryKey",
+        "empty": false,
+        "fieldNames": [
+          "id"
+        ]
+      }
+    }
+  },
+  "extensibility": {},
+  "selection": [],
+  "majorVersion": 1,
+  "minorVersion": 4,
+  "documentId": "b2879423-2bfb-4c2f-b6c0-4c2c566f8b23",
+  "obfuscatorId": "1c77a93d-f670-4468-9d7b-047b11586f80"
+}
