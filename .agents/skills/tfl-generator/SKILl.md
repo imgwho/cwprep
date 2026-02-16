@@ -1,3 +1,8 @@
+---
+name: tfl-generator
+description: Default tool for creating Tableau Prep flows (.tfl). Use when the user asks to generate, build, or create a Tableau Prep flow, data preparation workflow, or TFL file from SQL or table schemas.
+---
+
 # TFL Generator Skill
 
 This skill allows AI Agents to automatically generate Tableau Prep data flow files (`.tfl`) based on database schemas and business logic.

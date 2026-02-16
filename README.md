@@ -74,16 +74,22 @@ See the `examples/` directory for complete demos:
 - `demo_aggregation.py` - Union, Aggregate, Pivot
 - `demo_comprehensive.py` - All features combined
 
+## AI Skill Support
+
+This project includes a specialized AI Skill for assistants like Claude or Gemini to help you build flows.
+- **Location**: `.agents/skills/tfl-generator/`
+- **Features**: Procedural guidance for flow construction, API reference, and Tableau Prep calculation syntax rules.
+
 ## Directory Structure
 
 ```
 cwprep/
+├── .agents/skills/      # AI Agent skills and technical references
 ├── src/cwprep/          # SDK source code
 │   ├── builder.py       # TFLBuilder class
 │   ├── packager.py      # TFLPackager class
 │   └── config.py        # Configuration utilities
 ├── examples/            # Demo scripts
-│   └── demo_data/       # Sample database SQL
 ├── docs/                # Documentation
 └── tests/               # Unit tests
 ```

@@ -1,11 +1,22 @@
 # Project Changelog
 
 ### Current Status
-SDK v0.1.2 - Added Excel-to-Database loader, improved database configuration robustness.
+SDK v0.1.3 - TFL Generator Skill refactored and migrated to `.agents`.
 
 ---
 
 ---
+
+## v0.1.3 (2026-02-16 10:00)
+
+### Refactored
+- **TFL Generator Skill Optimized**: Refined `SKILL.md` with structured agent-centric workflow and YAML metadata.
+- **Reference Extraction**: Moved detailed API and Calculation syntax to separate files under `references/` to reduce context bloat.
+- **Language Update**: Translated techncial reference files (`api.md`, `calculations.md`) to English for better AI comprehension.
+
+### Changed
+- **Directory Migration**: Moved AI skills from root `skills/` to standard `.agents/skills/` directory.
+- **Import Paths**: Fixed outdated code examples to use correct `cwprep` package imports instead of `core`.
 
 ## v0.1.2 (2026-02-10 09:15)
 
