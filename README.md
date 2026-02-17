@@ -76,7 +76,7 @@ See the `examples/` directory for complete demos:
 
 ## MCP Server
 
-cwprep includes a built-in [Model Context Protocol](https://modelcontextprotocol.io/) server, enabling AI clients (Claude Desktop, Cursor, etc.) to generate TFL files directly.
+cwprep includes a built-in [Model Context Protocol](https://modelcontextprotocol.io/) server, enabling AI clients (Claude Desktop, Cursor, Gemini CLI, etc.) to generate TFL files directly.
 
 ### Installation
 
@@ -94,7 +94,9 @@ cwprep-mcp
 cwprep-mcp --transport streamable-http --port 8000
 ```
 
-### Claude Desktop Configuration
+### MCP Server Configuration
+
+Example config for Claude Desktop:
 
 Add to your Claude Desktop config (`claude_desktop_config.json`):
 
