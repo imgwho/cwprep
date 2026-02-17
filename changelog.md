@@ -5,6 +5,11 @@ SDK v0.1.3 - TFL Generator Skill refactored and migrated to `.agents`.
 
 ---
 
+## v0.2.2 (2026-02-17)
+
+### Documentation
+- **MCP Configuration**: Updated README to recommend `python -m cwprep.mcp_server` for Claude Desktop config (fixes PATH issues on Windows).
+
 ## v0.2.1 (2026-02-17)
 
 ### Fixed
