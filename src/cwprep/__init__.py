@@ -26,7 +26,7 @@ from .config import (
     DEFAULT_CONFIG
 )
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __author__ = "cooper wenhua"
 __all__ = [
     "TFLBuilder", 

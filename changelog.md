@@ -5,6 +5,11 @@ SDK v0.1.3 - TFL Generator Skill refactored and migrated to `.agents`.
 
 ---
 
+## v0.2.1 (2026-02-17)
+
+### Fixed
+- **Dependency Conflict**: Pinned `cffi<2.0.0` to resolve incompatibility with `tableauhyperapi` when installing `cwprep[mcp]`.
+
 ## v0.2.0 (2026-02-17)
 
 ### Added

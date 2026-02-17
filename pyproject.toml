@@ -40,12 +40,13 @@ dependencies = []
 [project.optional-dependencies]
 yaml = ["pyyaml>=6.0"]
 dotenv = ["python-dotenv>=1.0"]
-mcp = ["mcp>=1.25,<2"]
-all = ["pyyaml>=6.0", "python-dotenv>=1.0", "mcp>=1.25,<2"]
+mcp = ["mcp>=1.25,<2", "cffi>=1.0.0,<2.0.0"]
+all = ["pyyaml>=6.0", "python-dotenv>=1.0", "mcp>=1.25,<2", "cffi>=1.0.0,<2.0.0"]
 dev = [
     "pyyaml>=6.0",
     "python-dotenv>=1.0",
     "mcp>=1.25,<2",
+    "cffi>=1.0.0,<2.0.0",
     "pytest>=7.0",
     "build>=1.0",
 ]
