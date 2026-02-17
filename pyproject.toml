@@ -40,13 +40,18 @@ dependencies = []
 [project.optional-dependencies]
 yaml = ["pyyaml>=6.0"]
 dotenv = ["python-dotenv>=1.0"]
-all = ["pyyaml>=6.0", "python-dotenv>=1.0"]
+mcp = ["mcp>=1.25,<2"]
+all = ["pyyaml>=6.0", "python-dotenv>=1.0", "mcp>=1.25,<2"]
 dev = [
     "pyyaml>=6.0",
     "python-dotenv>=1.0",
+    "mcp>=1.25,<2",
     "pytest>=7.0",
     "build>=1.0",
 ]
+
+[project.scripts]
+cwprep-mcp = "cwprep.mcp_server:main"
 
 [project.urls]
 Homepage = "https://github.com/imgwho/cwprep"

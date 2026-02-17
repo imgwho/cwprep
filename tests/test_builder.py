@@ -150,7 +150,7 @@ def test_build_output():
 def test_version():
     """测试版本号"""
     from cwprep import __version__
-    assert __version__ == "0.1.0"
+    assert __version__ == "0.2.0"
 
 
 if __name__ == "__main__":

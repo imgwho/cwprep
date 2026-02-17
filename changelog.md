@@ -5,6 +5,19 @@ SDK v0.1.3 - TFL Generator Skill refactored and migrated to `.agents`.
 
 ---
 
+## v0.2.0 (2026-02-17)
+
+### Added
+- **MCP Server Support**: Integrated Model Context Protocol (MCP) server for AI clients (Claude Desktop, Cursor, Gemini CLI).
+  - **Tools**: `generate_tfl`, `list_supported_operations`, `validate_flow_definition`.
+  - **Resources**: API reference and calculation syntax documentation accessible via MCP.
+  - **Prompts**: `design_data_flow` and `explain_tfl_structure` for interactive assistance.
+  - **Transports**: Supports both `stdio` (local) and `streamable-http` (remote) transports.
+- **CLI Command**: Added `cwprep-mcp` entry point.
+- **Optional Dependency**: Added `mcp` extra (install via `pip install cwprep[mcp]`).
+
+---
+
 ---
 
 ## v0.1.3 (2026-02-16 10:00)

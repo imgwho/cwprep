@@ -74,6 +74,52 @@ See the `examples/` directory for complete demos:
 - `demo_aggregation.py` - Union, Aggregate, Pivot
 - `demo_comprehensive.py` - All features combined
 
+## MCP Server
+
+cwprep includes a built-in [Model Context Protocol](https://modelcontextprotocol.io/) server, enabling AI clients (Claude Desktop, Cursor, etc.) to generate TFL files directly.
+
+### Installation
+
+```bash
+pip install cwprep[mcp]
+```
+
+### Usage
+
+```bash
+# Local (stdio)
+cwprep-mcp
+
+# Remote (Streamable HTTP)
+cwprep-mcp --transport streamable-http --port 8000
+```
+
+### Claude Desktop Configuration
+
+Add to your Claude Desktop config (`claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "cwprep": {
+      "command": "cwprep-mcp"
+    }
+  }
+}
+```
+
+### Available MCP Capabilities
+
+| Type | Name | Description |
+|------|------|-------------|
+| Tool | `generate_tfl` | Generate .tfl file from flow definition |
+| Tool | `list_supported_operations` | List all supported node types |
+| Tool | `validate_flow_definition` | Validate flow definition before generating |
+| Resource | `cwprep://docs/api-reference` | SDK API reference |
+| Resource | `cwprep://docs/calculation-syntax` | Tableau Prep calculation syntax |
+| Prompt | `design_data_flow` | Interactive flow design assistant |
+| Prompt | `explain_tfl_structure` | TFL file structure explanation |
+
 ## AI Skill Support
 
 This project includes a specialized AI Skill for assistants like Claude or Gemini to help you build flows.
@@ -88,7 +134,8 @@ cwprep/
 ├── src/cwprep/          # SDK source code
 │   ├── builder.py       # TFLBuilder class
 │   ├── packager.py      # TFLPackager class
-│   └── config.py        # Configuration utilities
+│   ├── config.py        # Configuration utilities
+│   └── mcp_server.py    # MCP Server (Tools, Resources, Prompts)
 ├── examples/            # Demo scripts
 ├── docs/                # Documentation
 └── tests/               # Unit tests

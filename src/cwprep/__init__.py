@@ -26,7 +26,7 @@ from .config import (
     DEFAULT_CONFIG
 )
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __author__ = "cooper wenhua"
 __all__ = [
     "TFLBuilder", 
@@ -38,3 +38,6 @@ __all__ = [
     "DEFAULT_CONFIG",
     "__version__"
 ]
+
+# MCP Server is available via `cwprep.mcp_server` (requires `pip install cwprep[mcp]`)
+# Usage: cwprep-mcp  or  python -m cwprep.mcp_server
