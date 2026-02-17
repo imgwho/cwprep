@@ -102,7 +102,8 @@ Add to your Claude Desktop config (`claude_desktop_config.json`):
 {
   "mcpServers": {
     "cwprep": {
-      "command": "cwprep-mcp"
+      "command": "python",
+      "args": ["-m", "cwprep.mcp_server"]
     }
   }
 }
