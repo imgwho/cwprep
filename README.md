@@ -78,13 +78,14 @@ See the `examples/` directory for complete demos:
 
 cwprep includes a built-in [Model Context Protocol](https://modelcontextprotocol.io/) server, enabling AI clients (Claude Desktop, Cursor, Gemini CLI, etc.) to generate TFL files directly.
 
-### Installation
+### Prerequisites
 
-```bash
-pip install cwprep[mcp]
-```
+| Method | Requirement |
+|--------|-------------|
+| `uvx` (recommended) | Install [uv](https://docs.astral.sh/uv/getting-started/installation/) — it auto-downloads `cwprep[mcp]` in an isolated env |
+| `pip install` | Python ≥ 3.8 + `pip install cwprep[mcp]` |
 
-### Usage
+### Quick Start
 
 ```bash
 # Local (stdio)
@@ -94,34 +95,144 @@ cwprep-mcp
 cwprep-mcp --transport streamable-http --port 8000
 ```
 
-### MCP Server Configuration
+### Client Configuration
 
-Example config for Claude Desktop:
+All clients below use the **`uvx` method** (recommended). Replace `uvx` with `cwprep-mcp` if you prefer a local `pip install`.
 
-Add to your Claude Desktop config (`claude_desktop_config.json`):
+<details>
+<summary><b>Claude Desktop</b></summary>
+
+Edit config file:
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 
 ```json
 {
   "mcpServers": {
     "cwprep": {
-      "command": "python",
-      "args": ["-m", "cwprep.mcp_server"]
+      "command": "uvx",
+      "args": ["--from", "cwprep[mcp]", "cwprep-mcp"]
     }
   }
 }
 ```
+</details>
+
+<details>
+<summary><b>Cursor</b></summary>
+
+Settings → MCP → Add new MCP server, or edit `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "cwprep": {
+      "command": "uvx",
+      "args": ["--from", "cwprep[mcp]", "cwprep-mcp"]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><b>VS Code (Copilot)</b></summary>
+
+Create `.vscode/mcp.json` in project root:
+
+```json
+{
+  "servers": {
+    "cwprep": {
+      "command": "uvx",
+      "args": ["--from", "cwprep[mcp]", "cwprep-mcp"]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><b>Windsurf (Codeium)</b></summary>
+
+Edit `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "cwprep": {
+      "command": "uvx",
+      "args": ["--from", "cwprep[mcp]", "cwprep-mcp"]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><b>Claude Code (CLI)</b></summary>
+
+```bash
+claude mcp add cwprep -- uvx --from "cwprep[mcp]" cwprep-mcp
+```
+</details>
+
+<details>
+<summary><b>Gemini CLI</b></summary>
+
+Edit `~/.gemini/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "cwprep": {
+      "command": "uvx",
+      "args": ["--from", "cwprep[mcp]", "cwprep-mcp"]
+    }
+  }
+}
+```
+</details>
+
+<details>
+<summary><b>Continue (VS Code / JetBrains)</b></summary>
+
+Edit `~/.continue/config.yaml`:
+
+```yaml
+mcpServers:
+  - name: cwprep
+    command: uvx
+    args:
+      - --from
+      - cwprep[mcp]
+      - cwprep-mcp
+```
+</details>
+
+<details>
+<summary><b>Remote HTTP Mode (any client)</b></summary>
+
+Start the server:
+
+```bash
+cwprep-mcp --transport streamable-http --port 8000
+```
+
+Then configure your client with the endpoint: `http://your-server-ip:8000/mcp`
+</details>
 
 ### Available MCP Capabilities
 
 | Type | Name | Description |
 |------|------|-------------|
-| Tool | `generate_tfl` | Generate .tfl file from flow definition |
-| Tool | `list_supported_operations` | List all supported node types |
-| Tool | `validate_flow_definition` | Validate flow definition before generating |
-| Resource | `cwprep://docs/api-reference` | SDK API reference |
-| Resource | `cwprep://docs/calculation-syntax` | Tableau Prep calculation syntax |
-| Prompt | `design_data_flow` | Interactive flow design assistant |
-| Prompt | `explain_tfl_structure` | TFL file structure explanation |
+| 🔧 Tool | `generate_tfl` | Generate .tfl file from flow definition |
+| 🔧 Tool | `list_supported_operations` | List all supported node types |
+| 🔧 Tool | `validate_flow_definition` | Validate flow definition before generating |
+| 📖 Resource | `cwprep://docs/api-reference` | SDK API reference |
+| 📖 Resource | `cwprep://docs/calculation-syntax` | Tableau Prep calculation syntax |
+| 💬 Prompt | `design_data_flow` | Interactive flow design assistant |
+| 💬 Prompt | `explain_tfl_structure` | TFL file structure explanation |
 
 ## AI Skill Support
 
