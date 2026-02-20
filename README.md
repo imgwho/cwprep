@@ -1,6 +1,9 @@
-# cwprep - Tableau Prep Flow SDK
+# cwprep - Text-to-PrepFlow Engine
 
-A Python SDK for programmatically generating Tableau Prep data flow (.tfl) files. Built through reverse-engineering the TFL JSON structure, enabling flow creation and modification via code without opening the GUI.
+**cwprep** is a Python-based engine that enables **Text-to-PrepFlow** generation. 
+
+By reverse-engineering the `.tfl` JSON structure and providing a built-in MCP (Model Context Protocol) server, cwprep acts as a bridge between LLMs (like Claude, Gemini) and Tableau Prep. You can now generate, modify, and build data cleaning flows simply through natural language conversations or Python scripts, without ever opening the GUI!
+
 
 ## Installation
 
