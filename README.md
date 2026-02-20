@@ -61,6 +61,9 @@ TFLPackager.pack_zip("./output", "./my_flow.tfl")
 | Remove Columns | `add_remove_columns()` | Drop columns |
 | Rename | `add_rename()` | Rename columns |
 | Calculation | `add_calculation()` | Tableau formula fields |
+| Quick Calc | `add_quick_calc()` | Quick clean (lowercase/uppercase/trim/remove) |
+| Change Type | `add_change_type()` | Change column data types |
+| Duplicate Column | `add_duplicate_column()` | Duplicate (copy) a column |
 | Aggregate | `add_aggregate()` | GROUP BY with SUM/AVG/COUNT |
 | Pivot | `add_pivot()` | Rows to columns |
 | Unpivot | `add_unpivot()` | Columns to rows |

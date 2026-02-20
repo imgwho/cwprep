@@ -122,6 +122,86 @@ def test_add_calculation():
     assert calc_id in builder.nodes
 
 
+def test_add_quick_calc():
+    """测试添加快速清理操作"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_connection("localhost", "root", "test_db")
+    input_id = builder.add_input_sql("Orders", "SELECT * FROM orders", conn_id)
+    
+    calc_id = builder.add_quick_calc(
+        name="Lowercase Ship Mode",
+        parent_id=input_id,
+        column_name="ship_mode",
+        calc_type="lowercase"
+    )
+    
+    assert calc_id is not None
+    assert calc_id in builder.nodes
+    container = builder.nodes[calc_id]
+    assert container["nodeType"] == ".v1.Container"
+    # Check inner QuickCalcColumn node
+    inner_nodes = container["loomContainer"]["nodes"]
+    inner_node = list(inner_nodes.values())[0]
+    assert inner_node["nodeType"] == ".v2024_2_0.QuickCalcColumn"
+    assert inner_node["expression"] == "LOWER([ship_mode])"
+    assert inner_node["calcExpressionType"] == "Lowercase"
+
+
+def test_add_change_type():
+    """测试更改列数据类型"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_connection("localhost", "root", "test_db")
+    input_id = builder.add_input_sql("Orders", "SELECT * FROM orders", conn_id)
+    
+    change_id = builder.add_change_type(
+        name="Change Types",
+        parent_id=input_id,
+        fields={"profit": "integer", "quantity": "string"}
+    )
+    
+    assert change_id is not None
+    assert change_id in builder.nodes
+    container = builder.nodes[change_id]
+    inner_nodes = container["loomContainer"]["nodes"]
+    # Should have 2 ChangeColumnType nodes chained
+    assert len(inner_nodes) == 2
+    types_found = set()
+    for n in inner_nodes.values():
+        assert n["nodeType"] == ".v1.ChangeColumnType"
+        for col, info in n["fields"].items():
+            types_found.add((col, info["type"]))
+    assert ("profit", "integer") in types_found
+    assert ("quantity", "string") in types_found
+
+
+def test_add_duplicate_column():
+    """测试复制列"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_connection("localhost", "root", "test_db")
+    input_id = builder.add_input_sql("Orders", "SELECT * FROM orders", conn_id)
+    
+    dup_id = builder.add_duplicate_column(
+        name="Copy row_id",
+        parent_id=input_id,
+        source_column="row_id"
+    )
+    
+    assert dup_id is not None
+    assert dup_id in builder.nodes
+    container = builder.nodes[dup_id]
+    inner_nodes = container["loomContainer"]["nodes"]
+    inner_node = list(inner_nodes.values())[0]
+    assert inner_node["nodeType"] == ".v2019_2_3.DuplicateColumn"
+    assert inner_node["columnName"] == "row_id-1"
+    assert inner_node["expression"] == "[row_id]"
+
+
 def test_build_output():
     """测试构建输出结构"""
     from cwprep import TFLBuilder
@@ -150,7 +230,7 @@ def test_build_output():
 def test_version():
     """测试版本号"""
     from cwprep import __version__
-    assert __version__ == "0.2.0"
+    assert __version__ == "0.3.0"
 
 
 if __name__ == "__main__":

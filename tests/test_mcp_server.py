@@ -204,9 +204,83 @@ class TestListSupportedOperations:
         expected = {
             "input_sql", "input_table", "join", "union", "filter",
             "value_filter", "calculation", "aggregate", "keep_only",
-            "remove_columns", "rename", "pivot", "unpivot", "output_server",
+            "remove_columns", "rename", "pivot", "unpivot",
+            "quick_calc", "change_type", "duplicate_column",
+            "output_server",
         }
         assert types == expected
+
+
+# ── Tests: New node types via MCP ────────────────────────────────────────────
+
+class TestNewNodeTypes:
+    def test_build_flow_with_quick_calc(self, sample_connection):
+        nodes = [
+            {"type": "input_table", "name": "orders", "table": "orders"},
+            {
+                "type": "quick_calc",
+                "name": "lowercase_mode",
+                "parent": "orders",
+                "column_name": "ship_mode",
+                "calc_type": "lowercase",
+            },
+            {
+                "type": "output_server",
+                "name": "output",
+                "parent": "lowercase_mode",
+                "datasource_name": "Test",
+            },
+        ]
+        flow, display, meta, node_map = _build_flow("Test", sample_connection, nodes)
+        assert "lowercase_mode" in node_map
+        assert len(node_map) == 3
+
+    def test_build_flow_with_change_type(self, sample_connection):
+        nodes = [
+            {"type": "input_table", "name": "orders", "table": "orders"},
+            {
+                "type": "change_type",
+                "name": "change_types",
+                "parent": "orders",
+                "fields": {"profit": "integer"},
+            },
+            {
+                "type": "output_server",
+                "name": "output",
+                "parent": "change_types",
+                "datasource_name": "Test",
+            },
+        ]
+        flow, display, meta, node_map = _build_flow("Test", sample_connection, nodes)
+        assert "change_types" in node_map
+
+    def test_build_flow_with_duplicate(self, sample_connection):
+        nodes = [
+            {"type": "input_table", "name": "orders", "table": "orders"},
+            {
+                "type": "duplicate_column",
+                "name": "dup_col",
+                "parent": "orders",
+                "source_column": "row_id",
+            },
+            {
+                "type": "output_server",
+                "name": "output",
+                "parent": "dup_col",
+                "datasource_name": "Test",
+            },
+        ]
+        flow, display, meta, node_map = _build_flow("Test", sample_connection, nodes)
+        assert "dup_col" in node_map
+
+    def test_validate_quick_calc(self, sample_connection):
+        nodes = [
+            {"type": "input_table", "name": "t1", "table": "t"},
+            {"type": "quick_calc", "name": "qc", "parent": "t1", "column_name": "col", "calc_type": "uppercase"},
+            {"type": "output_server", "name": "out", "parent": "qc", "datasource_name": "D"},
+        ]
+        result = json.loads(validate_flow_definition("Test", sample_connection, nodes))
+        assert result["valid"] is True
 
 
 # ── Tests: MCP Server instance ───────────────────────────────────────────────
@@ -222,3 +296,4 @@ class TestMcpServer:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+

@@ -606,6 +606,37 @@ class TFLBuilder:
                 "description": None,
                 "columnNames": action["columns"]
             }
+        elif action_type == "quick_calc":
+            return self._create_quick_calc_node(action, node_id)
+        elif action_type == "change_type":
+            return {
+                "nodeType": ".v1.ChangeColumnType",
+                "fields": {
+                    action["column"]: {
+                        "type": action["target_type"],
+                        "calc": None
+                    }
+                },
+                "name": f"Change {action['column']} to {action['target_type']}",
+                "id": node_id,
+                "baseType": "transform",
+                "nextNodes": [],
+                "serialize": False,
+                "description": None
+            }
+        elif action_type == "duplicate":
+            self.features.add("node.v2019_2_3.DuplicateColumn")
+            return {
+                "nodeType": ".v2019_2_3.DuplicateColumn",
+                "columnName": action["new_column"],
+                "expression": f"[{action['source_column']}]",
+                "name": f"Duplicate {action['source_column']}",
+                "id": node_id,
+                "baseType": "transform",
+                "nextNodes": [],
+                "serialize": False,
+                "description": None
+            }
         else:
             raise ValueError(f"Unsupported action type: {action_type}")
     
@@ -780,6 +811,124 @@ class TFLBuilder:
             "nextNamespace": "Default"
         })
         return node_id
+
+    # QuickCalc expression mapping
+    _QUICK_CALC_MAP = {
+        "lowercase": ("Lowercase", "LOWER([{col}])"),
+        "uppercase": ("Uppercase", "UPPER([{col}])"),
+        "titlecase": ("Titlecase", "PROPER([{col}])"),
+        "trim_spaces": ("TrimSpaces", "REGEXP_REPLACE([{col}], '(^[[:space:]]*|[[:space:]]*$)', '')"),
+        "remove_extra_spaces": ("RemoveExtraSpaces", "TRIM(REGEXP_REPLACE([{col}], '[[:space:]]+', ' '))"),
+        "remove_all_spaces": ("RemoveAllSpaces", "REGEXP_REPLACE([{col}], '[[:space:]]', '')"),
+        "remove_letters": ("RemoveLetters", "REGEXP_REPLACE([{col}], '[[:alpha:]]', '')"),
+        "remove_punctuation": ("RemovePunctuations", "REGEXP_REPLACE([{col}], '[[:punct:]]', '')"),
+    }
+
+    def _create_quick_calc_node(self, action: Dict[str, Any], node_id: str) -> Dict[str, Any]:
+        """Create a QuickCalcColumn node from action dict"""
+        calc_type = action.get("calc_type", "")
+        column = action["column"]
+        if calc_type not in self._QUICK_CALC_MAP:
+            raise ValueError(
+                f"Unsupported quick_calc type: '{calc_type}'. "
+                f"Supported: {sorted(self._QUICK_CALC_MAP.keys())}"
+            )
+        expr_type, expr_template = self._QUICK_CALC_MAP[calc_type]
+        expression = expr_template.format(col=column)
+        self.features.add("node.v2024_2_0.QuickCalcColumn")
+        return {
+            "nodeType": ".v2024_2_0.QuickCalcColumn",
+            "columnName": column,
+            "expression": expression,
+            "calcExpressionType": expr_type,
+            "name": f"Quick Calc {calc_type} {column}",
+            "id": node_id,
+            "baseType": "transform",
+            "nextNodes": [],
+            "serialize": False,
+            "description": None
+        }
+
+    def add_quick_calc(
+        self,
+        name: str,
+        parent_id: str,
+        column_name: str,
+        calc_type: str
+    ) -> str:
+        """
+        Add quick clean operation
+        
+        Args:
+            name: Clean step name
+            parent_id: Upstream node ID
+            column_name: Column to apply the operation on
+            calc_type: Quick calc type, one of:
+                - "lowercase": Convert to lowercase
+                - "uppercase": Convert to uppercase
+                - "titlecase": Convert to title case
+                - "trim_spaces": Remove leading/trailing spaces
+                - "remove_extra_spaces": Collapse multiple spaces to one
+                - "remove_all_spaces": Remove all spaces
+                - "remove_letters": Remove all letters
+                - "remove_punctuation": Remove all punctuation
+            
+        Returns:
+            str: Clean step node ID
+        """
+        return self.add_clean_step(name, parent_id, [
+            {"type": "quick_calc", "column": column_name, "calc_type": calc_type}
+        ])
+
+    def add_change_type(
+        self,
+        name: str,
+        parent_id: str,
+        fields: Dict[str, str]
+    ) -> str:
+        """
+        Change column data types
+        
+        Args:
+            name: Clean step name
+            parent_id: Upstream node ID
+            fields: Mapping of column name to target type.
+                Supported types: "string", "integer", "real", "date",
+                "datetime", "boolean"
+            
+        Returns:
+            str: Clean step node ID
+        """
+        actions = [
+            {"type": "change_type", "column": col, "target_type": typ}
+            for col, typ in fields.items()
+        ]
+        return self.add_clean_step(name, parent_id, actions)
+
+    def add_duplicate_column(
+        self,
+        name: str,
+        parent_id: str,
+        source_column: str,
+        new_column_name: str = None
+    ) -> str:
+        """
+        Duplicate (copy) an existing column
+        
+        Args:
+            name: Clean step name
+            parent_id: Upstream node ID
+            source_column: Name of the column to duplicate
+            new_column_name: Name for the new column (default: "{source}-1")
+            
+        Returns:
+            str: Clean step node ID
+        """
+        if new_column_name is None:
+            new_column_name = f"{source_column}-1"
+        return self.add_clean_step(name, parent_id, [
+            {"type": "duplicate", "source_column": source_column, "new_column": new_column_name}
+        ])
 
     def add_keep_only(self, name: str, parent_id: str, columns: List[str]) -> str:
         """

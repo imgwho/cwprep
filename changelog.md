@@ -1,7 +1,18 @@
 # Project Changelog
 
 ### Current Status
-SDK v0.1.3 - TFL Generator Skill refactored and migrated to `.agents`.
+SDK v0.3.0 - Added Quick Calc, Change Type, and Duplicate Column operations.
+
+---
+
+## v0.3.0 (2026-02-20)
+
+### Added
+- **Quick Calc** `add_quick_calc()`: 8 quick clean operations — `lowercase`, `uppercase`, `titlecase`, `trim_spaces`, `remove_extra_spaces`, `remove_all_spaces`, `remove_letters`, `remove_punctuation`. Uses `.v2024_2_0.QuickCalcColumn` node type.
+- **Change Column Type** `add_change_type()`: Change column data types (string/integer/real/date/datetime/boolean). Uses `.v1.ChangeColumnType` node type.
+- **Duplicate Column** `add_duplicate_column()`: Copy an existing column with configurable new name. Uses `.v2019_2_3.DuplicateColumn` node type.
+- **MCP Server**: All 3 new operations exposed via MCP (`quick_calc`, `change_type`, `duplicate_column` node types).
+- **Tests**: 7 new test cases for builder and MCP server.
 
 ---
 

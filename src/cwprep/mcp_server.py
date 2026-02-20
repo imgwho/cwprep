@@ -63,6 +63,9 @@ _NODE_TYPES = {
     "rename",
     "pivot",
     "unpivot",
+    "quick_calc",
+    "change_type",
+    "duplicate_column",
     "output_server",
 }
 
@@ -188,6 +191,25 @@ def _build_flow(flow_name: str, connection: Dict[str, Any], nodes: List[Dict[str
                 node_def.get("value_column", "Value"),
             )
 
+        elif ntype == "quick_calc":
+            parent = node_id_map[node_def["parent"]]
+            nid = builder.add_quick_calc(
+                name, parent, node_def["column_name"], node_def["calc_type"]
+            )
+
+        elif ntype == "change_type":
+            parent = node_id_map[node_def["parent"]]
+            nid = builder.add_change_type(name, parent, node_def["fields"])
+
+        elif ntype == "duplicate_column":
+            parent = node_id_map[node_def["parent"]]
+            nid = builder.add_duplicate_column(
+                name,
+                parent,
+                node_def["source_column"],
+                node_def.get("new_column_name"),
+            )
+
         elif ntype == "output_server":
             parent = node_id_map[node_def["parent"]]
             nid = builder.add_output_server(
@@ -241,6 +263,9 @@ def generate_tfl(
             - rename:         parent, renames ({old: new})
             - pivot:          parent, pivot_column, aggregate_column, new_columns, group_by?, aggregation?
             - unpivot:        parent, columns_to_unpivot, name_column?, value_column?
+            - quick_calc:     parent, column_name, calc_type (lowercase|uppercase|titlecase|trim_spaces|remove_extra_spaces|remove_all_spaces|remove_letters|remove_punctuation)
+            - change_type:    parent, fields ({column: target_type})
+            - duplicate_column: parent, source_column, new_column_name?
             - output_server:  parent, datasource_name, project_name?, server_url?
         output_path: File path for the generated .tfl file (e.g. "./output/my_flow.tfl").
 
@@ -365,6 +390,26 @@ def list_supported_operations() -> str:
             ],
         },
         {
+            "type": "quick_calc",
+            "description": "Quick clean operation (lowercase, uppercase, trim, remove letters/punctuation/spaces)",
+            "required": ["name", "parent", "column_name", "calc_type"],
+            "optional": [],
+            "calc_type_options": "lowercase|uppercase|titlecase|trim_spaces|remove_extra_spaces|remove_all_spaces|remove_letters|remove_punctuation",
+        },
+        {
+            "type": "change_type",
+            "description": "Change column data types",
+            "required": ["name", "parent", "fields ({column_name: target_type})"],
+            "optional": [],
+            "target_type_options": "string|integer|real|date|datetime|boolean",
+        },
+        {
+            "type": "duplicate_column",
+            "description": "Duplicate (copy) an existing column",
+            "required": ["name", "parent", "source_column"],
+            "optional": [{"new_column_name": "str (default: {source}-1)"}],
+        },
+        {
             "type": "output_server",
             "description": "Publish output to Tableau Server",
             "required": ["name", "parent", "datasource_name"],
@@ -426,6 +471,9 @@ def validate_flow_definition(
         "rename": ["parent", "renames"],
         "pivot": ["parent", "pivot_column", "aggregate_column", "new_columns"],
         "unpivot": ["parent", "columns_to_unpivot"],
+        "quick_calc": ["parent", "column_name", "calc_type"],
+        "change_type": ["parent", "fields"],
+        "duplicate_column": ["parent", "source_column"],
         "output_server": ["parent", "datasource_name"],
     }
 
@@ -530,6 +578,9 @@ TFLBuilder(flow_name="Untitled Flow", config=None)
 | `add_rename(parent_id, renames)` | Rename {old: new} | Node ID |
 | `add_pivot(name, parent_id, pivot_column, aggregate_column, new_columns, ...)` | Rows to columns | Node ID |
 | `add_unpivot(name, parent_id, columns_to_unpivot, ...)` | Columns to rows | Node ID |
+| `add_quick_calc(name, parent_id, column_name, calc_type)` | Quick clean (lowercase, uppercase, trim, etc.) | Node ID |
+| `add_change_type(name, parent_id, fields)` | Change column data types | Node ID |
+| `add_duplicate_column(name, parent_id, source_column, new_column_name?)` | Duplicate a column | Node ID |
 
 ### Output Methods
 | Method | Parameters | Returns |

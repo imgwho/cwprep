@@ -21,6 +21,9 @@ The core class for creating and managing flow nodes.
 | `add_filter(name, parent_id, expression)` | name, parent_id, expression | Filter using Tableau Prep calculation syntax |
 | `add_value_filter(name, parent_id, field, values, exclude)` | filter parameters | Filter by specific values |
 | `add_calculation(name, parent_id, column_name, formula)` | calculation parameters | Add a calculated field |
+| `add_quick_calc(name, parent_id, column_name, calc_type)` | column_name, calc_type | Quick clean (lowercase/uppercase/titlecase/trim/remove) |
+| `add_change_type(name, parent_id, fields)` | fields: {col: type} | Change column data types (string/integer/real/date/datetime/boolean) |
+| `add_duplicate_column(name, parent_id, source_column, new_column_name)` | source_column, new_name (optional) | Duplicate (copy) a column |
 | `add_aggregate(name, parent_id, group_by, aggregations)` | aggregate parameters | Add an aggregation step |
 | `add_output_server(name, parent_id, datasource_name, project_name, server_url)` | output parameters | Add a Tableau Server output |
 | `build()` | None | Returns (flow, display, meta) |
