@@ -2,7 +2,7 @@
 
 > Based on [Tableau Prep Einstein Official Docs](https://help.tableau.com/current/prep/en-us/prep_einstein.htm)
 > 
-> Last updated: 2026-02-09 14:20
+> Last updated: 2026-02-20 17:16
 
 ---
 
@@ -18,11 +18,11 @@
 | Filter by date range | `add_filter("[date] >= ...")` | ✅ Implemented |
 | Filter by relative date | `add_filter()` + expression | ✅ Implemented |
 | Remove fields | `add_remove_columns()` | ✅ Implemented |
-| Change data type | - | 🔲 Planned |
+| Change data type | `add_change_type()` | ✅ Implemented |
 | **Clean and Shape** | | |
-| Set case (upper/lower/title) | - | 🔲 Planned |
-| Remove characters | - | 🔲 Planned |
-| Trim whitespace | - | 🔲 Planned |
+| Set case (upper/lower/title) | `add_quick_calc()` | ✅ Implemented |
+| Remove characters | `add_quick_calc()` | ✅ Implemented |
+| Trim whitespace | `add_quick_calc()` | ✅ Implemented |
 | Create calculation | `add_calculation()` | ✅ Implemented |
 | Rename field | `add_rename()` | ✅ Implemented |
 | Convert date format | `add_calculation()` | ✅ Implemented |
@@ -36,7 +36,7 @@
 | Create aggregate step | `add_aggregate()` | ✅ Implemented |
 | Group and aggregate | `add_aggregate()` | ✅ Implemented |
 
-**Coverage**: 12/18 (67%)
+**Coverage**: 16/18 (88%)
 
 ---
 
@@ -52,6 +52,7 @@
 | Flow branching | Multiple nextNodes | ✅ Non-linear flows |
 | Value filter | `add_value_filter()` | ✅ Keep/exclude values |
 | Keep only columns | `add_keep_only()` | ✅ Select fields |
+| Duplicate column | `add_duplicate_column()` | ✅ Copy existing column |
 
 ---
 
@@ -59,11 +60,10 @@
 
 | Feature | Priority | Notes |
 |---------|----------|-------|
-| Change data type | 🟡 Medium | ChangeDataType node |
-| Quick clean operations | 🟢 Low | Case, trim, etc. |
 | Split values | 🟢 Low | SplitValues node |
 | Identify duplicates | 🟢 Low | Deduplication |
 | File input/output | 🟢 Low | CSV/Excel/Hyper |
+| Fill gaps | 🟢 Low | Fill gaps in sequence |
 
 ---
 
@@ -71,6 +71,8 @@
 
 | Comparison | Tableau Agent | cwprep |
 |------------|---------------|--------|
+| Positioning | Native UI Assistant | **Text-to-PrepFlow Engine** |
+| Integration | Tableau UI | IDEs / AI Clients via MCP |
 | Join/Union | ❌ Not supported | ✅ Supported |
 | Pivot/Unpivot | ✅ Supported | ✅ Supported |
 | Flow branching | ❌ Linear only | ✅ Supported |
