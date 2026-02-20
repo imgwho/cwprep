@@ -44,6 +44,7 @@ Desktop.ini
 
 # 工作目录（生成的产物）
 workspace/
+demo_output/
 
 # 备份文件
 backup/
