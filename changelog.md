@@ -13,6 +13,8 @@ SDK v0.3.0 - Added Quick Calc, Change Type, and Duplicate Column operations.
 - **Duplicate Column** `add_duplicate_column()`: Copy an existing column with configurable new name. Uses `.v2019_2_3.DuplicateColumn` node type.
 - **MCP Server**: All 3 new operations exposed via MCP (`quick_calc`, `change_type`, `duplicate_column` node types).
 - **Tests**: 7 new test cases for builder and MCP server.
+- **Examples**: Added `demo_field_operations.py` demonstrating `add_quick_calc`, `add_change_type`, and `add_duplicate_column`.
+- **MCP Prompts**: Added `examples/prompts.md` with 8 business scenario prompt templates for AI-driven TFL generation.
 
 ---
 

@@ -77,8 +77,10 @@ TFLPackager.pack_zip("./output", "./my_flow.tfl")
 See the `examples/` directory for complete demos:
 - `demo_basic.py` - Input, Join, Output
 - `demo_cleaning.py` - Filter, Calculate, Rename
+- `demo_field_operations.py` - Quick Calc, Change Type, Duplicate Column
 - `demo_aggregation.py` - Union, Aggregate, Pivot
 - `demo_comprehensive.py` - All features combined
+- `prompts.md` - 8 ready-to-use MCP prompt templates for AI-driven flow generation
 
 ## MCP Server
 

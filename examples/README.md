@@ -30,10 +30,13 @@ python examples/demo_basic.py
 # Data cleaning (Filter, Rename, Calculation)
 python examples/demo_cleaning.py
 
+# Field operations (Quick Calc, Change Type, Duplicate Column)
+python examples/demo_field_operations.py
+
 # Aggregation and Transpose (Union, Aggregate, Pivot)
 python examples/demo_aggregation.py
 
-# Comprehensive demo (Covers all 15 SDK methods)
+# Comprehensive demo (Covers all SDK methods)
 python examples/demo_comprehensive.py
 ```
 
@@ -43,7 +46,19 @@ Open the generated `.tfl` files in the `demo_output/` directory using Tableau Pr
 
 ---
 
-## Example Scripts Description
+## Example Scripts
+
+### quick_start.py - Minimal Quick Start
+**Business Requirement**: Demonstrate the simplest cwprep workflow — connect, input, join, filter, output
+
+**Data Flow**:
+```
+Users + Orders → Left Join (id) → Filter completed → Calculate level → Output
+```
+
+**Features Covered**: `add_connection`, `add_input_sql`, `add_join`, `add_filter`, `add_calculation`, `add_output_server`
+
+---
 
 ### demo_basic.py - Customer Orders Join
 **Business Requirement**: Join orders table with customers table to display customer purchase records
@@ -67,6 +82,19 @@ Orders+Products → Filter profit>0 → Filter ship mode → Keep core fields
 ```
 
 **Features Covered**: `add_filter`, `add_value_filter`, `add_keep_only`, `add_rename`, `add_calculation`, `add_remove_columns`
+
+---
+
+### demo_field_operations.py - Customer Data Standardization
+**Business Requirement**: Normalize customer data — backup key columns, fix data types, standardize text format
+
+**Data Flow**:
+```
+Orders+Customers → Duplicate sales column → Fix data types → Uppercase name
+                → Trim whitespace → Rename → Output
+```
+
+**Features Covered**: `add_duplicate_column`, `add_change_type`, `add_quick_calc` (uppercase, trim)
 
 ---
 
@@ -100,17 +128,29 @@ Feb Orders ─┘
             → Remove IDs → Data Validation → Aggregate by Region → Pivot → Unpivot → Output
 ```
 
-**Covers all 15 SDK methods**: Complete demonstration of cwprep core functionality
+**Covers all SDK methods**: Complete demonstration of cwprep core functionality
 
 ---
 
 | Script | Feature Count | Difficulty |
 |------|:---:|:---:|
-| `load_superstore.py` | N/A | ⭐ Tool |
+| `quick_start.py` | 5 | ⭐ Quick Start |
 | `demo_basic.py` | 3 | ⭐ Beginner |
 | `demo_cleaning.py` | 6 | ⭐⭐ Basic |
+| `demo_field_operations.py` | 3 | ⭐⭐ Basic |
 | `demo_aggregation.py` | 5 | ⭐⭐ Basic |
-| `demo_comprehensive.py` | 15 | ⭐⭐⭐ Advanced |
+| `demo_comprehensive.py` | 18 | ⭐⭐⭐ Advanced |
+
+---
+
+## MCP Prompt Examples
+
+See [prompts.md](prompts.md) for **8 ready-to-use prompt templates** for generating TFL flows via AI clients (Claude, Gemini, Cursor, etc.) with the cwprep MCP server.
+
+Each prompt includes:
+- **Business Context** — Real-world scenario description
+- **Full Prompt** — Detailed prompt with explicit logic
+- **Capability Test Prompt** — Minimalist prompt to test AI inference capability
 
 ---
 
