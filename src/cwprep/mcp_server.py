@@ -39,9 +39,12 @@ from .config import (
 mcp = FastMCP(
     "cwprep",
     instructions=(
-        "cwprep is a Tableau Prep Flow SDK. Use the provided tools to "
-        "generate .tfl files programmatically. Read the resources first to "
-        "understand the supported operations and Tableau Prep calculation syntax."
+        "cwprep generates Tableau Prep .tfl files.\n\n"
+        "BEFORE generating, read these resources:\n"
+        "1. cwprep://docs/api-reference\n"
+        "2. cwprep://docs/calculation-syntax (differs from SQL!)\n"
+        "3. cwprep://docs/best-practices\n\n"
+        "WORKFLOW: read resources -> design -> validate_flow_definition -> generate_tfl"
     ),
 )
 
@@ -540,145 +543,35 @@ def validate_flow_definition(
 
 # ============================= MCP Resources ================================
 
-_API_REFERENCE = """\
-# cwprep SDK API Reference
-
-## TFLBuilder
-
-Core class for building Tableau Prep data flows.
-
-### Constructor
-```python
-TFLBuilder(flow_name="Untitled Flow", config=None)
-```
-
-### Connection Methods
-| Method | Parameters | Returns |
-|--------|-----------|---------|
-| `add_connection(host, username, dbname, port?, db_class?)` | Connection info | Connection ID |
-| `add_connection_from_config()` | None | Connection ID |
-
-### Input Methods
-| Method | Parameters | Returns |
-|--------|-----------|---------|
-| `add_input_sql(name, sql, connection_id)` | Node name, SQL query, conn ID | Node ID |
-| `add_input_table(name, table_name, connection_id)` | Node name, table name, conn ID | Node ID |
-
-### Transform Methods
-| Method | Parameters | Returns |
-|--------|-----------|---------|
-| `add_join(name, left_id, right_id, left_col, right_col, join_type?)` | Join params | Node ID |
-| `add_union(name, parent_ids)` | Name, list of parent IDs | Node ID |
-| `add_filter(name, parent_id, expression)` | Filter with Tableau syntax | Node ID |
-| `add_value_filter(name, parent_id, field, values, exclude?)` | Keep/exclude by values | Node ID |
-| `add_calculation(name, parent_id, column_name, formula)` | Calculated field | Node ID |
-| `add_aggregate(name, parent_id, group_by, aggregations?)` | GROUP BY + aggregation | Node ID |
-| `add_keep_only(name, parent_id, columns)` | Keep specified columns | Node ID |
-| `add_remove_columns(name, parent_id, columns)` | Remove specified columns | Node ID |
-| `add_rename(parent_id, renames)` | Rename {old: new} | Node ID |
-| `add_pivot(name, parent_id, pivot_column, aggregate_column, new_columns, ...)` | Rows to columns | Node ID |
-| `add_unpivot(name, parent_id, columns_to_unpivot, ...)` | Columns to rows | Node ID |
-| `add_quick_calc(name, parent_id, column_name, calc_type)` | Quick clean (lowercase, uppercase, trim, etc.) | Node ID |
-| `add_change_type(name, parent_id, fields)` | Change column data types | Node ID |
-| `add_duplicate_column(name, parent_id, source_column, new_column_name?)` | Duplicate a column | Node ID |
-
-### Output Methods
-| Method | Parameters | Returns |
-|--------|-----------|---------|
-| `add_output_server(name, parent_id, datasource_name, project_name?, server_url?)` | Publish output | Node ID |
-
-### Build
-| Method | Parameters | Returns |
-|--------|-----------|---------|
-| `build()` | None | (flow, displaySettings, maestroMetadata) |
-
-## TFLPackager
-
-| Method | Parameters | Description |
-|--------|-----------|-------------|
-| `save_to_folder(folder, flow, display, meta)` | Path + JSON objects | Write exploded folder |
-| `pack_zip(folder, output_tfl)` | Folder + output path | Pack as .tfl (ZIP) |
-
-## Join Types
-- `"left"` — Left Join (default)
-- `"right"` — Right Join
-- `"inner"` — Inner Join
-- `"full"` — Full Outer Join
-
-## Aggregate Functions
-SUM, AVG, COUNT, COUNTD, MIN, MAX, MEDIAN, STDEV, VAR
-"""
+_REFERENCES_DIR = Path(__file__).parent / "references"
 
 
-_CALC_SYNTAX = """\
-# Tableau Prep Calculation Syntax Reference
+def _load_reference(filename: str) -> str:
+    """Load a bundled reference document from the references/ directory."""
+    filepath = _REFERENCES_DIR / filename
+    if filepath.is_file():
+        return filepath.read_text(encoding="utf-8")
+    return f"# Error\n\nReference file not found: {filename}"
 
-## Important: Syntax Differences from SQL
-
-| Unsupported | Alternative |
-|-------------|------------|
-| `IN (1, 2, 3)` | Use `OR` to chain: `[x] = 1 OR [x] = 2 OR [x] = 3` |
-| `BETWEEN a AND b` | Use `[x] >= a AND [x] <= b` |
-| `!=` | Use `<>` |
-
-## String Rules
-- Strings must use **single quotes**: `[Field] = 'Value'`
-- Field references use **square brackets**: `[Field Name]`
-- Incorrect: `[name] == Headquarter` ❌
-- Correct: `[name] = 'Headquarter'` ✅
-
-## Logical Expressions
-```
-# Multiple value check (alternative to IN)
-[status] = 2 OR [status] = 3 OR [status] = 4
-
-# Exclude multiple values
-NOT ([branch] = 'Main' OR [branch] = 'Sales')
-
-# Regex match
-REGEXP_MATCH(STR([status]), '^[2-8]$')
-```
-
-## Function Categories
-
-### Numeric
-ABS, ROUND, CEILING, FLOOR, POWER, SQRT, LN, LOG, EXP, SIGN, SQUARE, PI, ACOS, ASIN, ATAN, COS, SIN, TAN
-
-### String
-CONTAINS, STARTSWITH, ENDSWITH, FIND, FINDNTH, LEFT, RIGHT, MID, LEN, TRIM, LTRIM, RTRIM,
-UPPER, LOWER, PROPER, REPLACE, SPLIT, SPACE, CHAR, ASCII, REGEXP_MATCH, REGEXP_REPLACE, REGEXP_EXTRACT
-
-### Date
-DATEADD, DATEDIFF, DATEPART, DATETRUNC, DATENAME, DATEPARSE,
-YEAR, MONTH, DAY, WEEK, QUARTER, MAKEDATE, MAKEDATETIME, NOW, TODAY, ISDATE
-
-### Logic
-IF / THEN / ELSEIF / ELSE / END
-CASE [field] WHEN value THEN result ... ELSE default END
-IIF(condition, then, else)
-IFNULL(expr, alternate)
-ISNULL(expr)
-ZN(expr)  — returns 0 if null
-ISBLANK(expr)
-
-### Type Conversion
-INT(expr), FLOAT(expr), STR(expr), DATE(expr), DATETIME(expr)
-
-### Aggregate (in calculated fields)
-SUM, AVG, COUNT, COUNTD, MIN, MAX, MEDIAN, STDEV, VAR, ATTR
-"""
 
 
 @mcp.resource("cwprep://docs/api-reference")
 def get_api_reference() -> str:
     """Complete API reference for the cwprep TFLBuilder and TFLPackager classes."""
-    return _API_REFERENCE
+    return _load_reference("api_reference.md")
 
 
 @mcp.resource("cwprep://docs/calculation-syntax")
 def get_calculation_syntax() -> str:
     """Tableau Prep calculation syntax reference — supported functions, operators, and important differences from SQL."""
-    return _CALC_SYNTAX
+    return _load_reference("calculation_syntax.md")
+
+
+@mcp.resource("cwprep://docs/best-practices")
+def get_best_practices() -> str:
+    """Common pitfalls, Tableau Prep vs SQL syntax differences, and flow design rules."""
+    return _load_reference("best_practices.md")
+
 
 
 # ============================= MCP Prompts ==================================
@@ -702,16 +595,16 @@ def design_data_flow(
         f"## Business Goal\n{business_goal}\n\n"
         f"## Output Name\n{output_name}\n\n"
         f"## Your Task\n"
-        f"1. Analyze the data sources and business goal.\n"
-        f"2. Design a data flow with appropriate operations "
+        f"1. Read `cwprep://docs/api-reference` for supported operations.\n"
+        f"2. Read `cwprep://docs/calculation-syntax` for Tableau Prep formula syntax.\n"
+        f"3. Read `cwprep://docs/best-practices` to avoid common pitfalls.\n"
+        f"4. Analyze the data sources and business goal.\n"
+        f"5. Design a data flow with appropriate operations "
         f"(input, join, filter, calculation, aggregate, output).\n"
-        f"3. Generate the complete flow definition as a JSON object compatible "
+        f"6. Generate the complete flow definition as a JSON object compatible "
         f"with the `generate_tfl` tool.\n"
-        f"4. Before generating, read the `cwprep://docs/api-reference` resource "
-        f"for supported operations and the `cwprep://docs/calculation-syntax` "
-        f"resource for Tableau Prep formula syntax.\n"
-        f"5. Call `validate_flow_definition` to check for errors.\n"
-        f"6. If valid, call `generate_tfl` to create the .tfl file.\n"
+        f"7. Call `validate_flow_definition` to check for errors.\n"
+        f"8. If valid, call `generate_tfl` to create the .tfl file.\n"
     )
 
 

@@ -239,6 +239,7 @@ Then configure your client with the endpoint: `http://your-server-ip:8000/mcp`
 | 🔧 Tool | `validate_flow_definition` | Validate flow definition before generating |
 | 📖 Resource | `cwprep://docs/api-reference` | SDK API reference |
 | 📖 Resource | `cwprep://docs/calculation-syntax` | Tableau Prep calculation syntax |
+| 📖 Resource | `cwprep://docs/best-practices` | Common pitfalls and flow design rules |
 | 💬 Prompt | `design_data_flow` | Interactive flow design assistant |
 | 💬 Prompt | `explain_tfl_structure` | TFL file structure explanation |
 
@@ -246,18 +247,19 @@ Then configure your client with the endpoint: `http://your-server-ip:8000/mcp`
 
 This project includes a specialized AI Skill for assistants like Claude or Gemini to help you build flows.
 - **Location**: `.agents/skills/tfl-generator/`
-- **Features**: Procedural guidance for flow construction, API reference, and Tableau Prep calculation syntax rules.
+- **Features**: MCP server index with fallback SDK usage guide. Detailed API and syntax references are served via MCP Resources from `src/cwprep/references/`.
 
 ## Directory Structure
 
 ```
 cwprep/
-├── .agents/skills/      # AI Agent skills and technical references
+├── .agents/skills/      # AI Agent skills (MCP index)
 ├── src/cwprep/          # SDK source code
 │   ├── builder.py       # TFLBuilder class
 │   ├── packager.py      # TFLPackager class
 │   ├── config.py        # Configuration utilities
-│   └── mcp_server.py    # MCP Server (Tools, Resources, Prompts)
+│   ├── mcp_server.py    # MCP Server (Tools, Resources, Prompts)
+│   └── references/      # MCP Resource documents (.md)
 ├── examples/            # Demo scripts
 ├── docs/                # Documentation
 └── tests/               # Unit tests

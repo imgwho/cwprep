@@ -1,7 +1,21 @@
 # Project Changelog
 
 ### Current Status
-SDK v0.3.0 - Added Quick Calc, Change Type, and Duplicate Column operations.
+SDK v0.3.1 - MCP usability improvements: externalized resources, added best-practices, simplified AI Skills.
+
+---
+
+## v0.3.1 (2026-02-24)
+
+### Improved
+- **MCP Resources**: Extracted hardcoded `_API_REFERENCE` and `_CALC_SYNTAX` strings to external `.md` files under `src/cwprep/references/` for easier maintenance and extensibility.
+- **New Resource**: Added `cwprep://docs/best-practices` — common Tableau Prep vs SQL syntax pitfalls and flow design rules.
+- **Enhanced Instructions**: `FastMCP` instructions now list all available resources and recommended workflow.
+- **Enhanced Prompt**: `design_data_flow` prompt guides AI to read resources before designing flows.
+
+### Changed
+- **Simplified AI Skills**: Reduced `.agents/skills/tfl-generator/SKILL.md` from 226 to 42 lines. Skills now serve as an MCP index with SDK fallback, instead of duplicating API and syntax documentation.
+- **Removed duplicate references**: Deleted `references/api.md` and `references/calculations.md` from Skills (content available via MCP Resources).
 
 ---
 
