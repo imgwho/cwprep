@@ -15,7 +15,7 @@ SDK v0.4.0 - Multi-database connection support: SQL Server (SSPI + username), Po
 - **PostgreSQL Connection Profile**: Pre-configured profile with port 5432 defaults.
 - **Schema Support**: `add_input_table(schema="dbo")` generates `[dbo].[table_name]` format for SQL Server.
 - **New Config Fields**: `DatabaseConfig` now supports `authentication` and `schema` fields.
-- **Database Loaders**: Added `load_superstore_sqlserver.py` and `load_superstore_postgresql.py` example scripts.
+- **Database Loaders**: Unified `load_superstore_sqlserver.py`, `load_superstore_postgresql.py`, and MySQL loader into a single `load_superstore.py` with `--db` argument.
 - **Tests**: 9 new test cases for SQL Server connection (builder + MCP server).
 
 ### Changed

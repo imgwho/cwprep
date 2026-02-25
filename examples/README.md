@@ -14,22 +14,24 @@ Execute in your MySQL client:
 examples/demo_data/init_superstore.sql
 ```
 
-**Option B: Using Python — MySQL (Automated from Excel)**
+**Option B: Using Python (Automated from Excel)**
 ```bash
-pip install pymysql pandas xlrd
-python examples/demo_data/load_superstore.py
-```
+pip install pandas xlrd sqlalchemy
 
-**Option C: Using Python — SQL Server**
-```bash
-pip install pyodbc pandas xlrd sqlalchemy
-python examples/demo_data/load_superstore_sqlserver.py
-```
+# MySQL
+pip install pymysql
+python examples/demo_data/load_superstore.py --db mysql
 
-**Option D: Using Python — PostgreSQL**
-```bash
-pip install psycopg2-binary pandas xlrd sqlalchemy
-python examples/demo_data/load_superstore_postgresql.py
+# PostgreSQL
+pip install psycopg2-binary
+python examples/demo_data/load_superstore.py --db postgresql
+
+# SQL Server
+pip install pyodbc
+python examples/demo_data/load_superstore.py --db sqlserver
+
+# Override defaults (optional)
+python examples/demo_data/load_superstore.py --db postgresql --host localhost --port 5432 --user myuser --password mypass
 ```
 
 ### 2. Run Example Scripts
@@ -197,11 +199,12 @@ Each prompt includes:
 
 ## Database Configuration
 
-```python
-DB_CONFIG = {
-    "host": "localhost",
-    "username": "root",
-    "dbname": "superstore",
-    "port": "3306"
-}
-```
+Use `load_superstore.py --db <type>` to load data. Default connection parameters:
+
+| Database | Host | Port | User | Password |
+|----------|------|------|------|----------|
+| MySQL | 127.0.0.1 | 3306 | root | *(empty)* |
+| PostgreSQL | localhost | 5432 | postgres | qwer123 |
+| SQL Server | 127.0.0.1 | — | *(SSPI)* | *(SSPI)* |
+
+Override defaults with `--host`, `--port`, `--user`, `--password` flags.
