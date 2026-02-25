@@ -103,6 +103,12 @@ cwprep-mcp
 cwprep-mcp --transport streamable-http --port 8000
 ```
 
+> [!TIP]
+> **Upgrading?** If you previously used `uvx` with an older version, clear the cache to pick up the latest release:
+> ```bash
+> uv cache clean cwprep
+> ```
+
 ### Client Configuration
 
 All clients below use the **`uvx` method** (recommended). Replace `uvx` with `cwprep-mcp` if you prefer a local `pip install`.
