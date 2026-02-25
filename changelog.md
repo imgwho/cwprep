@@ -1,7 +1,27 @@
 # Project Changelog
 
 ### Current Status
-SDK v0.3.1 - MCP usability improvements: externalized resources, added best-practices, simplified AI Skills.
+SDK v0.4.0 - Multi-database connection support: SQL Server (SSPI + username), PostgreSQL, extensible profile architecture.
+
+---
+
+## v0.4.0 (2026-02-25)
+
+### Added
+- **Multi-database Connection Support**: Introduced `_DB_PROFILES` architecture in `builder.py` — extensible dictionary-based connection attribute profiles for each database type.
+- **SQL Server Connection**: Full support for SQL Server 2022 with two authentication modes:
+  - `authentication="sspi"` — Windows Authentication (no username needed)
+  - `authentication="sqlserver"` — Username/password login
+- **PostgreSQL Connection Profile**: Pre-configured profile with port 5432 defaults.
+- **Schema Support**: `add_input_table(schema="dbo")` generates `[dbo].[table_name]` format for SQL Server.
+- **New Config Fields**: `DatabaseConfig` now supports `authentication` and `schema` fields.
+- **Database Loaders**: Added `load_superstore_sqlserver.py` and `load_superstore_postgresql.py` example scripts.
+- **Tests**: 9 new test cases for SQL Server connection (builder + MCP server).
+
+### Changed
+- **`add_connection()` API**: `username` and `dbname` are now optional (default `""`), enabling SQL Server SSPI connections without credentials.
+- **MCP Validation**: `validate_flow_definition` dynamically validates required fields based on `db_class` and `authentication` mode.
+- **Config Defaults**: `DatabaseConfig.port` default changed from `"3306"` to `""` (determined by profile).
 
 ---
 

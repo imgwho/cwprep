@@ -42,11 +42,13 @@ except ImportError:
 class DatabaseConfig:
     """Database connection configuration"""
     host: str = ""
-    port: str = "3306"
+    port: str = ""
     username: str = ""
     password: str = ""
     dbname: str = ""
     db_class: str = "mysql"
+    authentication: str = ""  # e.g. "sspi", "sqlserver", or "" for default
+    schema: str = ""  # e.g. "dbo" for SQL Server
 
 
 @dataclass
@@ -138,11 +140,13 @@ def load_config(
     db_yaml = yaml_data.get("database", {})
     db_config = DatabaseConfig(
         host=db_yaml.get("host", ""),
-        port=str(db_yaml.get("port", 3306)),
+        port=str(db_yaml.get("port", "")) if db_yaml.get("port") else "",
         username=os.getenv("DB_USERNAME", ""),
         password=os.getenv("DB_PASSWORD", ""),
         dbname=db_yaml.get("dbname", ""),
-        db_class=db_yaml.get("type", "mysql")
+        db_class=db_yaml.get("type", "mysql"),
+        authentication=db_yaml.get("authentication", ""),
+        schema=db_yaml.get("schema", ""),
     )
     
     # Prep version configuration

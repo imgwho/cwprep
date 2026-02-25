@@ -14,11 +14,22 @@ Execute in your MySQL client:
 examples/demo_data/init_superstore.sql
 ```
 
-**Option B: Using Python (Automated from Excel)**
-Recommended for using the original `Sample - Superstore.xls` data:
+**Option B: Using Python — MySQL (Automated from Excel)**
 ```bash
 pip install pymysql pandas xlrd
 python examples/demo_data/load_superstore.py
+```
+
+**Option C: Using Python — SQL Server**
+```bash
+pip install pyodbc pandas xlrd sqlalchemy
+python examples/demo_data/load_superstore_sqlserver.py
+```
+
+**Option D: Using Python — PostgreSQL**
+```bash
+pip install psycopg2-binary pandas xlrd sqlalchemy
+python examples/demo_data/load_superstore_postgresql.py
 ```
 
 ### 2. Run Example Scripts

@@ -202,6 +202,97 @@ def test_add_duplicate_column():
     assert inner_node["expression"] == "[row_id]"
 
 
+def test_add_connection_sqlserver_sspi():
+    """测试 SQL Server SSPI (Windows 身份验证) 连接"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_connection(
+        host="localhost",
+        db_class="sqlserver",
+        authentication="sspi"
+    )
+    
+    attrs = builder.connections[conn_id]["connectionAttributes"]
+    assert attrs["class"] == "sqlserver"
+    assert attrs["authentication"] == "sspi"
+    assert attrs["odbc-native-protocol"] == "yes"
+    assert "port" not in attrs  # SQL Server has no port field
+    assert "username" not in attrs  # SSPI doesn't need username
+    assert ":protocol-clone-parent" in attrs
+    assert "IsolationLevel" in attrs
+
+
+def test_add_connection_sqlserver_username():
+    """测试 SQL Server 用户名密码登录连接"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_connection(
+        host="localhost",
+        username="sa",
+        db_class="sqlserver",
+        authentication="sqlserver"
+    )
+    
+    attrs = builder.connections[conn_id]["connectionAttributes"]
+    assert attrs["class"] == "sqlserver"
+    assert attrs["authentication"] == "sqlserver"
+    assert attrs["username"] == "sa"  # username present for sqlserver auth
+    assert "port" not in attrs
+    assert attrs["odbc-native-protocol"] == "yes"
+
+
+def test_add_input_table_with_schema():
+    """测试带 schema 前缀的表名格式"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_connection(
+        host="localhost",
+        db_class="sqlserver",
+        authentication="sspi"
+    )
+    
+    input_id = builder.add_input_table("orders", "orders", conn_id, schema="dbo")
+    assert builder.nodes[input_id]["relation"]["table"] == "[dbo].[orders]"
+
+
+def test_add_connection_mysql_unchanged():
+    """测试 MySQL 连接行为不变（回归测试）"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_connection(
+        host="localhost",
+        username="root",
+        dbname="test_db"
+    )
+    
+    attrs = builder.connections[conn_id]["connectionAttributes"]
+    assert attrs["class"] == "mysql"
+    assert attrs["username"] == "root"
+    assert attrs["port"] == "3306"  # MySQL default port
+    assert "source-charset" in attrs
+    assert "sslcert" in attrs
+    assert "IsolationLevel" not in attrs  # SQL Server only
+
+
+def test_add_input_table_without_schema():
+    """测试不带 schema 的表名格式保持不变"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_connection(
+        host="localhost",
+        username="root",
+        dbname="test_db"
+    )
+    
+    input_id = builder.add_input_table("orders", "orders", conn_id)
+    assert builder.nodes[input_id]["relation"]["table"] == "[orders]"
+
+
 def test_build_output():
     """测试构建输出结构"""
     from cwprep import TFLBuilder
@@ -230,7 +321,7 @@ def test_build_output():
 def test_version():
     """测试版本号"""
     from cwprep import __version__
-    assert __version__ == "0.3.0"
+    assert __version__ == "0.4.0"
 
 
 if __name__ == "__main__":

@@ -283,6 +283,85 @@ class TestNewNodeTypes:
         assert result["valid"] is True
 
 
+# ── Tests: SQL Server connection via MCP ─────────────────────────────────────
+
+class TestSqlServerConnection:
+    def test_build_flow_sqlserver_sspi(self):
+        connection = {
+            "host": "localhost",
+            "db_class": "sqlserver",
+            "authentication": "sspi",
+            "schema": "dbo",
+        }
+        nodes = [
+            {"type": "input_table", "name": "orders", "table": "orders"},
+            {"type": "output_server", "name": "output", "parent": "orders",
+             "datasource_name": "Test"},
+        ]
+        flow, display, meta, node_map = _build_flow("Test", connection, nodes)
+        # Find the connection and verify its attributes
+        conn = list(flow["connections"].values())[0]
+        assert conn["connectionAttributes"]["class"] == "sqlserver"
+        assert conn["connectionAttributes"]["authentication"] == "sspi"
+        assert "port" not in conn["connectionAttributes"]
+        # Verify table has schema prefix
+        orders_node = flow["nodes"][node_map["orders"]]
+        assert orders_node["relation"]["table"] == "[dbo].[orders]"
+
+    def test_build_flow_sqlserver_username(self):
+        connection = {
+            "host": "localhost",
+            "username": "sa",
+            "db_class": "sqlserver",
+            "authentication": "sqlserver",
+            "schema": "dbo",
+        }
+        nodes = [
+            {"type": "input_table", "name": "orders", "table": "orders"},
+            {"type": "output_server", "name": "output", "parent": "orders",
+             "datasource_name": "Test"},
+        ]
+        flow, display, meta, node_map = _build_flow("Test", connection, nodes)
+        conn = list(flow["connections"].values())[0]
+        assert conn["connectionAttributes"]["authentication"] == "sqlserver"
+        assert conn["connectionAttributes"]["username"] == "sa"
+
+    def test_validate_sqlserver_sspi_no_username(self):
+        """SQL Server SSPI should not require username"""
+        connection = {
+            "host": "localhost",
+            "db_class": "sqlserver",
+            "authentication": "sspi",
+        }
+        nodes = [
+            {"type": "input_table", "name": "t1", "table": "t"},
+            {"type": "output_server", "name": "out", "parent": "t1",
+             "datasource_name": "D"},
+        ]
+        result = json.loads(
+            validate_flow_definition("Test", connection, nodes)
+        )
+        assert result["valid"] is True
+
+    def test_validate_sqlserver_auth_requires_username(self):
+        """SQL Server 'sqlserver' auth should require username"""
+        connection = {
+            "host": "localhost",
+            "db_class": "sqlserver",
+            "authentication": "sqlserver",
+        }
+        nodes = [
+            {"type": "input_table", "name": "t1", "table": "t"},
+            {"type": "output_server", "name": "out", "parent": "t1",
+             "datasource_name": "D"},
+        ]
+        result = json.loads(
+            validate_flow_definition("Test", connection, nodes)
+        )
+        assert result["valid"] is False
+        assert any("username" in e for e in result["errors"])
+
+
 # ── Tests: MCP Server instance ───────────────────────────────────────────────
 
 class TestMcpServer:

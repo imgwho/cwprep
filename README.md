@@ -53,7 +53,7 @@ TFLPackager.pack_zip("./output", "./my_flow.tfl")
 
 | Feature | Method | Description |
 |---------|--------|-------------|
-| Database Connection | `add_connection()` | Connect to MySQL/PostgreSQL/Oracle |
+| Database Connection | `add_connection()` | Connect to MySQL/PostgreSQL/SQL Server |
 | SQL Input | `add_input_sql()` | Custom SQL query input |
 | Table Input | `add_input_table()` | Direct table connection |
 | Join | `add_join()` | left/right/inner/full joins |
@@ -270,16 +270,30 @@ cwprep/
 Create `config.yaml` for default settings:
 
 ```yaml
+# MySQL (default)
 database:
   host: localhost
-  username: root
+  port: 3306
   dbname: mydb
-  port: "3306"
-  db_class: mysql
+  type: mysql
+
+# SQL Server (Windows Authentication)
+# database:
+#   host: localhost
+#   type: sqlserver
+#   authentication: sspi
+#   schema: dbo
+
+# PostgreSQL
+# database:
+#   host: localhost
+#   port: 5432
+#   dbname: mydb
+#   type: postgres
 
 tableau_server:
   url: http://your-server
-  project_name: Default
+  default_project: Default
 ```
 
 ## Changelog

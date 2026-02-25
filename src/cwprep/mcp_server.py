@@ -99,8 +99,13 @@ def _build_flow(flow_name: str, connection: Dict[str, Any], nodes: List[Dict[str
         conn_params["port"] = str(connection["port"])
     if "db_class" in connection:
         conn_params["db_class"] = connection["db_class"]
+    if "authentication" in connection:
+        conn_params["authentication"] = connection["authentication"]
 
     conn_id = builder.add_connection(**conn_params)
+
+    # Resolve schema for input_table nodes
+    schema = connection.get("schema", None)
 
     # Map user-supplied node names → internal IDs
     node_id_map: Dict[str, str] = {}
@@ -113,7 +118,10 @@ def _build_flow(flow_name: str, connection: Dict[str, Any], nodes: List[Dict[str
             nid = builder.add_input_sql(name, node_def["sql"], conn_id)
 
         elif ntype == "input_table":
-            nid = builder.add_input_table(name, node_def["table"], conn_id)
+            nid = builder.add_input_table(
+                name, node_def["table"], conn_id,
+                schema=node_def.get("schema", schema),
+            )
 
         elif ntype == "join":
             left = node_id_map[node_def["left"]]
@@ -247,8 +255,15 @@ def generate_tfl(
     Args:
         flow_name: Display name for the flow in Tableau Prep.
         connection: Database connection settings.
-            Required keys: host, username, dbname.
-            Optional keys: port (default "3306"), db_class (default "mysql").
+            Required keys: host.
+            Conditionally required: username (required for mysql/postgres,
+                optional for sqlserver with sspi authentication),
+                dbname (required for mysql/postgres, often empty at
+                connection-level for sqlserver).
+            Optional keys: port (default depends on db_class),
+                db_class ("mysql"|"sqlserver"|"postgres", default "mysql"),
+                authentication ("sspi"|"sqlserver"|"", default ""),
+                schema (e.g. "dbo" for SQL Server input_table nodes).
         nodes: Ordered list of node definitions. Each node is a dict with a
             "type" key and a "name" key (used to reference this node from
             downstream nodes). Additional keys depend on the node type:
@@ -449,9 +464,24 @@ def validate_flow_definition(
     # Validate connection
     if not flow_name:
         errors.append("flow_name is required.")
-    for key in ("host", "username", "dbname"):
-        if key not in connection or not connection[key]:
-            errors.append(f"connection.{key} is required.")
+    
+    db_class = connection.get("db_class", "mysql")
+    
+    # host is always required
+    if "host" not in connection or not connection["host"]:
+        errors.append("connection.host is required.")
+    
+    # username & dbname requirements depend on db_class
+    if db_class == "sqlserver":
+        auth = connection.get("authentication", "")
+        # sqlserver with username/password auth requires username
+        if auth == "sqlserver" and not connection.get("username"):
+            errors.append("connection.username is required for sqlserver authentication.")
+    else:
+        # mysql, postgres, etc. always require username and dbname
+        for key in ("username", "dbname"):
+            if key not in connection or not connection[key]:
+                errors.append(f"connection.{key} is required.")
 
     # Validate nodes
     if not nodes:

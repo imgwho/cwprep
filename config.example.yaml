@@ -15,8 +15,32 @@ tableau_server:
   project_luid: ""
 
 # Default database configuration
+# --- MySQL (default) ---
 database:
   host: "localhost"
   port: 3306
   dbname: "your_database"
-  type: "mysql"       # mysql, postgres, oracle, sqlserver
+  type: "mysql"       # mysql, postgres, sqlserver
+
+# --- SQL Server with Windows Authentication (SSPI) ---
+# database:
+#   host: "localhost"
+#   dbname: "your_database"
+#   type: "sqlserver"
+#   authentication: "sspi"
+#   schema: "dbo"
+
+# --- SQL Server with username/password ---
+# database:
+#   host: "localhost"
+#   dbname: "your_database"
+#   type: "sqlserver"
+#   authentication: "sqlserver"
+#   schema: "dbo"
+
+# --- PostgreSQL ---
+# database:
+#   host: "localhost"
+#   port: 5432
+#   dbname: "your_database"
+#   type: "postgres"

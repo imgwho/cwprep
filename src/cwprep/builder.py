@@ -21,6 +21,44 @@ from typing import Optional, List, Dict, Any
 from .config import TFLConfig, DEFAULT_CONFIG, DatabaseConfig
 
 
+# ---------------------------------------------------------------------------
+# Database connection attribute profiles
+# Each profile defines the base connection attributes for a database type.
+# To add support for a new database, simply add a new entry here.
+# ---------------------------------------------------------------------------
+_DB_PROFILES: Dict[str, Dict[str, Any]] = {
+    "mysql": {
+        "default_port": "3306",
+        "requires_username": True,
+        "extra_attrs": {
+            "source-charset": "",
+            "sslcert": "",
+            "expected-driver-version": "",
+            "odbc-native-protocol": "",
+        },
+    },
+    "sqlserver": {
+        "default_port": None,
+        "requires_username": False,
+        "extra_attrs": {
+            "IsolationLevel": "",
+            "odbc-native-protocol": "yes",
+            "minimum-driver-version": "",
+        },
+    },
+    "postgres": {
+        "default_port": "5432",
+        "requires_username": True,
+        "extra_attrs": {
+            "source-charset": "",
+            "sslcert": "",
+            "expected-driver-version": "",
+            "odbc-native-protocol": "",
+        },
+    },
+}
+
+
 class TFLBuilder:
     """
     TFL Builder
@@ -49,10 +87,11 @@ class TFLBuilder:
     def add_connection(
         self, 
         host: str, 
-        username: str, 
-        dbname: str,
+        username: str = "", 
+        dbname: str = "",
         port: str = None,
         db_class: str = None,
+        authentication: str = "",
         **kwargs
     ) -> str:
         """
@@ -60,10 +99,13 @@ class TFLBuilder:
         
         Args:
             host: Database host address
-            username: Username
-            dbname: Database name
-            port: Port number (defaults to config value)
-            db_class: Database type mysql/postgres/oracle (defaults to config value)
+            username: Username (required for mysql/postgres; optional for sqlserver with sspi)
+            dbname: Database name (connection-level; for sqlserver this is often empty,
+                    the actual database is specified at the node level)
+            port: Port number (defaults to profile value; sqlserver has no port)
+            db_class: Database type: "mysql", "sqlserver", "postgres" (defaults to config)
+            authentication: Authentication mode. For sqlserver: "sspi" (Windows) or
+                            "sqlserver" (username/password). For others: usually empty.
             **kwargs: Other connection attributes
             
         Returns:
@@ -71,11 +113,15 @@ class TFLBuilder:
         """
         conn_id = str(uuid.uuid4())
         
-        # Use passed parameters or config defaults
+        # Resolve defaults from config
         default_db = self.config.database or DatabaseConfig()
-        actual_port = port or default_db.port or "3306"
         actual_class = db_class or default_db.db_class or "mysql"
+        actual_auth = authentication or default_db.authentication or ""
         
+        # Get database profile (fall back to mysql-like defaults)
+        profile = _DB_PROFILES.get(actual_class, _DB_PROFILES["mysql"])
+        
+        # --- Build shared connection attributes ---
         connection_attrs = {
             "sslmode": kwargs.get("sslmode", ""),
             "odbc-connect-string-extras": "",
@@ -85,17 +131,28 @@ class TFLBuilder:
             "odbc-dbms-name": "",
             ":use-allowlist": "false",
             "dbname": dbname,
-            "port": actual_port,
             ":protocol-customizations": "",
-            "source-charset": kwargs.get("source_charset", ""),
-            "sslcert": "",
-            "odbc-native-protocol": "",
-            "expected-driver-version": "",
-            "class": actual_class,
             "one-time-sql": "",
-            "authentication": kwargs.get("authentication", ""),
-            "username": username
+            "class": actual_class,
+            "authentication": actual_auth,
         }
+        
+        # --- Add port (only if the profile uses it) ---
+        if profile["default_port"] is not None:
+            actual_port = port or default_db.port or profile["default_port"]
+            connection_attrs["port"] = actual_port
+        
+        # --- Add username (only if the profile requires it OR explicitly provided) ---
+        if profile["requires_username"] or username:
+            connection_attrs["username"] = username
+        
+        # --- Add profile-specific extra attributes ---
+        for key, default_val in profile.get("extra_attrs", {}).items():
+            connection_attrs[key] = kwargs.get(key, default_val)
+        
+        # --- SQL Server-specific: ":protocol-clone-parent" ---
+        if actual_class == "sqlserver":
+            connection_attrs[":protocol-clone-parent"] = ""
         
         self.connections[conn_id] = {
             "connectionType": ".v1.SqlConnection",
@@ -125,7 +182,8 @@ class TFLBuilder:
             username=db.username,
             dbname=db.dbname,
             port=db.port,
-            db_class=db.db_class
+            db_class=db.db_class,
+            authentication=db.authentication,
         )
 
     def add_input_sql(self, name: str, sql: str, connection_id: str) -> str:
@@ -166,7 +224,8 @@ class TFLBuilder:
         self.initial_nodes.append(node_id)
         return node_id
 
-    def add_input_table(self, name: str, table_name: str, connection_id: str) -> str:
+    def add_input_table(self, name: str, table_name: str, connection_id: str,
+                        schema: str = None) -> str:
         """
         Add table input node (direct table connection, no custom SQL)
         
@@ -174,6 +233,8 @@ class TFLBuilder:
             name: Node name (usually same as table name)
             table_name: Database table name
             connection_id: Database connection ID
+            schema: Table schema prefix (e.g. "dbo" for SQL Server).
+                    When provided, table reference becomes [schema].[table].
             
         Returns:
             str: Node ID, used by subsequent operations
@@ -188,6 +249,12 @@ class TFLBuilder:
             conn_attrs = self.connections[connection_id].get("connectionAttributes", {})
             dbname = conn_attrs.get("dbname", dbname)
         
+        # Build table reference (with optional schema prefix)
+        if schema:
+            table_ref = f"[{schema}].[{table_name}]"
+        else:
+            table_ref = f"[{table_name}]"
+        
         self.nodes[node_id] = {
             "nodeType": ".v1.LoadSql", "name": name, "id": node_id,
             "baseType": "input", "nextNodes": [], "serialize": False, "description": None,
@@ -199,7 +266,7 @@ class TFLBuilder:
             "restrictedFields": {}, "userRenamedFields": {},
             "selectedFields": None, "samplingType": None,
             "groupByFields": None, "filters": [],
-            "relation": {"type": "table", "table": f"[{table_name}]"}
+            "relation": {"type": "table", "table": table_ref}
         }
         self.initial_nodes.append(node_id)
         return node_id
