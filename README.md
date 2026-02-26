@@ -76,6 +76,7 @@ TFLPackager.pack_zip("./output", "./my_flow.tfl")
 | Unpivot | `add_unpivot()` | Columns to rows |
 | Output | `add_output_server()` | Publish to Tableau Server |
 | TFLX Packaging | `build(is_packaged=True)` | Generate .tflx with embedded data files |
+| **SQL Translation** | `SQLTranslator` | Translate TFL flows to equivalent ANSI SQL |
 
 ## Examples
 
@@ -246,6 +247,7 @@ Then configure your client with the endpoint: `http://your-server-ip:8000/mcp`
 | Type | Name | Description |
 |------|------|-------------|
 | 🔧 Tool | `generate_tfl` | Generate .tfl/.tflx file from flow definition |
+| 🔧 Tool | `translate_to_sql` | Translate flow definition or .tfl file to ANSI SQL |
 | 🔧 Tool | `list_supported_operations` | List all supported node types |
 | 🔧 Tool | `validate_flow_definition` | Validate flow definition before generating |
 | 📖 Resource | `cwprep://docs/api-reference` | SDK API reference |
@@ -268,6 +270,8 @@ cwprep/
 ├── src/cwprep/          # SDK source code
 │   ├── builder.py       # TFLBuilder class
 │   ├── packager.py      # TFLPackager class
+│   ├── translator.py    # SQLTranslator class
+│   ├── expression_translator.py  # ExpressionTranslator class
 │   ├── config.py        # Configuration utilities
 │   ├── mcp_server.py    # MCP Server (Tools, Resources, Prompts)
 │   └── references/      # MCP Resource documents (.md)

@@ -24,6 +24,7 @@ from mcp.server.fastmcp import FastMCP
 
 from .builder import TFLBuilder
 from .packager import TFLPackager
+from .translator import SQLTranslator
 from .config import (
     TFLConfig,
     DatabaseConfig,
@@ -690,6 +691,57 @@ def validate_flow_definition(
         {"valid": len(errors) == 0, "errors": errors},
         indent=2,
         ensure_ascii=False,
+    )
+
+
+@mcp.tool()
+def translate_to_sql(
+    flow_name: str = "",
+    connection: Optional[Dict[str, Any]] = None,
+    nodes: Optional[List[Dict[str, Any]]] = None,
+    tfl_path: Optional[str] = None,
+) -> str:
+    """Translate a Tableau Prep flow to equivalent ANSI SQL (CTE format).
+
+    Use this to preview the logical equivalence of a data flow as SQL,
+    for review and verification purposes. Supports two input modes:
+
+    Mode 1 — From declarative definition (same format as generate_tfl):
+        Provide flow_name, connection, and nodes.
+
+    Mode 2 — From existing .tfl file:
+        Provide tfl_path pointing to a .tfl file on disk.
+
+    If both tfl_path and (connection + nodes) are provided, tfl_path takes priority.
+
+    Args:
+        flow_name: Display name for the flow (used in Mode 1 and header comments).
+        connection: Connection settings (same format as generate_tfl). Required for Mode 1.
+        nodes: Ordered list of node definitions (same format as generate_tfl). Required for Mode 1.
+        tfl_path: Path to an existing .tfl file. Required for Mode 2.
+
+    Returns:
+        ANSI SQL string with CTEs representing the flow logic,
+        including a flow summary header and step-by-step comments.
+    """
+    translator = SQLTranslator()
+
+    # Mode 2: from .tfl file
+    if tfl_path:
+        resolved = str(Path(tfl_path).resolve())
+        return translator.translate_tfl_file(resolved)
+
+    # Mode 1: from declarative definition
+    if connection is not None and nodes is not None:
+        flow, _display, _meta, _node_map, _file_conns = _build_flow(
+            flow_name or "Untitled Flow", connection, nodes
+        )
+        return translator.translate_flow(flow, flow_name=flow_name)
+
+    return (
+        "Error: Please provide either:\n"
+        "  - tfl_path: path to a .tfl file, OR\n"
+        "  - connection + nodes: declarative flow definition"
     )
 
 

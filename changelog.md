@@ -1,7 +1,30 @@
 # Project Changelog
 
 ### Current Status
-SDK v0.4.1 - Excel/CSV file connections, TFLX packaging, multi-column join support.
+SDK v0.5.0 - TFL-to-SQL translation, expression translator, MCP `translate_to_sql` tool.
+
+---
+
+## v0.5.0 (2026-02-26)
+
+### Added
+- **SQL Translator** `SQLTranslator`: Translate TFL flow definitions to equivalent ANSI SQL (CTE format) with flow summary header and step-by-step comments.
+  - `translate_flow()`: From flow JSON dict (builder output)
+  - `translate_tfl_file()`: From `.tfl` ZIP file
+  - Configurable comments (`include_comments`, `include_summary`)
+- **Expression Translator** `ExpressionTranslator`: Regex-based Tableau Prep formula → ANSI SQL expression translator. Covers ~30 function mappings including:
+  - Logic: `IF/THEN/ELSE/END` → `CASE WHEN`, `IIF` → `CASE WHEN`, `ISNULL` → `IS NULL`, `IFNULL` → `COALESCE`, `ZN` → `COALESCE(x, 0)`
+  - String: `CONTAINS` → `LIKE`, `PROPER` → `INITCAP`, `LEN` → `LENGTH`, `MID` → `SUBSTRING`, `FIND` → `POSITION`
+  - Date: `DATEPART` → `EXTRACT`, `YEAR/MONTH/DAY` → `EXTRACT`, `NOW()` → `CURRENT_TIMESTAMP`
+  - Type: `INT/FLOAT/STR/DATE` → `CAST(... AS ...)`
+  - Aggregate: `COUNTD` → `COUNT(DISTINCT ...)`
+  - Unsupported functions (REGEXP_*, SPLIT, analytics) marked with `/* UNSUPPORTED */` comments
+- **MCP Tool** `translate_to_sql`: Single tool supporting both declarative definition and `.tfl` file input.
+- **Tests**: 40 new test cases (27 expression + 10 SQL + 3 MCP integration).
+
+### Fixed
+- **test_mcp_server.py**: Fixed `_build_flow` return value unpacking (4 → 5 tuple), added missing file input types to `test_all_types_present`.
+- **test_builder.py**: Updated version assertion.
 
 ---
 

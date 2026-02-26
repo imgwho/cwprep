@@ -76,7 +76,7 @@ def tmp_output_dir():
 
 class TestBuildFlow:
     def test_basic_flow(self, sample_connection, sample_nodes):
-        flow, display, meta, node_map = _build_flow(
+        flow, display, meta, node_map, _file_conns = _build_flow(
             "Test Flow", sample_connection, sample_nodes
         )
         assert "nodes" in flow
@@ -202,7 +202,8 @@ class TestListSupportedOperations:
         result = json.loads(list_supported_operations())
         types = {op["type"] for op in result}
         expected = {
-            "input_sql", "input_table", "join", "union", "filter",
+            "input_sql", "input_table", "input_excel", "input_csv",
+            "input_csv_union", "join", "union", "filter",
             "value_filter", "calculation", "aggregate", "keep_only",
             "remove_columns", "rename", "pivot", "unpivot",
             "quick_calc", "change_type", "duplicate_column",
@@ -231,7 +232,7 @@ class TestNewNodeTypes:
                 "datasource_name": "Test",
             },
         ]
-        flow, display, meta, node_map = _build_flow("Test", sample_connection, nodes)
+        flow, display, meta, node_map, _fc = _build_flow("Test", sample_connection, nodes)
         assert "lowercase_mode" in node_map
         assert len(node_map) == 3
 
@@ -251,7 +252,7 @@ class TestNewNodeTypes:
                 "datasource_name": "Test",
             },
         ]
-        flow, display, meta, node_map = _build_flow("Test", sample_connection, nodes)
+        flow, display, meta, node_map, _fc = _build_flow("Test", sample_connection, nodes)
         assert "change_types" in node_map
 
     def test_build_flow_with_duplicate(self, sample_connection):
@@ -270,7 +271,7 @@ class TestNewNodeTypes:
                 "datasource_name": "Test",
             },
         ]
-        flow, display, meta, node_map = _build_flow("Test", sample_connection, nodes)
+        flow, display, meta, node_map, _fc = _build_flow("Test", sample_connection, nodes)
         assert "dup_col" in node_map
 
     def test_validate_quick_calc(self, sample_connection):
@@ -298,7 +299,7 @@ class TestSqlServerConnection:
             {"type": "output_server", "name": "output", "parent": "orders",
              "datasource_name": "Test"},
         ]
-        flow, display, meta, node_map = _build_flow("Test", connection, nodes)
+        flow, display, meta, node_map, _fc = _build_flow("Test", connection, nodes)
         # Find the connection and verify its attributes
         conn = list(flow["connections"].values())[0]
         assert conn["connectionAttributes"]["class"] == "sqlserver"
@@ -321,7 +322,7 @@ class TestSqlServerConnection:
             {"type": "output_server", "name": "output", "parent": "orders",
              "datasource_name": "Test"},
         ]
-        flow, display, meta, node_map = _build_flow("Test", connection, nodes)
+        flow, display, meta, node_map, _fc = _build_flow("Test", connection, nodes)
         conn = list(flow["connections"].values())[0]
         assert conn["connectionAttributes"]["authentication"] == "sqlserver"
         assert conn["connectionAttributes"]["username"] == "sa"

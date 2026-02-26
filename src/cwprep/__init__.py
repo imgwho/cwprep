@@ -18,6 +18,8 @@ Usage:
 
 from .builder import TFLBuilder
 from .packager import TFLPackager
+from .translator import SQLTranslator
+from .expression_translator import ExpressionTranslator
 from .config import (
     TFLConfig, 
     DatabaseConfig, 
@@ -26,11 +28,13 @@ from .config import (
     DEFAULT_CONFIG
 )
 
-__version__ = "0.4.1"
+__version__ = "0.5.0"
 __author__ = "cooper wenhua"
 __all__ = [
     "TFLBuilder", 
     "TFLPackager", 
+    "SQLTranslator",
+    "ExpressionTranslator",
     "TFLConfig", 
     "DatabaseConfig", 
     "TableauServerConfig", 
