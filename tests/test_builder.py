@@ -321,8 +321,218 @@ def test_build_output():
 def test_version():
     """测试版本号"""
     from cwprep import __version__
-    assert __version__ == "0.4.0"
+    assert __version__ == "0.4.1"
+
+
+# ====================== File Connection Tests ======================
+
+def test_add_file_connection_excel():
+    """测试添加 Excel 文件连接"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_file_connection("orders.xlsx")
+    
+    assert conn_id in builder.connections
+    conn = builder.connections[conn_id]
+    assert conn["connectionType"] == ".v1.SqlConnection"
+    assert conn["connectionAttributes"]["class"] == "excel-direct"
+    assert conn["isPackaged"] == False
+    # Non-packaged should have directory attribute
+    assert "directory" in conn["connectionAttributes"]
+    assert conn["name"] == "orders.xlsx"
+
+
+def test_add_file_connection_csv():
+    """测试添加 CSV 文件连接"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_file_connection("data.csv")
+    
+    conn = builder.connections[conn_id]
+    assert conn["connectionAttributes"]["class"] == "textscan"
+    assert conn["name"] == "data.csv"
+
+
+def test_add_file_connection_auto_class():
+    """测试自动检测文件类型"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    
+    # .xlsx -> excel-direct
+    xlsx_conn = builder.add_file_connection("test.xlsx")
+    assert builder.connections[xlsx_conn]["connectionAttributes"]["class"] == "excel-direct"
+    
+    # .xls -> excel-direct
+    xls_conn = builder.add_file_connection("test.xls")
+    assert builder.connections[xls_conn]["connectionAttributes"]["class"] == "excel-direct"
+    
+    # .csv -> textscan
+    csv_conn = builder.add_file_connection("test.csv")
+    assert builder.connections[csv_conn]["connectionAttributes"]["class"] == "textscan"
+    
+    # Unknown extension -> ValueError
+    with pytest.raises(ValueError, match="Cannot auto-detect"):
+        builder.add_file_connection("test.json")
+
+
+def test_add_file_connection_packaged():
+    """测试 is_packaged 标记 — 只存 basename"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_file_connection(
+        "C:\\Users\\test\\data\\orders.xlsx", is_packaged=True
+    )
+    conn = builder.connections[conn_id]
+    assert conn["isPackaged"] == True
+    # Packaged should only store basename
+    assert conn["connectionAttributes"]["filename"] == "orders.xlsx"
+    assert conn["name"] == "orders.xlsx"
+    assert "directory" not in conn["connectionAttributes"]
+
+
+def test_add_file_connection_non_packaged():
+    """测试非 packaged 模式 — 完整路径 + directory"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_file_connection("orders.xlsx", is_packaged=False)
+    conn = builder.connections[conn_id]
+    assert conn["isPackaged"] == False
+    # Non-packaged should have full path and directory
+    attrs = conn["connectionAttributes"]
+    assert "directory" in attrs
+    assert attrs["filename"].endswith("orders.xlsx")
+
+
+def test_add_input_excel():
+    """测试添加 Excel 输入节点"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_file_connection("orders.xlsx")
+    
+    input_id = builder.add_input_excel(
+        name="订单",
+        sheet_name="Sheet1",
+        connection_id=conn_id,
+        fields=[
+            {"name": "订单ID", "type": "string"},
+            {"name": "金额", "type": "real"},
+        ]
+    )
+    
+    assert input_id in builder.nodes
+    node = builder.nodes[input_id]
+    assert node["nodeType"] == ".v1.LoadExcel"
+    assert node["baseType"] == "input"
+    assert node["connectionId"] == conn_id
+    assert node["relation"]["table"] == "[Sheet1$]"
+    assert len(node["fields"]) == 2
+    assert node["fields"][0]["name"] == "订单ID"
+    assert input_id in builder.initial_nodes
+
+
+def test_add_input_csv():
+    """测试添加 CSV 输入节点"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_file_connection("data.csv")
+    
+    input_id = builder.add_input_csv(
+        name="数据",
+        connection_id=conn_id,
+        charset="UTF-8",
+        locale="zh_CN",
+    )
+    
+    assert input_id in builder.nodes
+    node = builder.nodes[input_id]
+    assert node["nodeType"] == ".v1.LoadCsv"
+    assert node["baseType"] == "input"
+    assert node["charSet"] == "UTF-8"
+    assert node["locale"] == "zh_CN"
+    assert node["containsHeaders"] == True
+    # connectionAttributes should be empty (not filename/class)
+    assert node["connectionAttributes"] == {}
+
+
+def test_add_input_csv_union():
+    """测试添加 CSV 并集输入节点"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_file_connection("orders_2015.csv")
+    
+    input_id = builder.add_input_csv_union(
+        name="所有订单",
+        connection_id=conn_id,
+        file_names=["orders_2015.csv", "orders_2016.csv", "orders_2017.csv"],
+    )
+    
+    assert input_id in builder.nodes
+    node = builder.nodes[input_id]
+    assert node["nodeType"] == ".v1.LoadCsvInputUnion"
+    assert len(node["generatedInputs"]) == 3
+    for i, gi in enumerate(node["generatedInputs"]):
+        assert gi["inputUnionInputType"] == ".FileInputUnionInput"
+        assert gi["inputNode"]["nodeType"] == ".v1.LoadCsv"
+        assert gi["inputNode"]["connectionAttributes"] == {}
+        assert gi["filePath"] == f"orders_201{5+i}.csv"
+
+
+def test_add_join_multi_column():
+    """测试多字段 join"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_connection("localhost", "root", "test_db")
+    
+    input1 = builder.add_input_sql("Returns", "SELECT * FROM returns", conn_id)
+    input2 = builder.add_input_sql("Orders", "SELECT * FROM orders", conn_id)
+    
+    join_id = builder.add_join(
+        name="Join",
+        left_id=input1,
+        right_id=input2,
+        left_col=["产品 ID", "订单 ID"],
+        right_col=["产品 ID", "订单 ID"],
+    )
+    
+    assert join_id in builder.nodes
+    conditions = builder.nodes[join_id]["actionNode"]["conditions"]
+    assert len(conditions) == 2
+    assert conditions[0]["leftExpression"] == "[产品 ID]"
+    assert conditions[0]["rightExpression"] == "[产品 ID]"
+    assert conditions[1]["leftExpression"] == "[订单 ID]"
+    assert conditions[1]["rightExpression"] == "[订单 ID]"
+
+
+def test_build_packaged():
+    """测试 build(is_packaged=True) 标记"""
+    from cwprep import TFLBuilder
+    
+    builder = TFLBuilder(flow_name="Test")
+    conn_id = builder.add_file_connection("data.xlsx")
+    builder.add_input_excel("Sheet1", "Sheet1", conn_id)
+    builder.add_output_server("Output", list(builder.nodes.keys())[0], "DS")
+    
+    flow, display, meta = builder.build(is_packaged=True)
+    
+    # maestroMetadata should be marked as packaged
+    assert meta["isPackagedMaestroDocument"] == True
+    
+    # File connections should be marked as packaged
+    for conn in flow["connections"].values():
+        conn_class = conn.get("connectionAttributes", {}).get("class", "")
+        if conn_class in ("excel-direct", "textscan"):
+            assert conn["isPackaged"] == True
 
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+

@@ -55,6 +55,9 @@ mcp = FastMCP(
 _NODE_TYPES = {
     "input_sql",
     "input_table",
+    "input_excel",
+    "input_csv",
+    "input_csv_union",
     "join",
     "union",
     "filter",
@@ -80,35 +83,56 @@ def _resolve_output_path(output_path: str) -> str:
     return str(path)
 
 
-def _build_flow(flow_name: str, connection: Dict[str, Any], nodes: List[Dict[str, Any]]) -> tuple:
+def _build_flow(
+    flow_name: str,
+    connection: Dict[str, Any],
+    nodes: List[Dict[str, Any]],
+    is_packaged: bool = False,
+) -> tuple:
     """
     Internal helper: build TFL components from a declarative flow definition.
 
     Returns:
-        (flow, display, meta, node_id_map)
+        (flow, display, meta, node_id_map, file_conn_ids)
     """
     builder = TFLBuilder(flow_name=flow_name)
 
     # --- connection ---
-    conn_params = {
-        "host": connection.get("host", "localhost"),
-        "username": connection.get("username", ""),
-        "dbname": connection.get("dbname", ""),
-    }
-    if "port" in connection:
-        conn_params["port"] = str(connection["port"])
-    if "db_class" in connection:
-        conn_params["db_class"] = connection["db_class"]
-    if "authentication" in connection:
-        conn_params["authentication"] = connection["authentication"]
+    conn_type = connection.get("type", "database")
+    file_conn_ids: Dict[str, str] = {}  # filename -> conn_id
 
-    conn_id = builder.add_connection(**conn_params)
+    if conn_type == "database":
+        conn_params = {
+            "host": connection.get("host", "localhost"),
+            "username": connection.get("username", ""),
+            "dbname": connection.get("dbname", ""),
+        }
+        if "port" in connection:
+            conn_params["port"] = str(connection["port"])
+        if "db_class" in connection:
+            conn_params["db_class"] = connection["db_class"]
+        if "authentication" in connection:
+            conn_params["authentication"] = connection["authentication"]
+        conn_id = builder.add_connection(**conn_params)
+    elif conn_type == "file":
+        # File connections are created per-node (each file needs its own)
+        conn_id = None
+    else:
+        raise ValueError(f"Unknown connection type: '{conn_type}'. Use 'database' or 'file'.")
 
     # Resolve schema for input_table nodes
     schema = connection.get("schema", None)
 
     # Map user-supplied node names → internal IDs
     node_id_map: Dict[str, str] = {}
+
+    def _get_or_create_file_conn(filename: str) -> str:
+        """Get or create a file connection for the given filename."""
+        if filename not in file_conn_ids:
+            file_conn_ids[filename] = builder.add_file_connection(
+                filename, is_packaged=is_packaged
+            )
+        return file_conn_ids[filename]
 
     for node_def in nodes:
         ntype = node_def.get("type")
@@ -121,6 +145,36 @@ def _build_flow(flow_name: str, connection: Dict[str, Any], nodes: List[Dict[str
             nid = builder.add_input_table(
                 name, node_def["table"], conn_id,
                 schema=node_def.get("schema", schema),
+            )
+
+        elif ntype == "input_excel":
+            fc = _get_or_create_file_conn(node_def["filename"])
+            nid = builder.add_input_excel(
+                name, node_def["sheet"], fc,
+                fields=node_def.get("fields"),
+            )
+
+        elif ntype == "input_csv":
+            fc = _get_or_create_file_conn(node_def["filename"])
+            nid = builder.add_input_csv(
+                name, fc,
+                fields=node_def.get("fields"),
+                separator=node_def.get("separator", "A"),
+                locale=node_def.get("locale", "en_US"),
+                charset=node_def.get("charset", "UTF-8"),
+                contains_headers=node_def.get("contains_headers", True),
+            )
+
+        elif ntype == "input_csv_union":
+            fc = _get_or_create_file_conn(node_def["file_names"][0])
+            nid = builder.add_input_csv_union(
+                name, fc,
+                node_def["file_names"],
+                fields=node_def.get("fields"),
+                separator=node_def.get("separator", "A"),
+                locale=node_def.get("locale", "en_US"),
+                charset=node_def.get("charset", "UTF-8"),
+                contains_headers=node_def.get("contains_headers", True),
             )
 
         elif ntype == "join":
@@ -239,8 +293,8 @@ def _build_flow(flow_name: str, connection: Dict[str, Any], nodes: List[Dict[str
 
         node_id_map[name] = nid
 
-    flow, display, meta = builder.build()
-    return flow, display, meta, node_id_map
+    flow, display, meta = builder.build(is_packaged=is_packaged)
+    return flow, display, meta, node_id_map, file_conn_ids
 
 
 @mcp.tool()
@@ -249,56 +303,86 @@ def generate_tfl(
     connection: Dict[str, Any],
     nodes: List[Dict[str, Any]],
     output_path: str,
+    data_files: Optional[Dict[str, List[str]]] = None,
 ) -> str:
-    """Generate a Tableau Prep data flow (.tfl) file from a declarative flow definition.
+    """Generate a Tableau Prep data flow (.tfl/.tflx) file from a declarative flow definition.
 
     Args:
         flow_name: Display name for the flow in Tableau Prep.
-        connection: Database connection settings.
-            Required keys: host.
-            Conditionally required: username (required for mysql/postgres,
-                optional for sqlserver with sspi authentication),
-                dbname (required for mysql/postgres, often empty at
-                connection-level for sqlserver).
-            Optional keys: port (default depends on db_class),
-                db_class ("mysql"|"sqlserver"|"postgres", default "mysql"),
-                authentication ("sspi"|"sqlserver"|"", default ""),
-                schema (e.g. "dbo" for SQL Server input_table nodes).
+        connection: Connection settings. Must include a "type" key:
+            For type="database":
+                Required keys: host.
+                Conditionally required: username (required for mysql/postgres,
+                    optional for sqlserver with sspi authentication),
+                    dbname (required for mysql/postgres, often empty at
+                    connection-level for sqlserver).
+                Optional keys: port (default depends on db_class),
+                    db_class ("mysql"|"sqlserver"|"postgres", default "mysql"),
+                    authentication ("sspi"|"sqlserver"|"", default ""),
+                    schema (e.g. "dbo" for SQL Server input_table nodes).
+            For type="file":
+                No additional keys needed at this level. File connections
+                are created automatically from input_excel/input_csv nodes.
         nodes: Ordered list of node definitions. Each node is a dict with a
             "type" key and a "name" key (used to reference this node from
             downstream nodes). Additional keys depend on the node type:
 
-            - input_sql:      sql (str)
-            - input_table:    table (str)
-            - join:           left, right (node names), left_col, right_col, join_type?
-            - union:          parents (list of node names)
-            - filter:         parent (node name), expression (str)
-            - value_filter:   parent, field, values (list), exclude? (bool)
-            - calculation:    parent, column_name, formula
-            - aggregate:      parent, group_by (list), aggregations? (list of {field, function, output_name?})
-            - keep_only:      parent, columns (list)
-            - remove_columns: parent, columns (list)
-            - rename:         parent, renames ({old: new})
-            - pivot:          parent, pivot_column, aggregate_column, new_columns, group_by?, aggregation?
-            - unpivot:        parent, columns_to_unpivot, name_column?, value_column?
-            - quick_calc:     parent, column_name, calc_type (lowercase|uppercase|titlecase|trim_spaces|remove_extra_spaces|remove_all_spaces|remove_letters|remove_punctuation)
-            - change_type:    parent, fields ({column: target_type})
+            - input_sql:        sql (str)
+            - input_table:      table (str)
+            - input_excel:      filename, sheet (str), fields? (list)
+            - input_csv:        filename, fields? (list), separator?, locale?, charset?, contains_headers?
+            - input_csv_union:  file_names (list of str), fields? (list), separator?, locale?, charset?, contains_headers?
+            - join:             left, right (node names), left_col, right_col, join_type?
+            - union:            parents (list of node names)
+            - filter:           parent (node name), expression (str)
+            - value_filter:     parent, field, values (list), exclude? (bool)
+            - calculation:      parent, column_name, formula
+            - aggregate:        parent, group_by (list), aggregations? (list of {field, function, output_name?})
+            - keep_only:        parent, columns (list)
+            - remove_columns:   parent, columns (list)
+            - rename:           parent, renames ({old: new})
+            - pivot:            parent, pivot_column, aggregate_column, new_columns, group_by?, aggregation?
+            - unpivot:          parent, columns_to_unpivot, name_column?, value_column?
+            - quick_calc:       parent, column_name, calc_type (lowercase|uppercase|titlecase|trim_spaces|remove_extra_spaces|remove_all_spaces|remove_letters|remove_punctuation)
+            - change_type:      parent, fields ({column: target_type})
             - duplicate_column: parent, source_column, new_column_name?
-            - output_server:  parent, datasource_name, project_name?, server_url?
-        output_path: File path for the generated .tfl file (e.g. "./output/my_flow.tfl").
+            - output_server:    parent, datasource_name, project_name?, server_url?
+        output_path: File path for the generated flow file.
+            Use .tfl extension for standard flows.
+            Use .tflx extension for packaged flows with embedded data files.
+        data_files: Optional dict mapping filenames to list of absolute source
+            file paths. Required when output_path ends with .tflx.
+            Example: {"orders.xlsx": ["C:/data/orders.xlsx"]}
 
     Returns:
         A summary string with the output file path and node count.
     """
     resolved = _resolve_output_path(output_path)
-    folder = resolved.rsplit(".", 1)[0]  # strip .tfl extension for temp folder
+    folder = resolved.rsplit(".", 1)[0]  # strip extension for temp folder
+    is_tflx = resolved.lower().endswith(".tflx")
 
-    flow, display, meta, node_map = _build_flow(flow_name, connection, nodes)
-    TFLPackager.save_to_folder(folder, flow, display, meta)
-    TFLPackager.pack_zip(folder, resolved)
+    flow, display, meta, node_map, file_conn_ids = _build_flow(
+        flow_name, connection, nodes, is_packaged=is_tflx
+    )
 
+    # Build data_files mapping: {connection_id: [file_paths]}
+    packager_data = None
+    if is_tflx and data_files:
+        packager_data = {}
+        for filename, file_paths in data_files.items():
+            if filename in file_conn_ids:
+                packager_data[file_conn_ids[filename]] = file_paths
+
+    TFLPackager.save_to_folder(folder, flow, display, meta, data_files=packager_data)
+
+    if is_tflx:
+        TFLPackager.pack_tflx(folder, resolved)
+    else:
+        TFLPackager.pack_zip(folder, resolved)
+
+    ext_label = "TFLX" if is_tflx else "TFL"
     return (
-        f"Successfully generated TFL file: {resolved}\n"
+        f"Successfully generated {ext_label} file: {resolved}\n"
         f"Flow name: {flow_name}\n"
         f"Total nodes: {len(node_map)}\n"
         f"Nodes: {', '.join(node_map.keys())}"
@@ -315,15 +399,45 @@ def list_supported_operations() -> str:
     operations = [
         {
             "type": "input_sql",
-            "description": "SQL query input node",
+            "description": "SQL query input node (database connection)",
             "required": ["name", "sql"],
             "optional": [],
         },
         {
             "type": "input_table",
-            "description": "Direct table input node (no custom SQL)",
+            "description": "Direct table input node (database connection, no custom SQL)",
             "required": ["name", "table"],
             "optional": [],
+        },
+        {
+            "type": "input_excel",
+            "description": "Excel file input node (file connection)",
+            "required": ["name", "filename", "sheet"],
+            "optional": [{"fields": "list of {name, type}"}],
+        },
+        {
+            "type": "input_csv",
+            "description": "CSV file input node (file connection)",
+            "required": ["name", "filename"],
+            "optional": [
+                {"fields": "list of {name, type}"},
+                {"separator": "str (default: A=auto)"},
+                {"locale": "str (default: en_US)"},
+                {"charset": "str (default: UTF-8)"},
+                {"contains_headers": "bool (default: true)"},
+            ],
+        },
+        {
+            "type": "input_csv_union",
+            "description": "CSV union input node (merge multiple CSV files)",
+            "required": ["name", "file_names (list)"],
+            "optional": [
+                {"fields": "list of {name, type}"},
+                {"separator": "str (default: A=auto)"},
+                {"locale": "str (default: en_US)"},
+                {"charset": "str (default: UTF-8)"},
+                {"contains_headers": "bool (default: true)"},
+            ],
         },
         {
             "type": "join",
@@ -465,23 +579,28 @@ def validate_flow_definition(
     if not flow_name:
         errors.append("flow_name is required.")
     
-    db_class = connection.get("db_class", "mysql")
+    conn_type = connection.get("type", "database")
     
-    # host is always required
-    if "host" not in connection or not connection["host"]:
-        errors.append("connection.host is required.")
-    
-    # username & dbname requirements depend on db_class
-    if db_class == "sqlserver":
-        auth = connection.get("authentication", "")
-        # sqlserver with username/password auth requires username
-        if auth == "sqlserver" and not connection.get("username"):
-            errors.append("connection.username is required for sqlserver authentication.")
-    else:
-        # mysql, postgres, etc. always require username and dbname
-        for key in ("username", "dbname"):
-            if key not in connection or not connection[key]:
-                errors.append(f"connection.{key} is required.")
+    if conn_type == "database":
+        db_class = connection.get("db_class", "mysql")
+        
+        # host is always required
+        if "host" not in connection or not connection["host"]:
+            errors.append("connection.host is required.")
+        
+        # username & dbname requirements depend on db_class
+        if db_class == "sqlserver":
+            auth = connection.get("authentication", "")
+            # sqlserver with username/password auth requires username
+            if auth == "sqlserver" and not connection.get("username"):
+                errors.append("connection.username is required for sqlserver authentication.")
+        else:
+            # mysql, postgres, etc. always require username and dbname
+            for key in ("username", "dbname"):
+                if key not in connection or not connection[key]:
+                    errors.append(f"connection.{key} is required.")
+    elif conn_type != "file":
+        errors.append(f"Unknown connection type: '{conn_type}'. Use 'database' or 'file'.")
 
     # Validate nodes
     if not nodes:
@@ -493,6 +612,9 @@ def validate_flow_definition(
     _required_fields = {
         "input_sql": ["sql"],
         "input_table": ["table"],
+        "input_excel": ["filename", "sheet"],
+        "input_csv": ["filename"],
+        "input_csv_union": ["file_names"],
         "join": ["left", "right", "left_col", "right_col"],
         "union": ["parents"],
         "filter": ["parent", "expression"],

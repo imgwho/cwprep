@@ -1,7 +1,26 @@
 # Project Changelog
 
 ### Current Status
-SDK v0.4.0 - Multi-database connection support: SQL Server (SSPI + username), PostgreSQL, extensible profile architecture.
+SDK v0.4.1 - Excel/CSV file connections, TFLX packaging, multi-column join support.
+
+---
+
+## v0.4.1 (2026-02-26)
+
+### Added
+- **Excel File Connection** `add_file_connection()`: Auto-detects `.xlsx`/`.xls` → `excel-direct`, `.csv` → `textscan`. Handles path/directory attributes for TFL vs basename-only for TFLX.
+- **Excel Input** `add_input_excel()`: Read from Excel worksheets (`.v1.LoadExcel` node type).
+- **CSV Input** `add_input_csv()`: Read from CSV files (`.v1.LoadCsv` node type) with configurable separator, locale, charset.
+- **CSV Union** `add_input_csv_union()`: Merge multiple CSV files (`.v1.LoadCsvInputUnion` node type).
+- **TFLX Packaging**: `build(is_packaged=True)` + `TFLPackager.pack_tflx()` — generate `.tflx` files with embedded data in `Data/{connection_id}/` structure.
+- **Multi-column Join**: `add_join()` now accepts `List[str]` for `left_col`/`right_col` to generate multiple join conditions.
+- **MCP Server**: Full integration — `generate_tfl` supports `.tflx` output with `data_files` parameter; file connection types in `_NODE_TYPES`, `list_supported_operations`, and `validate_flow_definition`.
+- **Tests**: 10 new test cases (file connections, CSV nodes, multi-column join, packaged/non-packaged paths).
+
+### Fixed
+- **Excel connection** no longer includes invalid `cleaning`/`interpretationMode` attributes.
+- **CSV input node** `connectionAttributes` changed to empty `{}` (matches Tableau Prep actual format).
+- **TFLX packaging** correctly stores basename-only filenames in packaged connections.
 
 ---
 

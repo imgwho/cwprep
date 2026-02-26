@@ -54,9 +54,13 @@ TFLPackager.pack_zip("./output", "./my_flow.tfl")
 | Feature | Method | Description |
 |---------|--------|-------------|
 | Database Connection | `add_connection()` | Connect to MySQL/PostgreSQL/SQL Server |
+| File Connection | `add_file_connection()` | Connect to Excel (.xlsx/.xls) or CSV files |
 | SQL Input | `add_input_sql()` | Custom SQL query input |
 | Table Input | `add_input_table()` | Direct table connection |
-| Join | `add_join()` | left/right/inner/full joins |
+| Excel Input | `add_input_excel()` | Read from Excel worksheet |
+| CSV Input | `add_input_csv()` | Read from CSV file |
+| CSV Union | `add_input_csv_union()` | Merge multiple CSV files |
+| Join | `add_join()` | left/right/inner/full joins (single or multi-column) |
 | Union | `add_union()` | Merge multiple tables |
 | Filter | `add_filter()` | Expression-based filter |
 | Value Filter | `add_value_filter()` | Keep/exclude by values |
@@ -71,6 +75,7 @@ TFLPackager.pack_zip("./output", "./my_flow.tfl")
 | Pivot | `add_pivot()` | Rows to columns |
 | Unpivot | `add_unpivot()` | Columns to rows |
 | Output | `add_output_server()` | Publish to Tableau Server |
+| TFLX Packaging | `build(is_packaged=True)` | Generate .tflx with embedded data files |
 
 ## Examples
 
@@ -240,7 +245,7 @@ Then configure your client with the endpoint: `http://your-server-ip:8000/mcp`
 
 | Type | Name | Description |
 |------|------|-------------|
-| 🔧 Tool | `generate_tfl` | Generate .tfl file from flow definition |
+| 🔧 Tool | `generate_tfl` | Generate .tfl/.tflx file from flow definition |
 | 🔧 Tool | `list_supported_operations` | List all supported node types |
 | 🔧 Tool | `validate_flow_definition` | Validate flow definition before generating |
 | 📖 Resource | `cwprep://docs/api-reference` | SDK API reference |

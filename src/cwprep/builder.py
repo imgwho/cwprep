@@ -15,8 +15,9 @@ Usage:
     flow, display, meta = builder.build()
 """
 
+import os
 import uuid
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union as TypingUnion
 
 from .config import TFLConfig, DEFAULT_CONFIG, DatabaseConfig
 
@@ -271,14 +272,358 @@ class TFLBuilder:
         self.initial_nodes.append(node_id)
         return node_id
 
+    # -----------------------------------------------------------------------
+    # File-based connections (Excel / CSV)
+    # -----------------------------------------------------------------------
+
+    def add_file_connection(
+        self,
+        filename: str,
+        file_class: str = "auto",
+        is_packaged: bool = False,
+    ) -> str:
+        """
+        Add file connection (Excel or CSV)
+        
+        Args:
+            filename: File name or full path (e.g. "orders.xlsx",
+                      "C:/data/orders.xlsx")
+            file_class: File type. "excel-direct" for Excel, "textscan" for CSV.
+                        Default "auto" detects from extension.
+            is_packaged: Whether the data file is embedded in tflx.
+                         When True, only the base filename is stored.
+                         When False, the full path and directory are stored.
+            
+        Returns:
+            str: Connection ID, used by subsequent input nodes
+        """
+        conn_id = str(uuid.uuid4())
+
+        # Auto-detect class from file extension
+        if file_class == "auto":
+            lower = filename.lower()
+            if lower.endswith((".xlsx", ".xls")):
+                file_class = "excel-direct"
+            elif lower.endswith(".csv"):
+                file_class = "textscan"
+            else:
+                raise ValueError(
+                    f"Cannot auto-detect file class for '{filename}'. "
+                    "Use file_class='excel-direct' or 'textscan'."
+                )
+
+        # Determine display name (always basename)
+        base_name = os.path.basename(filename)
+
+        if is_packaged:
+            # Packaged (tflx): store only basename
+            connection_attrs = {
+                "filename": base_name,
+                "class": file_class,
+            }
+        else:
+            # Non-packaged (tfl): store full path + directory
+            full_path = os.path.abspath(filename)
+            directory = os.path.dirname(full_path)
+            connection_attrs = {
+                "filename": full_path,
+                "class": file_class,
+                "directory": directory,
+            }
+
+        self.connections[conn_id] = {
+            "connectionType": ".v1.SqlConnection",
+            "id": conn_id,
+            "name": base_name,
+            "isPackaged": is_packaged,
+            "connectionAttributes": connection_attrs,
+        }
+        return conn_id
+
+    def add_input_excel(
+        self,
+        name: str,
+        sheet_name: str,
+        connection_id: str,
+        fields: List[Dict[str, Any]] = None,
+    ) -> str:
+        """
+        Add Excel input node
+        
+        Args:
+            name: Node name
+            sheet_name: Excel sheet name (e.g. "Sheet1")
+            connection_id: File connection ID (from add_file_connection)
+            fields: Optional list of field definitions, each dict has:
+                    {"name": str, "type": str} (type: string/integer/real/date/datetime)
+            
+        Returns:
+            str: Node ID, used by subsequent operations
+        """
+        node_id = str(uuid.uuid4())
+        self._input_count += 1
+        self._node_order.append({"id": node_id, "type": "input", "y_hint": self._input_count})
+
+        # Build fields list
+        field_list = None
+        if fields:
+            field_list = []
+            for i, f in enumerate(fields):
+                field_list.append({
+                    "name": f["name"],
+                    "type": f.get("type", "string"),
+                    "collation": f.get("collation"),
+                    "caption": f.get("caption", ""),
+                    "ordinal": i,
+                    "isGenerated": False,
+                })
+
+        self.nodes[node_id] = {
+            "nodeType": ".v1.LoadExcel",
+            "name": name,
+            "id": node_id,
+            "baseType": "input",
+            "nextNodes": [],
+            "serialize": False,
+            "description": None,
+            "connectionId": connection_id,
+            "connectionAttributes": {},
+            "fields": field_list or [],
+            "actions": [],
+            "debugModeRowLimit": None,
+            "originalDataTypes": {},
+            "randomSampling": None,
+            "updateTimestamp": None,
+            "restrictedFields": {},
+            "userRenamedFields": {},
+            "selectedFields": None,
+            "samplingType": None,
+            "groupByFields": None,
+            "filters": [],
+            "relation": {
+                "type": "table",
+                "table": f"[{sheet_name}$]",
+            },
+        }
+        self.initial_nodes.append(node_id)
+        return node_id
+
+    def add_input_csv(
+        self,
+        name: str,
+        connection_id: str,
+        fields: List[Dict[str, Any]] = None,
+        separator: str = "A",
+        locale: str = "en_US",
+        charset: str = "UTF-8",
+        contains_headers: bool = True,
+        text_qualifier: str = "A",
+    ) -> str:
+        """
+        Add CSV input node
+        
+        Args:
+            name: Node name
+            connection_id: File connection ID (from add_file_connection)
+            fields: Optional list of field definitions
+            separator: Separator type ("A" = auto-detect, "," = comma, etc.)
+            locale: Locale string (e.g. "en_US", "zh_CN")
+            charset: Character encoding (e.g. "UTF-8")
+            contains_headers: Whether the CSV file has header row
+            text_qualifier: Text qualifier ("A" = auto-detect)
+            
+        Returns:
+            str: Node ID, used by subsequent operations
+        """
+        node_id = str(uuid.uuid4())
+        self._input_count += 1
+        self._node_order.append({"id": node_id, "type": "input", "y_hint": self._input_count})
+
+        # Get filename from connection
+        conn_filename = ""
+        if connection_id in self.connections:
+            conn_attrs = self.connections[connection_id].get("connectionAttributes", {})
+            conn_filename = conn_attrs.get("filename", "")
+
+        # Build fields list
+        field_list = None
+        if fields:
+            field_list = []
+            for f in fields:
+                field_list.append({
+                    "name": f["name"],
+                    "type": f.get("type", "string"),
+                    "collation": f.get("collation"),
+                    "caption": None,
+                    "ordinal": None,
+                    "isGenerated": False,
+                })
+
+        self.nodes[node_id] = {
+            "nodeType": ".v1.LoadCsv",
+            "name": name,
+            "id": node_id,
+            "baseType": "input",
+            "nextNodes": [],
+            "serialize": False,
+            "description": None,
+            "connectionId": connection_id,
+            "connectionAttributes": {},
+            "fields": field_list or [],
+            "actions": [],
+            "debugModeRowLimit": None,
+            "originalDataTypes": {},
+            "randomSampling": None,
+            "updateTimestamp": None,
+            "restrictedFields": {},
+            "userRenamedFields": {},
+            "selectedFields": None,
+            "samplingType": None,
+            "groupByFields": None,
+            "filters": [],
+            "separator": separator,
+            "locale": locale,
+            "charSet": charset,
+            "containsHeaders": contains_headers,
+            "textQualifier": text_qualifier,
+        }
+        self.initial_nodes.append(node_id)
+        return node_id
+
+    def add_input_csv_union(
+        self,
+        name: str,
+        connection_id: str,
+        file_names: List[str],
+        fields: List[Dict[str, Any]] = None,
+        separator: str = "A",
+        locale: str = "en_US",
+        charset: str = "UTF-8",
+        contains_headers: bool = True,
+        text_qualifier: str = "A",
+    ) -> str:
+        """
+        Add CSV union input node (merge multiple CSV files from same directory)
+        
+        Args:
+            name: Node name
+            connection_id: File connection ID (from add_file_connection)
+            file_names: List of CSV file names to union
+            fields: Optional shared field definitions (applied to all files)
+            separator: Separator type
+            locale: Locale string
+            charset: Character encoding
+            contains_headers: Whether CSV files have header row
+            text_qualifier: Text qualifier
+            
+        Returns:
+            str: Node ID, used by subsequent operations
+        """
+        if len(file_names) < 1:
+            raise ValueError("csv_union requires at least 1 file name")
+
+        node_id = str(uuid.uuid4())
+        self._input_count += 1
+        self._node_order.append({"id": node_id, "type": "input", "y_hint": self._input_count})
+
+        # Build shared fields list
+        field_list = []
+        if fields:
+            for f in fields:
+                field_list.append({
+                    "name": f["name"],
+                    "type": f.get("type", "string"),
+                    "collation": f.get("collation"),
+                    "caption": None,
+                    "ordinal": None,
+                    "isGenerated": False,
+                })
+
+        # Build generated inputs (one LoadCsv per file)
+        generated_inputs = []
+        for fname in file_names:
+            sub_node_id = str(uuid.uuid4())
+            # Build per-file fields (same structure)
+            sub_fields = []
+            if fields:
+                for f in fields:
+                    sub_fields.append({
+                        "name": f["name"],
+                        "type": f.get("type", "string"),
+                        "collation": f.get("collation"),
+                        "caption": None,
+                        "ordinal": None,
+                        "isGenerated": False,
+                    })
+
+            generated_inputs.append({
+                "inputUnionInputType": ".FileInputUnionInput",
+                "inputNode": {
+                    "nodeType": ".v1.LoadCsv",
+                    "name": name,
+                    "id": sub_node_id,
+                    "baseType": "input",
+                    "nextNodes": [],
+                    "serialize": False,
+                    "description": None,
+                    "connectionId": connection_id,
+                    "connectionAttributes": {},
+                    "fields": sub_fields,
+                    "actions": [],
+                    "debugModeRowLimit": None,
+                    "originalDataTypes": {},
+                    "randomSampling": None,
+                    "updateTimestamp": None,
+                    "restrictedFields": None,
+                    "userRenamedFields": {},
+                    "selectedFields": None,
+                    "samplingType": None,
+                    "groupByFields": None,
+                    "filters": None,
+                    "separator": separator,
+                    "locale": locale,
+                    "charSet": charset,
+                    "containsHeaders": contains_headers,
+                    "textQualifier": text_qualifier,
+                },
+                "filePath": fname,
+            })
+
+        self.nodes[node_id] = {
+            "nodeType": ".v1.LoadCsvInputUnion",
+            "name": name,
+            "id": node_id,
+            "baseType": "input",
+            "nextNodes": [],
+            "serialize": False,
+            "description": None,
+            "connectionId": connection_id,
+            "connectionAttributes": {},
+            "fields": field_list,
+            "actions": [],
+            "debugModeRowLimit": None,
+            "originalDataTypes": {},
+            "randomSampling": None,
+            "updateTimestamp": None,
+            "restrictedFields": {},
+            "userRenamedFields": {},
+            "selectedFields": None,
+            "samplingType": None,
+            "groupByFields": None,
+            "filters": [],
+            "generatedInputs": generated_inputs,
+        }
+        self.initial_nodes.append(node_id)
+        return node_id
+
 
     def add_join(
         self, 
         name: str, 
         left_id: str, 
         right_id: str, 
-        left_col: str, 
-        right_col: str, 
+        left_col: TypingUnion[str, List[str]], 
+        right_col: TypingUnion[str, List[str]], 
         join_type: str = "left"
     ) -> str:
         """
@@ -288,8 +633,10 @@ class TFLBuilder:
             name: Join node name
             left_id: Left table node ID
             right_id: Right table node ID
-            left_col: Left table join column name
-            right_col: Right table join column name
+            left_col: Left table join column name(s). Can be a single string
+                      or a list of strings for multi-column joins.
+            right_col: Right table join column name(s). Must match the format
+                       of left_col (both str or both list of same length).
             join_type: Join type ("left", "right", "inner", "full")
             
         Returns:
@@ -308,6 +655,26 @@ class TFLBuilder:
             }
         }
         
+        # Normalize to lists for multi-column join support
+        if isinstance(left_col, str):
+            left_col = [left_col]
+        if isinstance(right_col, str):
+            right_col = [right_col]
+        if len(left_col) != len(right_col):
+            raise ValueError(
+                f"left_col has {len(left_col)} columns but right_col has "
+                f"{len(right_col)} columns. They must be the same length."
+            )
+        
+        conditions = [
+            {
+                "leftExpression": f"[{lc}]",
+                "rightExpression": f"[{rc}]",
+                "comparator": "==",
+            }
+            for lc, rc in zip(left_col, right_col)
+        ]
+        
         self.nodes[node_id] = {
             "nodeType": ".v2018_2_3.SuperJoin", "name": name, "id": node_id,
             "baseType": "superNode", "nextNodes": [], "serialize": False, "description": None,
@@ -316,7 +683,7 @@ class TFLBuilder:
             "actionNode": {
                 "nodeType": ".v1.SimpleJoin", "name": name, "id": str(uuid.uuid4()),
                 "baseType": "transform", "nextNodes": [], "serialize": False, "description": None,
-                "conditions": [{"leftExpression": f"[{left_col}]", "rightExpression": f"[{right_col}]", "comparator": "=="}],
+                "conditions": conditions,
                 "joinType": join_type
             }
         }
@@ -1203,13 +1570,24 @@ class TFLBuilder:
         
         return layout
 
-    def build(self) -> tuple:
+    def build(self, is_packaged: bool = False) -> tuple:
         """
         Build final TFL file components
+        
+        Args:
+            is_packaged: If True, marks the flow as a packaged document (tflx)
+                         and sets isPackaged=True on all file-based connections.
         
         Returns:
             tuple: (flow, displaySettings, maestroMetadata) three JSON objects
         """
+        # When building for tflx, mark all file connections as packaged
+        if is_packaged:
+            for conn in self.connections.values():
+                conn_class = conn.get("connectionAttributes", {}).get("class", "")
+                if conn_class in ("excel-direct", "textscan"):
+                    conn["isPackaged"] = True
+
         connection_ids = list(self.connections.keys())
         
         flow = {
@@ -1251,7 +1629,7 @@ class TFLBuilder:
             "majorVersion": 1, "minorVersion": 0,
             "flowEntryName": "flow", 
             "displaySettingsEntryName": "displaySettings",
-            "isPackagedMaestroDocument": False,
+            "isPackagedMaestroDocument": is_packaged,
             "documentFeaturesUsedInDocument": [
                 {
                     "id": f, 
