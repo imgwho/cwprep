@@ -23,9 +23,78 @@ import json
 import zipfile
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Set
 
 from .expression_translator import ExpressionTranslator
+
+
+class ColumnTracker:
+    """Tracks known columns for each CTE in the flow DAG.
+    
+    Status can be:
+        - "UNKNOWN": We don't know the full schema (results in SELECT *).
+        - "KNOWN": We know exactly which columns exist (results in SELECT a, b...).
+    """
+    def __init__(self, hidden_columns: Optional[Dict[str, Set[str]]] = None):
+        # Maps CTE name -> {"status": "KNOWN"|"UNKNOWN", "columns": set[str]}
+        self.cte_states: Dict[str, Dict[str, Any]] = {}
+        # Maps node_id -> set of hidden field names
+        self.hidden_columns: Dict[str, Set[str]] = hidden_columns or {}
+
+    def set_state(self, cte_name: str, status: str, columns: Set[str]):
+        """Set the exact known state for a CTE."""
+        self.cte_states[cte_name] = {
+            "status": status,
+            "columns": set(columns)
+        }
+
+    def get_state(self, cte_name: str) -> Tuple[str, Set[str]]:
+        """Get the state for a CTE. Defaults to UNKNOWN."""
+        state = self.cte_states.get(cte_name, {"status": "UNKNOWN", "columns": set()})
+        return state["status"], set(state["columns"])
+
+    def get_hidden_for_node(self, node_id: str) -> Set[str]:
+        """Get the set of hidden field names for a node."""
+        return self.hidden_columns.get(node_id, set())
+
+    def merge_states(self, cte_names: List[str]) -> Tuple[str, Set[str]]:
+        """Merge multiple upstream states (e.g. for Union/Join).
+        If any upstream is UNKNOWN, the result is UNKNOWN.
+        """
+        if not cte_names:
+            return "UNKNOWN", set()
+            
+        all_cols = set()
+        for cte in cte_names:
+            status, cols = self.get_state(cte)
+            if status == "UNKNOWN":
+                return "UNKNOWN", set()
+            all_cols.update(cols)
+            
+        return "KNOWN", all_cols
+
+    @staticmethod
+    def parse_hidden_columns(display_settings: Dict[str, Any]) -> Dict[str, Set[str]]:
+        """Parse hiddenColumns from displaySettings.
+        
+        Format: ["nodeId-fieldName", ...]
+        Returns: {node_id: {field1, field2, ...}}
+        """
+        result: Dict[str, Set[str]] = {}
+        for entry in display_settings.get("hiddenColumns", []):
+            # Format: "uuid-fieldName" — the UUID is 36 chars (8-4-4-4-12)
+            if len(entry) > 37 and entry[36] == "-":
+                node_id = entry[:36]
+                field_name = entry[37:]
+            else:
+                parts = entry.split("-", 5)
+                if len(parts) >= 6:
+                    node_id = "-".join(parts[:5])
+                    field_name = "-".join(parts[5:])
+                else:
+                    continue
+            result.setdefault(node_id, set()).add(field_name)
+        return result
 
 
 # Node type icons for human-readable comments
@@ -67,12 +136,15 @@ class SQLTranslator:
         self,
         flow: Dict[str, Any],
         flow_name: str = "",
+        display_settings: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Translate a flow JSON dict to SQL.
 
         Args:
             flow: Flow JSON dict (from builder.build() or .tfl archive)
             flow_name: Optional flow name for the header comment
+            display_settings: Optional displaySettings dict from TFL
+                (used to parse hiddenColumns for optimization)
 
         Returns:
             ANSI SQL string with CTEs
@@ -87,10 +159,16 @@ class SQLTranslator:
         # Build the DAG and get topological order
         ordered_ids = self._topological_sort(nodes, initial_nodes)
 
+        # Parse hidden columns from displaySettings
+        hidden_map = {}
+        if display_settings:
+            hidden_map = ColumnTracker.parse_hidden_columns(display_settings)
+
         # Generate CTE for each node
         cte_entries: List[Dict[str, Any]] = []
         cte_name_map: Dict[str, str] = {}  # node_id → cte_name
         name_counter: Dict[str, int] = defaultdict(int)
+        tracker = ColumnTracker(hidden_columns=hidden_map)
 
         for node_id in ordered_ids:
             node = nodes[node_id]
@@ -98,7 +176,7 @@ class SQLTranslator:
             cte_name_map[node_id] = cte_name
 
             entry = self._translate_node(
-                node, node_id, connections, cte_name_map, nodes
+                node, node_id, connections, cte_name_map, nodes, tracker
             )
             entry["cte_name"] = cte_name
             cte_entries.append(entry)
@@ -115,23 +193,37 @@ class SQLTranslator:
         Returns:
             ANSI SQL string with CTEs
         """
+        flow = {}
+        display_settings = None
+        flow_name = ""
+
         with zipfile.ZipFile(tfl_path, "r") as zf:
-            # The flow JSON is typically stored as "flow" in the ZIP
+            names = zf.namelist()
+
+            # Read flow JSON
             with zf.open("flow") as f:
                 flow = json.loads(f.read().decode("utf-8"))
 
-        # Try to extract flow name from metadata
-        flow_name = ""
-        try:
-            with zipfile.ZipFile(tfl_path, "r") as zf:
-                if "maestroMetadata" in zf.namelist():
+            # Read displaySettings (contains hiddenColumns)
+            if "displaySettings" in names:
+                try:
+                    with zf.open("displaySettings") as f:
+                        display_settings = json.loads(f.read().decode("utf-8"))
+                except Exception:
+                    pass
+
+            # Read metadata for flow name
+            if "maestroMetadata" in names:
+                try:
                     with zf.open("maestroMetadata") as f:
                         meta = json.loads(f.read().decode("utf-8"))
                         flow_name = meta.get("flowEntryName", "")
-        except Exception:
-            pass
+                except Exception:
+                    pass
 
-        return self.translate_flow(flow, flow_name=flow_name)
+        return self.translate_flow(
+            flow, flow_name=flow_name, display_settings=display_settings
+        )
 
     # ==================================================================
     # DAG traversal
@@ -226,54 +318,59 @@ class SQLTranslator:
         connections: Dict[str, Any],
         cte_name_map: Dict[str, str],
         all_nodes: Dict[str, Any],
+        tracker: ColumnTracker,
     ) -> Dict[str, Any]:
-        """Translate a single node to a CTE entry dict.
-
-        Returns dict with keys:
-            - cte_name: str (filled by caller)
-            - sql: str (the CTE body)
-            - comment: str (human-readable description)
-            - icon: str (emoji icon)
-            - node_type: str
-            - node_name: str
-        """
+        """Translate a single node to a CTE entry dict."""
         node_type = node.get("nodeType", "")
         base_type = node.get("baseType", "")
         node_name = node.get("name", "")
+        cte_name = cte_name_map.get(node_id, "unknown_cte")
 
-        # Input nodes
-        if node_type == ".v1.LoadSql":
-            return self._translate_input_sql(node, connections)
-        if node_type == ".v1.LoadExcel":
-            return self._translate_input_file(node, connections, "Excel")
-        if node_type in (".v1.LoadCsv", ".v1.LoadCsvInputUnion"):
-            return self._translate_input_file(node, connections, "CSV")
+        # Input nodes — try to extract fields for KNOWN state
+        if node_type in (".v1.LoadSql", ".v1.LoadExcel", ".v1.LoadCsv", ".v1.LoadCsvInputUnion"):
+            fields = node.get("fields", [])
+            hidden = tracker.get_hidden_for_node(node_id)
+            if fields:
+                field_names = {f.get("name", "") for f in fields if f.get("name")}
+                visible_fields = field_names - hidden
+                tracker.set_state(cte_name, "KNOWN", visible_fields)
+            else:
+                tracker.set_state(cte_name, "UNKNOWN", set())
+
+            if node_type == ".v1.LoadSql":
+                return self._translate_input_sql(node, connections)
+            elif node_type == ".v1.LoadExcel":
+                return self._translate_input_file(node, connections, "Excel")
+            else:
+                return self._translate_input_file(node, connections, "CSV")
 
         # Join
         if node_type == ".v2018_2_3.SuperJoin":
-            return self._translate_join(node, cte_name_map, all_nodes)
+            return self._translate_join(node, cte_name, cte_name_map, all_nodes, tracker)
 
         # Union
         if node_type == ".v2018_2_3.SuperUnion":
-            return self._translate_union(node, cte_name_map, all_nodes)
+            return self._translate_union(node, cte_name, cte_name_map, all_nodes, tracker)
 
         # Aggregate
         if node_type == ".v2018_2_3.SuperAggregate":
-            return self._translate_aggregate(node, cte_name_map, all_nodes)
+            return self._translate_aggregate(node, cte_name, cte_name_map, all_nodes, tracker)
 
         # Pivot / Unpivot — unsupported
         if node_type in (".v2018_3_3.SuperPivot", ".v2018_2_3.SuperUnpivot"):
+            tracker.set_state(cte_name, "UNKNOWN", set())
             return self._translate_unsupported_node(node, node_type)
 
         # Clean step (Container)
         if node_type == ".v1.Container":
-            return self._translate_container(node, cte_name_map, all_nodes)
+            return self._translate_container(node, cte_name, cte_name_map, all_nodes, tracker)
 
         # Output
         if node_type == ".v1.PublishExtract":
             return self._translate_output(node, cte_name_map, all_nodes)
 
         # Fallback
+        tracker.set_state(cte_name, "UNKNOWN", set())
         return {
             "sql": "SELECT 1 /* unknown node type */",
             "comment": f"未知节点类型: {node_type}",
@@ -338,8 +435,10 @@ class SQLTranslator:
     def _translate_join(
         self,
         node: Dict[str, Any],
+        cte_name: str,
         cte_name_map: Dict[str, str],
         all_nodes: Dict[str, Any],
+        tracker: ColumnTracker,
     ) -> Dict[str, Any]:
         node_name = node.get("name", "")
         action_node = node.get("actionNode", {})
@@ -386,6 +485,10 @@ class SQLTranslator:
             f"-- 条件: {cond_desc}"
         )
 
+        # Update column tracker
+        j_status, j_cols = tracker.merge_states([left_cte, right_cte])
+        tracker.set_state(cte_name, j_status, j_cols)
+
         return {
             "sql": sql,
             "comment": comment,
@@ -421,8 +524,10 @@ class SQLTranslator:
     def _translate_union(
         self,
         node: Dict[str, Any],
+        cte_name: str,
         cte_name_map: Dict[str, str],
         all_nodes: Dict[str, Any],
+        tracker: ColumnTracker,
     ) -> Dict[str, Any]:
         node_name = node.get("name", "")
 
@@ -438,6 +543,10 @@ class SQLTranslator:
         sql = "\n    UNION ALL\n    ".join(union_parts)
 
         comment = f"合并: {', '.join(parent_ctes)}"
+
+        # Update column tracker
+        u_status, u_cols = tracker.merge_states(parent_ctes)
+        tracker.set_state(cte_name, u_status, u_cols)
 
         return {
             "sql": sql,
@@ -468,8 +577,10 @@ class SQLTranslator:
     def _translate_aggregate(
         self,
         node: Dict[str, Any],
+        cte_name: str,
         cte_name_map: Dict[str, str],
         all_nodes: Dict[str, Any],
+        tracker: ColumnTracker,
     ) -> Dict[str, Any]:
         node_name = node.get("name", "")
         action_node = node.get("actionNode", {})
@@ -513,6 +624,15 @@ class SQLTranslator:
             f"-- 聚合: {agg_desc}"
         )
 
+        # Aggregate always outputs specific columns -> KNOWN
+        out_cols = set(group_cols)
+        for agg in agg_fields:
+            col = agg.get("columnName", "")
+            func = agg.get("function", "COUNT")
+            output = agg.get("newColumnName") or f"{func}_{col}"
+            out_cols.add(output)
+        tracker.set_state(cte_name, "KNOWN", out_cols)
+
         return {
             "sql": sql,
             "comment": comment,
@@ -528,14 +648,21 @@ class SQLTranslator:
     def _translate_container(
         self,
         node: Dict[str, Any],
+        cte_name: str,
         cte_name_map: Dict[str, str],
         all_nodes: Dict[str, Any],
+        tracker: ColumnTracker,
     ) -> Dict[str, Any]:
         node_name = node.get("name", "")
 
         parent_cte = self._find_single_parent(
             node.get("id", ""), all_nodes, cte_name_map
         )
+
+        # Get start state from parent
+        p_status, p_cols = tracker.get_state(parent_cte)
+        current_status = p_status
+        current_cols = set(p_cols)
 
         loom = node.get("loomContainer", {})
         inner_nodes = loom.get("nodes", {})
@@ -545,6 +672,7 @@ class SQLTranslator:
         actions = self._walk_action_chain(inner_nodes, initial)
 
         if not actions:
+            tracker.set_state(cte_name, current_status, current_cols)
             return {
                 "sql": f"SELECT * FROM {parent_cte}",
                 "comment": "空的清理步骤",
@@ -568,16 +696,24 @@ class SQLTranslator:
                 old = action.get("columnName", "")
                 new = action.get("rename", "")
                 renames[old] = new
+                if current_status == "KNOWN" and old in current_cols:
+                    current_cols.remove(old)
+                    current_cols.add(new)
                 comment_parts.append(f"重命名: {old} → {new}")
 
             elif atype == ".v1.RemoveColumns":
                 cols = action.get("columnNames", [])
                 removes.extend(cols)
+                if current_status == "KNOWN":
+                    for c in cols:
+                        current_cols.discard(c)
                 comment_parts.append(f"移除列: {', '.join(cols)}")
 
             elif atype == ".v2019_2_2.KeepOnlyColumns":
                 cols = action.get("columnNames", [])
                 keeps = cols
+                current_status = "KNOWN"
+                current_cols = set(cols)
                 comment_parts.append(f"仅保留列: {', '.join(cols)}")
 
             elif atype == ".v1.FilterOperation":
@@ -591,6 +727,8 @@ class SQLTranslator:
                 expr = action.get("expression", "")
                 sql_expr = self.expr_translator.translate(expr)
                 select_extras.append(f'{sql_expr} AS "{col_name}"')
+                if current_status == "KNOWN":
+                    current_cols.add(col_name)
                 comment_parts.append(f"计算字段: {col_name} = {expr}")
 
             elif atype == ".v2024_2_0.QuickCalcColumn":
@@ -601,6 +739,8 @@ class SQLTranslator:
                 # QuickCalc replaces the column in-place
                 renames[col_name] = col_name  # placeholder
                 select_extras.append(f'{sql_expr} AS "{col_name}"')
+                if current_status == "KNOWN":
+                    current_cols.add(col_name)
                 comment_parts.append(f"快速清理 ({calc_type}): {col_name}")
 
             elif atype == ".v1.ChangeColumnType":
@@ -618,15 +758,20 @@ class SQLTranslator:
                 expr = action.get("expression", "")
                 sql_expr = self.expr_translator.translate(expr)
                 select_extras.append(f'{sql_expr} AS "{col_name}"')
+                if current_status == "KNOWN":
+                    current_cols.add(col_name)
                 comment_parts.append(f"复制列: {col_name}")
 
             else:
                 comment_parts.append(f"未知操作: {atype}")
 
+        # Finalize tracked columns and save to tracker
+        tracker.set_state(cte_name, current_status, current_cols)
+
         # Build SQL
         sql = self._build_container_sql(
             parent_cte, select_extras, where_clauses,
-            renames, removes, keeps
+            renames, removes, keeps, current_status, current_cols
         )
 
         return {
@@ -668,30 +813,64 @@ class SQLTranslator:
         renames: Dict[str, str],
         removes: List[str],
         keeps: List[str],
+        current_status: str = "UNKNOWN",
+        current_cols: Optional[Set[str]] = None,
     ) -> str:
         """Build SQL for a container step."""
         parts = []
 
-        if keeps:
-            # SELECT only specified columns
-            col_list = ", ".join(f'"{c}"' for c in keeps)
-            parts.append(f"SELECT {col_list}")
-        elif removes:
-            parts.append(
-                f"SELECT * /* REMOVE: {', '.join(removes)} */"
-            )
+        if current_status == "KNOWN" and current_cols is not None:
+            # === KNOWN mode: precise column selection ===
+            # Identify columns that are newly computed (from select_extras)
+            new_computed = set()
+            for extra in select_extras:
+                end_quote = extra.rfind('"')
+                start_quote = extra.rfind('"', 0, end_quote)
+                if start_quote >= 0 and end_quote > start_quote:
+                    c_name = extra[start_quote + 1:end_quote]
+                    new_computed.add(c_name)
+
+            for new in renames.values():
+                new_computed.add(new)
+
+            pass_through = current_cols - new_computed
+            base_selects = [f'"{c}"' for c in sorted(pass_through)]
+
+            # Add rename aliases (old AS new)
+            for old, new in renames.items():
+                if old != new:
+                    base_selects.append(f'"{old}" AS "{new}"')
+
+            # Combine base selects with computed extras
+            all_selects = base_selects[:]
+            if select_extras:
+                all_selects.extend(select_extras)
+
+            if all_selects:
+                parts.append("SELECT " + ",\n        ".join(all_selects))
+            else:
+                parts.append("SELECT *")
         else:
-            parts.append("SELECT *")
+            # === UNKNOWN mode: fallback to old behavior ===
+            if keeps:
+                col_list = ", ".join(f'"{c}"' for c in keeps)
+                parts.append(f"SELECT {col_list}")
+            elif removes:
+                parts.append(
+                    f"SELECT * /* REMOVE: {', '.join(removes)} */"
+                )
+            else:
+                parts.append("SELECT *")
 
-        # Add rename aliases
-        for old, new in renames.items():
-            if old != new:  # skip self-rename from QuickCalc
-                parts[0] += f',\n        "{old}" AS "{new}"'
+            # Add rename aliases
+            for old, new in renames.items():
+                if old != new:
+                    parts[0] += f',\n        "{old}" AS "{new}"'
 
-        # Add calculated/extra columns
-        if select_extras:
-            extras = ",\n        ".join(select_extras)
-            parts[0] += f",\n        {extras}"
+            # Add calculated/extra columns
+            if select_extras:
+                extras = ",\n        ".join(select_extras)
+                parts[0] += f",\n        {extras}"
 
         parts.append(f"    FROM {parent_cte}")
 

@@ -1,7 +1,17 @@
 # Project Changelog
 
 ### Current Status
-SDK v0.5.0 - TFL-to-SQL translation, expression translator, MCP `translate_to_sql` tool.
+SDK v0.5.1 - Column tracking optimization with input schema awareness and hidden column support.
+
+---
+
+## v0.5.1 (2026-02-26)
+
+### Optimized
+- **Column Tracking (`ColumnTracker`)**: Track explicit column schemas across the DAG, enabling precise `SELECT` column lists instead of `SELECT *`
+- **Input Node Schema Awareness**: Extract `fields` array from input nodes to establish KNOWN column state from the source
+- **Hidden Column Support**: Parse `hiddenColumns` from `displaySettings` to exclude hidden fields from intermediate CTEs
+- **`translate_tfl_file` Enhancement**: Now reads `displaySettings` for hidden column optimization
 
 ---
 

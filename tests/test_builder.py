@@ -321,7 +321,7 @@ def test_build_output():
 def test_version():
     """测试版本号"""
     from cwprep import __version__
-    assert __version__ == "0.5.0"
+    assert __version__ == "0.5.1"
 
 
 # ====================== File Connection Tests ======================
