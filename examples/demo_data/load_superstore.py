@@ -8,6 +8,7 @@ Usage:
     python load_superstore.py --db sqlserver
 
     # Override default connection parameters:
+    python load_superstore.py --db mysql --host 127.0.0.1 --port 3306 --user root --password secret
     python load_superstore.py --db postgresql --host localhost --port 5432 --user postgres --password secret
     python load_superstore.py --db sqlserver --driver "ODBC+Driver+18+for+SQL+Server"
 """
@@ -305,6 +306,7 @@ Examples:
   python load_superstore.py --db mysql
   python load_superstore.py --db postgresql
   python load_superstore.py --db sqlserver
+  python load_superstore.py --db mysql --host 127.0.0.1 --port 3306 --user root --password mypass
   python load_superstore.py --db postgresql --host localhost --port 5432 --user myuser --password mypass
   python load_superstore.py --db sqlserver --driver "ODBC+Driver+18+for+SQL+Server"
         """,

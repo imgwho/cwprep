@@ -31,7 +31,9 @@ pip install pyodbc
 python examples/demo_data/load_superstore.py --db sqlserver
 
 # Override defaults (optional)
+python examples/demo_data/load_superstore.py --db mysql --host 127.0.0.1 --port 3306 --user root --password mypass
 python examples/demo_data/load_superstore.py --db postgresql --host localhost --port 5432 --user myuser --password mypass
+python examples/demo_data/load_superstore.py --db sqlserver --driver "ODBC+Driver+18+for+SQL+Server"
 ```
 
 ### 2. Run Example Scripts
