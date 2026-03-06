@@ -317,4 +317,4 @@ See [changelog.md](changelog.md) for version history.
 
 ## License
 
-MIT License
+AGPL-3.0 License
