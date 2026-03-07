@@ -1,7 +1,15 @@
 # Project Changelog
 
 ### Current Status
-SDK v0.5.1 - Column tracking optimization with input schema awareness and hidden column support.
+SDK v0.5.3 - Support for Alibaba Analytic DB for MySQL (`adb_mysql`).
+
+---
+
+## v0.5.3 (2026-03-07)
+
+### Added
+- **adb_mysql Support**: Aded native connection support for Alibaba Analytic DB for MySQL by providing the `adb_mysql` class profile.
+- **Documentation**: Updated MCP parameters and API Reference to reflect the new `db_class`.
 
 ---
 

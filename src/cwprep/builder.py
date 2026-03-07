@@ -38,6 +38,16 @@ _DB_PROFILES: Dict[str, Dict[str, Any]] = {
             "odbc-native-protocol": "",
         },
     },
+    "adb_mysql": {
+        "default_port": "3306",
+        "requires_username": True,
+        "extra_attrs": {
+            "source-charset": "",
+            "sslcert": "",
+            "expected-driver-version": "",
+            "odbc-native-protocol": "",
+        },
+    },
     "sqlserver": {
         "default_port": None,
         "requires_username": False,
@@ -104,7 +114,7 @@ class TFLBuilder:
             dbname: Database name (connection-level; for sqlserver this is often empty,
                     the actual database is specified at the node level)
             port: Port number (defaults to profile value; sqlserver has no port)
-            db_class: Database type: "mysql", "sqlserver", "postgres" (defaults to config)
+            db_class: Database type: "mysql", "sqlserver", "postgres", "adb_mysql" (defaults to config)
             authentication: Authentication mode. For sqlserver: "sspi" (Windows) or
                             "sqlserver" (username/password). For others: usually empty.
             **kwargs: Other connection attributes

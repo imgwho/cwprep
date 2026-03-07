@@ -16,7 +16,7 @@ TFLBuilder(flow_name="Untitled Flow", config=None)
 | `add_connection_from_config()` | None | Connection ID |
 | `add_file_connection(filename, file_class?, is_packaged?)` | File path or name | Connection ID |
 
-**Supported `db_class` values**: `"mysql"` (default), `"sqlserver"`, `"postgres"`
+**Supported `db_class` values**: `"mysql"` (default), `"sqlserver"`, `"postgres"`, `"adb_mysql"`
 
 **SQL Server authentication modes** (`authentication` parameter):
 - `"sspi"` — Windows Authentication (no username needed)

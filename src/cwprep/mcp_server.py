@@ -318,7 +318,7 @@ def generate_tfl(
                     dbname (required for mysql/postgres, often empty at
                     connection-level for sqlserver).
                 Optional keys: port (default depends on db_class),
-                    db_class ("mysql"|"sqlserver"|"postgres", default "mysql"),
+                    db_class ("mysql"|"sqlserver"|"postgres"|"adb_mysql", default "mysql"),
                     authentication ("sspi"|"sqlserver"|"", default ""),
                     schema (e.g. "dbo" for SQL Server input_table nodes).
             For type="file":
