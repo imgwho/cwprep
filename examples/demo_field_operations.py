@@ -116,12 +116,9 @@ JOIN customers c ON o.customer_id = c.customer_id""",
     # Build
     print()
     flow, display, meta = builder.build()
-    
-    output_folder = "./demo_output/field_operations"
     output_tfl = "./demo_output/field_operations.tfl"
-    
-    TFLPackager.save_to_folder(output_folder, flow, display, meta)
-    TFLPackager.pack_zip(output_folder, output_tfl)
+
+    TFLPackager.save_tfl(output_tfl, flow, display, meta)
     
     print(f"[OK] Generated: {output_tfl}")
     print()

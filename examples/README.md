@@ -53,11 +53,15 @@ python examples/demo_aggregation.py
 
 # Comprehensive demo (Covers all SDK methods)
 python examples/demo_comprehensive.py
+
+# MCP validation demo (generates review-friendly .tfl/.tflx)
+python examples/demo_mcp_flow.py
 ```
 
 ### 3. Verify Results
 
-Open the generated `.tfl` files in the `demo_output/` directory using Tableau Prep.
+Open the generated `.tfl` or `.tflx` files in the `demo_output/` directory using Tableau Prep.
+The SDK demos now write the final archive directly and do not leave exploded flow folders behind by default.
 
 ---
 

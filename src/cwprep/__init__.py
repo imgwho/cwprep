@@ -12,8 +12,7 @@ Usage:
     builder.add_output_server("Output", input1, "Datasource Name")
     
     flow, display, meta = builder.build()
-    TFLPackager.save_to_folder("./output", flow, display, meta)
-    TFLPackager.pack_zip("./output", "./output.tfl")
+    TFLPackager.save_tfl("./output.tfl", flow, display, meta)
 """
 
 from .builder import TFLBuilder
@@ -28,7 +27,7 @@ from .config import (
     DEFAULT_CONFIG
 )
 
-__version__ = "0.5.3"
+__version__ = "0.5.4"
 __author__ = "cooper wenhua"
 __all__ = [
     "TFLBuilder", 

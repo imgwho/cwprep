@@ -87,12 +87,10 @@ def main():
     flow, display, meta = builder.build()
     print("[OK] Build complete")
     
-    # Save to folder
-    output_folder = "./demo_output"
+    # Save directly to a .tfl archive
     output_tfl = "./demo_output.tfl"
-    
-    TFLPackager.save_to_folder(output_folder, flow, display, meta)
-    TFLPackager.pack_zip(output_folder, output_tfl)
+
+    TFLPackager.save_tfl(output_tfl, flow, display, meta)
     
     print()
     print("=" * 50)

@@ -70,9 +70,11 @@ When `schema` is provided (e.g. `"dbo"`), the table reference becomes `[dbo].[ta
 
 | Method | Parameters | Description |
 |--------|-----------|-------------|
-| `save_to_folder(folder, flow, display, meta, data_files?)` | Path + JSON objects + optional data map | Write exploded folder |
-| `pack_zip(folder, output_tfl)` | Folder + output path | Pack as .tfl (ZIP) |
-| `pack_tflx(folder, output_tflx)` | Folder + output path | Pack as .tflx (ZIP with Data/) |
+| `save_tfl(output_tfl, flow, display, meta)` | Output path + JSON objects | Write `.tfl` directly (no exploded folder left by default) |
+| `save_tflx(output_tflx, flow, display, meta, data_files?)` | Output path + JSON objects + optional data map | Write `.tflx` directly (no exploded folder left by default) |
+| `save_to_folder(folder, flow, display, meta, data_files?)` | Path + JSON objects + optional data map | Write exploded folder explicitly |
+| `pack_zip(folder, output_tfl, keep_folder=False)` | Folder + output path | Pack as .tfl (ZIP); removes folder by default |
+| `pack_tflx(folder, output_tflx, keep_folder=False)` | Folder + output path | Pack as .tflx (ZIP with Data/); removes folder by default |
 
 ## Connection Examples
 
@@ -127,6 +129,5 @@ conn = builder.add_file_connection("orders.xlsx", is_packaged=True)
 input_id = builder.add_input_excel("Orders", "Sheet1", conn)
 builder.add_output_server("Out", input_id, "DS")
 flow, display, meta = builder.build(is_packaged=True)
-TFLPackager.save_to_folder("./out", flow, display, meta, data_files={conn: ["C:/data/orders.xlsx"]})
-TFLPackager.pack_tflx("./out", "./out.tflx")
+TFLPackager.save_tflx("./out.tflx", flow, display, meta, data_files={conn: ["C:/data/orders.xlsx"]})
 ```

@@ -313,12 +313,9 @@ AND order_date < '2024-03-01'""",
     print("-" * 60)
     flow, display, meta = builder.build()
     print("[OK] Build complete")
-    
-    output_folder = "./demo_output/comprehensive"
     output_tfl = "./demo_output/comprehensive.tfl"
-    
-    TFLPackager.save_to_folder(output_folder, flow, display, meta)
-    TFLPackager.pack_zip(output_folder, output_tfl)
+
+    TFLPackager.save_tfl(output_tfl, flow, display, meta)
     
     print(f"[OK] Generated: {output_tfl}")
     print()

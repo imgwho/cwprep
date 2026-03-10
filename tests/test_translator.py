@@ -5,8 +5,6 @@ Tests the expression translator and SQL translator without real databases.
 """
 
 import json
-import os
-import tempfile
 import zipfile
 
 import pytest
@@ -301,7 +299,7 @@ class TestSQLTranslator:
         assert "Flow: My Flow" in sql
         assert "步骤明细" in sql
 
-    def test_translate_tfl_file(self):
+    def test_translate_tfl_file(self, workspace_tmp_dir):
         """Test translating from a .tfl file."""
         # Build a flow and save as .tfl
         builder = TFLBuilder(flow_name="File Test")
@@ -310,23 +308,15 @@ class TestSQLTranslator:
         builder.add_output_server("Output", input_id, "Test_DS")
         flow, display, meta = builder.build()
 
-        # Create temp .tfl (ZIP with flow JSON)
-        with tempfile.NamedTemporaryFile(
-            suffix=".tfl", delete=False
-        ) as tmp:
-            tmp_path = tmp.name
+        tmp_path = workspace_tmp_dir / "translator_input.tfl"
+        with zipfile.ZipFile(tmp_path, "w") as zf:
+            zf.writestr("flow", json.dumps(flow))
+            zf.writestr("displaySettings", json.dumps(display))
+            zf.writestr("maestroMetadata", json.dumps(meta))
 
-        try:
-            with zipfile.ZipFile(tmp_path, "w") as zf:
-                zf.writestr("flow", json.dumps(flow))
-                zf.writestr("displaySettings", json.dumps(display))
-                zf.writestr("maestroMetadata", json.dumps(meta))
-
-            sql = SQLTranslator().translate_tfl_file(tmp_path)
-            assert "WITH" in sql
-            assert "SELECT *" in sql
-        finally:
-            os.unlink(tmp_path)
+        sql = SQLTranslator().translate_tfl_file(str(tmp_path))
+        assert "WITH" in sql
+        assert "SELECT *" in sql
 
     def test_empty_flow(self):
         sql = SQLTranslator().translate_flow({})

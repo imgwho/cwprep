@@ -6,8 +6,7 @@ Tests the core logic of MCP tools without starting a real MCP server.
 
 import json
 import os
-import shutil
-import tempfile
+import zipfile
 
 import pytest
 
@@ -66,10 +65,8 @@ def sample_nodes():
 
 
 @pytest.fixture
-def tmp_output_dir():
-    d = tempfile.mkdtemp(prefix="cwprep_test_")
-    yield d
-    shutil.rmtree(d, ignore_errors=True)
+def tmp_output_dir(workspace_tmp_dir):
+    return str(workspace_tmp_dir)
 
 
 # ── Tests: _build_flow ────────────────────────────────────────────────────────
@@ -109,8 +106,6 @@ class TestGenerateTfl:
         assert "Test Flow" in result
 
     def test_output_is_valid_zip(self, sample_connection, sample_nodes, tmp_output_dir):
-        import zipfile
-
         output_path = os.path.join(tmp_output_dir, "test_flow.tfl")
         generate_tfl("Test", sample_connection, sample_nodes, output_path)
         assert zipfile.is_zipfile(output_path)
@@ -120,6 +115,109 @@ class TestGenerateTfl:
             assert "flow" in names
             assert "displaySettings" in names
             assert "maestroMetadata" in names
+
+    def test_existing_output_is_backed_up(self, sample_connection, sample_nodes, tmp_output_dir):
+        output_path = os.path.join(tmp_output_dir, "test_flow.tfl")
+        with open(output_path, "wb") as f:
+            f.write(b"legacy")
+
+        generate_tfl("Test Flow", sample_connection, sample_nodes, output_path)
+
+        backups = [name for name in os.listdir(tmp_output_dir) if name.startswith("test_flow.tfl.bak-")]
+        assert len(backups) == 1
+        with open(os.path.join(tmp_output_dir, backups[0]), "rb") as f:
+            assert f.read() == b"legacy"
+
+    def test_existing_tflx_is_backed_up(self, sample_connection, sample_nodes, tmp_output_dir):
+        output_path = os.path.join(tmp_output_dir, "test_flow.tflx")
+        with open(output_path, "wb") as f:
+            f.write(b"legacy")
+
+        generate_tfl("Test Flow", sample_connection, sample_nodes, output_path)
+
+        backups = [name for name in os.listdir(tmp_output_dir) if name.startswith("test_flow.tflx.bak-")]
+        assert len(backups) == 1
+        assert os.path.exists(output_path)
+
+    def test_tflx_embeds_packaged_csv_files(self, workspace_tmp_dir):
+        source_csv = workspace_tmp_dir / "orders.csv"
+        source_csv.write_text("order_id,amount\n1,120\n2,85\n", encoding="utf-8")
+        output_path = workspace_tmp_dir / "file_flow.tflx"
+        connection = {"type": "file"}
+        nodes = [
+            {"type": "input_csv", "name": "orders", "filename": "orders.csv"},
+            {
+                "type": "output_server",
+                "name": "output",
+                "parent": "orders",
+                "datasource_name": "File_Output",
+            },
+        ]
+
+        result = generate_tfl(
+            "File Flow",
+            connection,
+            nodes,
+            str(output_path),
+            data_files={"orders.csv": [str(source_csv)]},
+        )
+
+        assert "Successfully generated TFLX" in result
+        assert zipfile.is_zipfile(output_path)
+        with zipfile.ZipFile(output_path, "r") as zf:
+            names = set(zf.namelist())
+            assert "flow" in names
+            data_members = [
+                name for name in names
+                if name.startswith("Data/") and name.endswith("/orders.csv")
+            ]
+            assert len(data_members) == 1
+            flow = json.loads(zf.read("flow").decode("utf-8"))
+
+        conn = next(iter(flow["connections"].values()))
+        assert conn["isPackaged"] is True
+        assert conn["connectionAttributes"]["filename"] == "orders.csv"
+        assert "directory" not in conn["connectionAttributes"]
+
+    def test_invalid_flow_raises_before_writing_output(self, sample_connection, tmp_output_dir):
+        output_path = os.path.join(tmp_output_dir, "invalid_flow.tfl")
+        nodes = [
+            {"type": "input_table", "name": "orders", "table": "   "},
+            {
+                "type": "output_server",
+                "name": "output",
+                "parent": "orders",
+                "datasource_name": "Test_Output",
+            },
+        ]
+
+        with pytest.raises(ValueError, match="Invalid flow definition"):
+            generate_tfl("Test Flow", sample_connection, nodes, output_path)
+
+        assert not os.path.exists(output_path)
+        leftovers = [
+            name for name in os.listdir(tmp_output_dir)
+            if name.startswith("cwprep_build_") or name.startswith("cwprep_output_")
+        ]
+        assert leftovers == []
+
+    def test_invalid_flow_does_not_touch_existing_output(self, sample_connection, tmp_output_dir):
+        output_path = os.path.join(tmp_output_dir, "existing_invalid.tfl")
+        with open(output_path, "wb") as f:
+            f.write(b"legacy")
+
+        nodes = [
+            {"type": "input_table", "name": "orders", "table": "   "},
+            {"type": "output_server", "name": "output", "parent": "orders", "datasource_name": "Test_Output"},
+        ]
+
+        with pytest.raises(ValueError, match="Invalid flow definition"):
+            generate_tfl("Test Flow", sample_connection, nodes, output_path)
+
+        with open(output_path, "rb") as f:
+            assert f.read() == b"legacy"
+        backups = [name for name in os.listdir(tmp_output_dir) if name.startswith("existing_invalid.tfl.bak-")]
+        assert backups == []
 
 
 # ── Tests: validate_flow_definition ──────────────────────────────────────────
@@ -188,6 +286,114 @@ class TestValidateFlowDefinition:
             validate_flow_definition("", sample_connection, sample_nodes)
         )
         assert result["valid"] is False
+
+    def test_whitespace_flow_name(self, sample_connection, sample_nodes):
+        result = json.loads(
+            validate_flow_definition("   ", sample_connection, sample_nodes)
+        )
+        assert result["valid"] is False
+        assert any("flow_name" in e for e in result["errors"])
+
+    def test_whitespace_connection_host(self, sample_nodes):
+        connection = {
+            "type": "database",
+            "host": "   ",
+            "username": "root",
+            "dbname": "test_db",
+        }
+        result = json.loads(
+            validate_flow_definition("Test", connection, sample_nodes)
+        )
+        assert result["valid"] is False
+        assert any("connection.host is required" in e for e in result["errors"])
+
+    def test_input_table_requires_non_blank_table(self, sample_connection):
+        nodes = [
+            {"type": "input_table", "name": "orders", "table": "   "},
+            {"type": "output_server", "name": "out", "parent": "orders", "datasource_name": "D"},
+        ]
+        result = json.loads(
+            validate_flow_definition("Test", sample_connection, nodes)
+        )
+        assert result["valid"] is False
+        assert any("field 'table' must be a non-empty string" in e for e in result["errors"])
+
+    def test_input_sql_requires_non_blank_sql(self, sample_connection):
+        nodes = [
+            {"type": "input_sql", "name": "orders", "sql": "   "},
+            {"type": "output_server", "name": "out", "parent": "orders", "datasource_name": "D"},
+        ]
+        result = json.loads(
+            validate_flow_definition("Test", sample_connection, nodes)
+        )
+        assert result["valid"] is False
+        assert any("field 'sql' must be a non-empty string" in e for e in result["errors"])
+
+    def test_database_flow_requires_database_source(self):
+        connection = {
+            "type": "database",
+            "host": "localhost",
+            "username": "root",
+            "dbname": "test_db",
+        }
+        nodes = [
+            {"type": "input_csv", "name": "csv", "filename": "orders.csv"},
+            {"type": "output_server", "name": "out", "parent": "csv", "datasource_name": "D"},
+        ]
+        result = json.loads(
+            validate_flow_definition("Test", connection, nodes)
+        )
+        assert result["valid"] is False
+        assert any("at least one valid input_sql.sql or input_table.table" in e for e in result["errors"])
+
+    def test_database_flow_accepts_valid_input_sql_source(self, sample_connection):
+        nodes = [
+            {"type": "input_sql", "name": "orders", "sql": "SELECT * FROM orders"},
+            {"type": "output_server", "name": "out", "parent": "orders", "datasource_name": "D"},
+        ]
+        result = json.loads(
+            validate_flow_definition("Test", sample_connection, nodes)
+        )
+        assert result["valid"] is True
+
+    def test_file_connection_rejects_database_inputs(self):
+        connection = {"type": "file"}
+        nodes = [
+            {"type": "input_table", "name": "orders", "table": "orders"},
+            {"type": "output_server", "name": "out", "parent": "orders", "datasource_name": "D"},
+        ]
+        result = json.loads(
+            validate_flow_definition("Test", connection, nodes)
+        )
+        assert result["valid"] is False
+        assert any("requires connection.type='database'" in e for e in result["errors"])
+
+    def test_database_connection_rejects_file_inputs(self, sample_connection):
+        nodes = [
+            {"type": "input_excel", "name": "orders", "filename": "orders.xlsx", "sheet": "Sheet1"},
+            {"type": "output_server", "name": "out", "parent": "orders", "datasource_name": "D"},
+        ]
+        result = json.loads(
+            validate_flow_definition("Test", sample_connection, nodes)
+        )
+        assert result["valid"] is False
+        assert any("requires connection.type='file'" in e for e in result["errors"])
+
+    def test_input_csv_union_rejects_blank_file_names(self):
+        connection = {"type": "file"}
+        nodes = [
+            {
+                "type": "input_csv_union",
+                "name": "orders",
+                "file_names": ["orders_2024.csv", "   "],
+            },
+            {"type": "output_server", "name": "out", "parent": "orders", "datasource_name": "D"},
+        ]
+        result = json.loads(
+            validate_flow_definition("Test", connection, nodes)
+        )
+        assert result["valid"] is False
+        assert any("every file name must be a non-empty string" in e for e in result["errors"])
 
 
 # ── Tests: list_supported_operations ─────────────────────────────────────────

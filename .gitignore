@@ -58,3 +58,7 @@ logs/
 *.tmp
 *.temp
 
+.tmp_pytest_workspace/
+demo_output.tfl
+demo_output.tflx
+*.bak-*

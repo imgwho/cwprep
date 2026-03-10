@@ -45,9 +45,10 @@ builder.add_output_server("Output", joined, "My_Datasource")
 
 # Build and save
 flow, display, meta = builder.build()
-TFLPackager.save_to_folder("./output", flow, display, meta)
-TFLPackager.pack_zip("./output", "./my_flow.tfl")
+TFLPackager.save_tfl("./my_flow.tfl", flow, display, meta)
 ```
+
+By default, both the SDK and MCP output only the final `.tfl`/`.tflx` archive. Use `save_to_folder()` only when you explicitly want the exploded folder for inspection.
 
 ## Features
 

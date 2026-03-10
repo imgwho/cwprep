@@ -1,7 +1,21 @@
 # Project Changelog
 
 ### Current Status
-SDK v0.5.3 - Support for Alibaba Analytic DB for MySQL (`adb_mysql`).
+SDK v0.5.4 - Archive-only default output for SDK/MCP, stricter flow validation, and safer overwrite handling.
+
+---
+
+## v0.5.4 (2026-03-10)
+
+### Changed
+- **Archive-only Defaults**: SDK examples, `TFLPackager`, and MCP generation now keep only the final `.tfl`/`.tflx` archive by default instead of leaving exploded flow folders behind.
+- **Packaging API**: Added `save_tfl()` and `save_tflx()` helpers for direct archive generation; `pack_zip()` and `pack_tflx()` now remove the source folder by default unless `keep_folder=True`.
+- **Prep Defaults**: Updated default Tableau Prep compatibility metadata to `2024.2.0`.
+
+### Improved
+- **MCP Validation**: Added stronger validation for blank strings, file/database connection mismatches, CSV union file lists, and missing database sources.
+- **Overwrite Safety**: Generation now writes to temporary artifacts first and backs up existing outputs before replacement.
+- **Tests and Demos**: Expanded automated coverage and added a packaged MCP review demo with generated sample data.
 
 ---
 

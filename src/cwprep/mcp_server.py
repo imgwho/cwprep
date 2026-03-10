@@ -16,7 +16,6 @@ Usage:
 import sys
 import os
 import json
-import tempfile
 from typing import Any, Dict, List, Optional
 from pathlib import Path
 
@@ -82,6 +81,193 @@ def _resolve_output_path(output_path: str) -> str:
     path = Path(output_path).resolve()
     path.parent.mkdir(parents=True, exist_ok=True)
     return str(path)
+
+
+def _is_non_empty_string(value: Any) -> bool:
+    """Check whether a value is a non-empty string after trimming."""
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _validate_flow_definition_data(
+    flow_name: str,
+    connection: Dict[str, Any],
+    nodes: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Validate a flow definition and return structured results."""
+    errors: List[str] = []
+
+    if not _is_non_empty_string(flow_name):
+        errors.append("flow_name is required.")
+
+    conn_type = connection.get("type", "database")
+    if conn_type == "database":
+        db_class = connection.get("db_class", "mysql")
+
+        if not _is_non_empty_string(connection.get("host")):
+            errors.append("connection.host is required.")
+
+        if db_class == "sqlserver":
+            auth = connection.get("authentication", "")
+            if auth == "sqlserver" and not _is_non_empty_string(connection.get("username")):
+                errors.append(
+                    "connection.username is required for sqlserver authentication."
+                )
+        else:
+            if not _is_non_empty_string(connection.get("username")):
+                errors.append("connection.username is required.")
+            if not _is_non_empty_string(connection.get("dbname")):
+                errors.append("connection.dbname is required.")
+    elif conn_type != "file":
+        errors.append(f"Unknown connection type: '{conn_type}'. Use 'database' or 'file'.")
+
+    if not nodes:
+        errors.append("At least one node is required.")
+
+    known_names = set()
+    has_output = False
+    has_database_source = False
+    database_input_types = {"input_sql", "input_table"}
+    file_input_types = {"input_excel", "input_csv", "input_csv_union"}
+    required_fields = {
+        "input_sql": ["sql"],
+        "input_table": ["table"],
+        "input_excel": ["filename", "sheet"],
+        "input_csv": ["filename"],
+        "input_csv_union": ["file_names"],
+        "join": ["left", "right", "left_col", "right_col"],
+        "union": ["parents"],
+        "filter": ["parent", "expression"],
+        "value_filter": ["parent", "field", "values"],
+        "calculation": ["parent", "column_name", "formula"],
+        "aggregate": ["parent", "group_by"],
+        "keep_only": ["parent", "columns"],
+        "remove_columns": ["parent", "columns"],
+        "rename": ["parent", "renames"],
+        "pivot": ["parent", "pivot_column", "aggregate_column", "new_columns"],
+        "unpivot": ["parent", "columns_to_unpivot"],
+        "quick_calc": ["parent", "column_name", "calc_type"],
+        "change_type": ["parent", "fields"],
+        "duplicate_column": ["parent", "source_column"],
+        "output_server": ["parent", "datasource_name"],
+    }
+    string_fields = {
+        "input_sql": {"name", "sql"},
+        "input_table": {"name", "table"},
+        "input_excel": {"name", "filename", "sheet"},
+        "input_csv": {"name", "filename"},
+        "input_csv_union": {"name"},
+        "join": {"name", "left", "right"},
+        "union": {"name"},
+        "filter": {"name", "parent", "expression"},
+        "value_filter": {"name", "parent", "field"},
+        "calculation": {"name", "parent", "column_name", "formula"},
+        "aggregate": {"name", "parent"},
+        "keep_only": {"name", "parent"},
+        "remove_columns": {"name", "parent"},
+        "rename": {"name", "parent"},
+        "pivot": {"name", "parent", "pivot_column", "aggregate_column"},
+        "unpivot": {"name", "parent", "name_column", "value_column"},
+        "quick_calc": {"name", "parent", "column_name", "calc_type"},
+        "change_type": {"name", "parent"},
+        "duplicate_column": {"name", "parent", "source_column", "new_column_name"},
+        "output_server": {"name", "parent", "datasource_name", "project_name", "server_url"},
+    }
+
+    for i, node in enumerate(nodes):
+        ntype = node.get("type")
+        name = node.get("name")
+
+        if not _is_non_empty_string(name):
+            errors.append(f"Node #{i}: 'name' is required.")
+            continue
+
+        if name in known_names:
+            errors.append(f"Node #{i}: duplicate name '{name}'.")
+        known_names.add(name)
+
+        if not _is_non_empty_string(ntype):
+            errors.append(f"Node '{name}': 'type' is required.")
+            continue
+
+        if ntype not in _NODE_TYPES:
+            errors.append(
+                f"Node '{name}': unknown type '{ntype}'. "
+                f"Supported: {sorted(_NODE_TYPES)}"
+            )
+            continue
+
+        if ntype == "output_server":
+            has_output = True
+
+        if conn_type == "database" and ntype in file_input_types:
+            errors.append(
+                f"Node '{name}' (type={ntype}) requires connection.type='file'."
+            )
+        if conn_type == "file" and ntype in database_input_types:
+            errors.append(
+                f"Node '{name}' (type={ntype}) requires connection.type='database'."
+            )
+
+        for field in required_fields.get(ntype, []):
+            if field not in node:
+                errors.append(
+                    f"Node '{name}' (type={ntype}): missing required field '{field}'."
+                )
+                continue
+
+            value = node.get(field)
+            if field in string_fields.get(ntype, set()) and not _is_non_empty_string(value):
+                errors.append(
+                    f"Node '{name}' (type={ntype}): field '{field}' must be a non-empty string."
+                )
+
+        for ref_field in ("parent", "left", "right"):
+            if ref_field in node:
+                ref = node[ref_field]
+                if ref not in known_names:
+                    errors.append(
+                        f"Node '{name}': '{ref_field}' references unknown node '{ref}'. "
+                        f"It must be defined before this node."
+                    )
+
+        if "parents" in node:
+            parents = node["parents"]
+            if not isinstance(parents, list) or len(parents) < 2:
+                errors.append(
+                    f"Node '{name}' (union): 'parents' must be a list with at least 2 items."
+                )
+            else:
+                for parent in parents:
+                    if parent not in known_names:
+                        errors.append(f"Node '{name}': parent '{parent}' not found.")
+
+        if ntype == "input_csv_union" and "file_names" in node:
+            file_names = node["file_names"]
+            if not isinstance(file_names, list) or len(file_names) < 1:
+                errors.append(
+                    f"Node '{name}' (input_csv_union): 'file_names' must be a non-empty list."
+                )
+            else:
+                for filename in file_names:
+                    if not _is_non_empty_string(filename):
+                        errors.append(
+                            f"Node '{name}' (input_csv_union): every file name must be a non-empty string."
+                        )
+
+        if ntype == "input_sql" and _is_non_empty_string(node.get("sql")):
+            has_database_source = True
+        elif ntype == "input_table" and _is_non_empty_string(node.get("table")):
+            has_database_source = True
+
+    if conn_type == "database" and not has_database_source:
+        errors.append(
+            "Database flows must include at least one valid input_sql.sql or input_table.table source."
+        )
+
+    if not has_output and not errors:
+        errors.append("Warning: No output_server node found. The flow will have no output.")
+
+    return {"valid": len(errors) == 0, "errors": errors}
 
 
 def _build_flow(
@@ -359,8 +545,10 @@ def generate_tfl(
         A summary string with the output file path and node count.
     """
     resolved = _resolve_output_path(output_path)
-    folder = resolved.rsplit(".", 1)[0]  # strip extension for temp folder
     is_tflx = resolved.lower().endswith(".tflx")
+    validation = _validate_flow_definition_data(flow_name, connection, nodes)
+    if not validation["valid"]:
+        raise ValueError("Invalid flow definition:\n" + "\n".join(validation["errors"]))
 
     flow, display, meta, node_map, file_conn_ids = _build_flow(
         flow_name, connection, nodes, is_packaged=is_tflx
@@ -374,12 +562,16 @@ def generate_tfl(
             if filename in file_conn_ids:
                 packager_data[file_conn_ids[filename]] = file_paths
 
-    TFLPackager.save_to_folder(folder, flow, display, meta, data_files=packager_data)
-
     if is_tflx:
-        TFLPackager.pack_tflx(folder, resolved)
+        TFLPackager.save_tflx(
+            resolved,
+            flow,
+            display,
+            meta,
+            data_files=packager_data,
+        )
     else:
-        TFLPackager.pack_zip(folder, resolved)
+        TFLPackager.save_tfl(resolved, flow, display, meta)
 
     ext_label = "TFLX" if is_tflx else "TFL"
     return (
@@ -574,124 +766,8 @@ def validate_flow_definition(
     Returns:
         A JSON string with "valid" (bool) and "errors" (list of error strings).
     """
-    errors: List[str] = []
-
-    # Validate connection
-    if not flow_name:
-        errors.append("flow_name is required.")
-    
-    conn_type = connection.get("type", "database")
-    
-    if conn_type == "database":
-        db_class = connection.get("db_class", "mysql")
-        
-        # host is always required
-        if "host" not in connection or not connection["host"]:
-            errors.append("connection.host is required.")
-        
-        # username & dbname requirements depend on db_class
-        if db_class == "sqlserver":
-            auth = connection.get("authentication", "")
-            # sqlserver with username/password auth requires username
-            if auth == "sqlserver" and not connection.get("username"):
-                errors.append("connection.username is required for sqlserver authentication.")
-        else:
-            # mysql, postgres, etc. always require username and dbname
-            for key in ("username", "dbname"):
-                if key not in connection or not connection[key]:
-                    errors.append(f"connection.{key} is required.")
-    elif conn_type != "file":
-        errors.append(f"Unknown connection type: '{conn_type}'. Use 'database' or 'file'.")
-
-    # Validate nodes
-    if not nodes:
-        errors.append("At least one node is required.")
-
-    known_names: set = set()
-    has_output = False
-
-    _required_fields = {
-        "input_sql": ["sql"],
-        "input_table": ["table"],
-        "input_excel": ["filename", "sheet"],
-        "input_csv": ["filename"],
-        "input_csv_union": ["file_names"],
-        "join": ["left", "right", "left_col", "right_col"],
-        "union": ["parents"],
-        "filter": ["parent", "expression"],
-        "value_filter": ["parent", "field", "values"],
-        "calculation": ["parent", "column_name", "formula"],
-        "aggregate": ["parent", "group_by"],
-        "keep_only": ["parent", "columns"],
-        "remove_columns": ["parent", "columns"],
-        "rename": ["parent", "renames"],
-        "pivot": ["parent", "pivot_column", "aggregate_column", "new_columns"],
-        "unpivot": ["parent", "columns_to_unpivot"],
-        "quick_calc": ["parent", "column_name", "calc_type"],
-        "change_type": ["parent", "fields"],
-        "duplicate_column": ["parent", "source_column"],
-        "output_server": ["parent", "datasource_name"],
-    }
-
-    for i, node in enumerate(nodes):
-        ntype = node.get("type")
-        name = node.get("name")
-
-        if not name:
-            errors.append(f"Node #{i}: 'name' is required.")
-            continue
-
-        if name in known_names:
-            errors.append(f"Node #{i}: duplicate name '{name}'.")
-        known_names.add(name)
-
-        if not ntype:
-            errors.append(f"Node '{name}': 'type' is required.")
-            continue
-
-        if ntype not in _NODE_TYPES:
-            errors.append(
-                f"Node '{name}': unknown type '{ntype}'. "
-                f"Supported: {sorted(_NODE_TYPES)}"
-            )
-            continue
-
-        if ntype == "output_server":
-            has_output = True
-
-        # Check required fields
-        for field in _required_fields.get(ntype, []):
-            if field not in node:
-                errors.append(f"Node '{name}' (type={ntype}): missing required field '{field}'.")
-
-        # Check parent references
-        for ref_field in ("parent", "left", "right"):
-            if ref_field in node:
-                ref = node[ref_field]
-                if ref not in known_names:
-                    errors.append(
-                        f"Node '{name}': '{ref_field}' references unknown node '{ref}'. "
-                        f"It must be defined before this node."
-                    )
-
-        # Check parents list (union)
-        if "parents" in node:
-            parents = node["parents"]
-            if not isinstance(parents, list) or len(parents) < 2:
-                errors.append(f"Node '{name}' (union): 'parents' must be a list with at least 2 items.")
-            else:
-                for p in parents:
-                    if p not in known_names:
-                        errors.append(f"Node '{name}': parent '{p}' not found.")
-
-    if not has_output and not errors:
-        errors.append("Warning: No output_server node found. The flow will have no output.")
-
-    return json.dumps(
-        {"valid": len(errors) == 0, "errors": errors},
-        indent=2,
-        ensure_ascii=False,
-    )
+    validation = _validate_flow_definition_data(flow_name, connection, nodes)
+    return json.dumps(validation, indent=2, ensure_ascii=False)
 
 
 @mcp.tool()

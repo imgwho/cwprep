@@ -6,6 +6,7 @@ cwprep 基础单元测试
 
 import pytest
 import uuid
+import zipfile
 
 
 def test_import():
@@ -321,7 +322,171 @@ def test_build_output():
 def test_version():
     """测试版本号"""
     from cwprep import __version__
-    assert __version__ == "0.5.1"
+    assert __version__ == "0.5.4"
+
+
+def test_default_prep_version():
+    """???? Prep ????? 2024.2.0"""
+    from cwprep.config import TFLConfig
+
+    config = TFLConfig()
+    assert config.prep_version == "2024.2.0"
+    assert config.prep_year == 2024
+    assert config.prep_quarter == 2
+    assert config.prep_release == 0
+
+
+def test_build_uses_default_prep_version():
+    """?? build() ???? 2024.2.0 metadata"""
+    from cwprep import TFLBuilder
+
+    builder = TFLBuilder(flow_name="Version Test")
+    conn_id = builder.add_connection("localhost", "root", "test_db")
+    input_id = builder.add_input_table("orders", "orders", conn_id)
+    builder.add_output_server("Output", input_id, "DS")
+
+    _flow, _display, meta = builder.build()
+    feature_versions = meta["documentFeaturesUsedInDocument"]
+    assert feature_versions
+    for feature in feature_versions:
+        assert feature["firstSoftwareVersionSupportedIn"]["versionString"] == "2024.2.0"
+        assert feature["minimumCompatibleSoftwareVersion"]["versionString"] == "2024.2.0"
+
+
+def test_save_to_folder_backs_up_existing_directory(workspace_tmp_dir):
+    """?? save_to_folder() ????????"""
+    from cwprep import TFLPackager
+
+    folder_path = workspace_tmp_dir / "out"
+    TFLPackager.save_to_folder(
+        str(folder_path),
+        {"nodes": {"legacy": True}},
+        {"flowDisplaySettings": {"legacy": True}},
+        {"flowEntryName": "legacy_flow"},
+    )
+
+    TFLPackager.save_to_folder(
+        str(folder_path),
+        {"nodes": {"fresh": True}},
+        {"flowDisplaySettings": {"fresh": True}},
+        {"flowEntryName": "flow"},
+    )
+
+    backups = [path for path in workspace_tmp_dir.iterdir() if path.name.startswith("out.bak-")]
+    assert len(backups) == 1
+    assert backups[0].is_dir()
+    assert (backups[0] / "flow").exists()
+    assert (folder_path / "flow").exists()
+    assert (folder_path / "displaySettings").exists()
+    assert (folder_path / "maestroMetadata").exists()
+
+
+def test_save_to_folder_uses_incrementing_backup_suffix(monkeypatch, workspace_tmp_dir):
+    """????????????????"""
+    from cwprep import TFLPackager
+
+    class FixedDateTime:
+        @staticmethod
+        def now():
+            class FixedNow:
+                @staticmethod
+                def strftime(_fmt):
+                    return "20240101120000"
+
+            return FixedNow()
+
+    monkeypatch.setattr("cwprep.packager.datetime", FixedDateTime)
+
+    folder_path = workspace_tmp_dir / "out"
+    for marker in ("first", "second", "third"):
+        TFLPackager.save_to_folder(
+            str(folder_path),
+            {"nodes": {marker: True}},
+            {"flowDisplaySettings": {marker: True}},
+            {"flowEntryName": marker},
+        )
+
+    assert (workspace_tmp_dir / "out.bak-20240101120000").is_dir()
+    assert (workspace_tmp_dir / "out.bak-20240101120000-1").is_dir()
+
+
+def test_pack_zip_removes_source_folder_by_default(workspace_tmp_dir):
+    """?? pack_zip() ?????????"""
+    from cwprep import TFLPackager
+
+    folder_path = workspace_tmp_dir / "exploded"
+    archive_path = workspace_tmp_dir / "flow.tfl"
+
+    TFLPackager.save_to_folder(
+        str(folder_path),
+        {"nodes": {"fresh": True}},
+        {"flowDisplaySettings": {"fresh": True}},
+        {"flowEntryName": "flow"},
+    )
+    TFLPackager.pack_zip(str(folder_path), str(archive_path))
+
+    assert archive_path.exists()
+    assert not folder_path.exists()
+    with zipfile.ZipFile(archive_path, "r") as zf:
+        assert {"flow", "displaySettings", "maestroMetadata"}.issubset(set(zf.namelist()))
+
+
+def test_pack_zip_can_keep_source_folder(workspace_tmp_dir):
+    """?? pack_zip(keep_folder=True) ???????"""
+    from cwprep import TFLPackager
+
+    folder_path = workspace_tmp_dir / "exploded"
+    archive_path = workspace_tmp_dir / "flow.tfl"
+
+    TFLPackager.save_to_folder(
+        str(folder_path),
+        {"nodes": {"fresh": True}},
+        {"flowDisplaySettings": {"fresh": True}},
+        {"flowEntryName": "flow"},
+    )
+    TFLPackager.pack_zip(str(folder_path), str(archive_path), keep_folder=True)
+
+    assert archive_path.exists()
+    assert folder_path.exists()
+
+
+def test_save_tfl_creates_archive_without_leaving_folder(workspace_tmp_dir):
+    """?? save_tfl() ?????????"""
+    from cwprep import TFLPackager
+
+    archive_path = workspace_tmp_dir / "flow.tfl"
+
+    TFLPackager.save_tfl(
+        str(archive_path),
+        {"nodes": {"fresh": True}},
+        {"flowDisplaySettings": {"fresh": True}},
+        {"flowEntryName": "flow"},
+    )
+
+    assert archive_path.exists()
+    assert [path for path in workspace_tmp_dir.iterdir() if path.is_dir()] == []
+
+
+def test_save_tflx_embeds_data_without_leaving_folder(workspace_tmp_dir):
+    """?? save_tflx() ??????????????"""
+    from cwprep import TFLPackager
+
+    source_file = workspace_tmp_dir / "orders.csv"
+    archive_path = workspace_tmp_dir / "flow.tflx"
+    source_file.write_text("order_id,amount\n1,120\n", encoding="utf-8")
+
+    TFLPackager.save_tflx(
+        str(archive_path),
+        {"nodes": {"fresh": True}},
+        {"flowDisplaySettings": {"fresh": True}},
+        {"flowEntryName": "flow"},
+        data_files={"conn-1": [str(source_file)]},
+    )
+
+    assert archive_path.exists()
+    assert [path for path in workspace_tmp_dir.iterdir() if path.is_dir()] == []
+    with zipfile.ZipFile(archive_path, "r") as zf:
+        assert "Data/conn-1/orders.csv" in set(zf.namelist())
 
 
 # ====================== File Connection Tests ======================

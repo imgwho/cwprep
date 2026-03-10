@@ -1,0 +1,4 @@
+﻿order_id,customer_id,amount,status
+1001,1,120,completed
+1002,2,85,pending
+1003,1,200,completed

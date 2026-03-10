@@ -64,10 +64,10 @@ class TFLConfig:
     """TFL Generator main configuration"""
     server: TableauServerConfig = field(default_factory=TableauServerConfig)
     database: Optional[DatabaseConfig] = None
-    prep_version: str = "2019.1.3"
-    prep_year: int = 2019
-    prep_quarter: int = 1
-    prep_release: int = 3
+    prep_version: str = "2024.2.0"
+    prep_year: int = 2024
+    prep_quarter: int = 2
+    prep_release: int = 0
 
 
 # ============ Configuration Loading Functions ============
@@ -155,10 +155,10 @@ def load_config(
     return TFLConfig(
         server=server_config,
         database=db_config if db_config.host else None,
-        prep_version=prep_yaml.get("version", "2019.1.3"),
-        prep_year=prep_yaml.get("year", 2019),
-        prep_quarter=prep_yaml.get("quarter", 1),
-        prep_release=prep_yaml.get("release", 3)
+        prep_version=prep_yaml.get("version", "2024.2.0"),
+        prep_year=prep_yaml.get("year", 2024),
+        prep_quarter=prep_yaml.get("quarter", 2),
+        prep_release=prep_yaml.get("release", 0)
     )
 
 
